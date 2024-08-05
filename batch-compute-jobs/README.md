@@ -28,7 +28,7 @@ Create an `-input` and `-ouput` Cloud Storage bucket. Copy [4kmedia.org/big-buck
 Using the prebuilt [ffmpeg-container](../ffmpeg-container/README.md), published to Artifact Repository, kick off a new batch job in `us-central1-a` with the following configuration. Pass in the name the `-intput` video file as a variable `MEDIA=Big Buck Bunny Demo.mp4` to the container.
 
 ```
-gcloud beta batch jobs submit job-lza70prs --location us-central1 --network "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/global/networks/default-vpc" --subnetwork "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/regions/us-central1/subnetworks/default-vpc" --no-external-ip-address --config - <<EOD
+gcloud alpha batch jobs submit job-lza70prs --location us-central1 --network "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/global/networks/default-vpc" --subnetwork "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/regions/us-central1/subnetworks/default-vpc" --no-external-ip-address --config - <<EOD
 {
   "name": "projects/alanpoole-transcoding-on-gke/locations/us-central1/jobs/job-lza70prs",
   "taskGroups": [
@@ -39,6 +39,10 @@ gcloud beta batch jobs submit job-lza70prs --location us-central1 --network "htt
         "computeResource": {
             "cpuMilli": "16000",
             "memoryMib": "65536"
+        },
+      "serviceAccount": {
+        "email": "141244229955-compute@developer.gserviceaccount.com",
+        "scopes": "https://www.googleapis.com/auth/cloud-platform"
         },
         "runnables": [
           {
