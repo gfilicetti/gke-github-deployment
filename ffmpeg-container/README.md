@@ -19,7 +19,7 @@ docker build -t ffmpeg-container-name:v1 .
 ## Test locally
 
 ```
-docker ffmpeg-container-name:v1 ffmpeg -v
+docker run ffmpeg-container-name:v1 ffmpeg -v
 ```
 
 ## Deploy to Artifact Repository
@@ -28,7 +28,7 @@ docker ffmpeg-container-name:v1 ffmpeg -v
 
 2. Add a tag
 ```
-docker tag docker.io/library/ffmpeg-container-name:v1 us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:v1
+docker tag ffmpeg-container-name:v1 us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:v1
 ```
 
 3. Push
