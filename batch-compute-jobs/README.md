@@ -11,6 +11,7 @@ Alternatively, this Quickstart guide: [Create and run an example job](https://cl
 1. Create a Cloud NAT
 1. Enable the [Batch API](https://console.cloud.google.com/flows/enableapi?apiid=batch.googleapis.com,compute.googleapis.com,logging.googleapis.com&_ga=2.202165972.418309743.1722610490-793002559.1722604502)
 1. Ensure the [default compute service account](https://cloud.google.com/compute/docs/access/service-accounts#default_service_account) is available for use, or [customize it with a new one](https://cloud.google.com/batch/docs/create-run-job-custom-service-account)
+1. Ensure service account has the required permissions: `roles/batch.agentReporter`, `roles/storage.admin`, `roles/logging.logWriter`.
 
 ## Set quota
 
