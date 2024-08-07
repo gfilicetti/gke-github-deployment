@@ -1,0 +1,8 @@
+BACKEND_SVC: "Batch Compute API"
+DOCKER_IMAGE_URI: "us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:latest"
+GCS_DESTINATION: "alanpoole-transcoding-on-gke-output"
+MACHINE_CPU_MILLI: "16000"
+MACHINE_MEMORY_MIB: "65536"
+MACHINE_TYPE: "c2-standard-16"
+VPC_NETWORK_FULLNAME: "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/global/networks/default-vpc"
+VPC_SUBNETWORK_FULLNAME: "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/regions/us-central1/subnetworks/default-vpc"
