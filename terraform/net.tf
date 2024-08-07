@@ -32,7 +32,7 @@ module "vpc" {
   ]
 
   secondary_ranges = {
-    "sn-usw1" = [
+    "sn-${var.customer_id}-${var.region}" = [
       {
         range_name    = "sn-${var.customer_id}-${var.region}-pods1"
         ip_cidr_range = "172.16.0.0/16"
