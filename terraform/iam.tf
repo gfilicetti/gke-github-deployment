@@ -18,7 +18,7 @@ data "google_project" "project" {
 
 # Create a service account for GKE cluster
 resource "google_service_account" "sa_gke_cluster" {
-  account_id   = "sa-gke-cluster"
+  account_id   = "sa-${var.customer_id}-gke-cluster"
   display_name = "TF - GKE cluster SA"
   project      = var.project_id
 }
@@ -50,7 +50,7 @@ module "member_roles_gke_cluster" {
 
 # Create a service account for GKE AI Platform access to Vertex AI
 resource "google_service_account" "sa_gke_aiplatform" {
-  account_id   = "sa-gke-aiplatform"
+  account_id   = "sa-${var.customer_id}-gke-aiplatform"
   display_name = "TF - GKE ai platform SA"
   project      = var.project_id
 }
@@ -76,7 +76,7 @@ module "member_roles_gke_aiplatform" {
 
 # Create a service account for GKE telemetry collection
 resource "google_service_account" "sa_gke_telemetry" {
-  account_id   = "sa-gke-telemetry"
+  account_id   = "sa-${var.customer_id}-gke-telemetry"
   display_name = "TF - GKE telemetry collection SA"
   project      = var.project_id
 }
