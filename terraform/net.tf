@@ -17,46 +17,46 @@ module "vpc" {
   version = "8.0.0"
 
   project_id   = var.project_id
-  network_name = "vpc-genai-quickstart"
+  network_name = "vpc-${var.customer_id}"
   routing_mode = "GLOBAL"
 
   subnets = [
     {
-      subnet_name           = "sn-usw1"
-      subnet_ip             = "10.11.16.0/20"
-      subnet_region         = "us-west1"
+      subnet_name           = "sn-${var.customer_id}-${var.region}"
+      subnet_ip             = "10.128.0.0/20"
+      subnet_region         = "${var.region}"
       subnet_private_access = "true"
       subnet_flow_logs      = "false"
-      description           = "Subnet for US West1"
+      description           = "Subnet for var.region"
     }
   ]
 
   secondary_ranges = {
     "sn-usw1" = [
       {
-        range_name    = "sn-usw1-pods1"
-        ip_cidr_range = "10.11.0.0/20"
+        range_name    = "sn-${var.customer_id}-${var.region}-pods1"
+        ip_cidr_range = "172.16.0.0/16"
       },
       {
-        range_name    = "sn-usw1-svcs1"
-        ip_cidr_range = "10.111.0.0/25"
+        range_name    = "sn-${var.customer_id}-${var.region}-svcs1"
+        ip_cidr_range = "192.168.0.0/26"
       },
     ]
   }
 
-  ingress_rules = [
-    {
-      name          = "fw-game-server"
-      description   = "Allow game server traffic"
-      priority      = 1000
-      source_ranges = ["0.0.0.0/0"],
-      target_tags   = ["game-server"]
-      allow = [
-        {
-          protocol = "udp"
-          ports    = ["7000-8000"]
-        }
-      ]
-    }
-  ]
+  # ingress_rules = [
+  #   {
+  #     name          = "fw-batch-server"
+  #     description   = "Allow batch server traffic"
+  #     priority      = 1000
+  #     source_ranges = ["0.0.0.0/0"],
+  #     target_tags   = ["batch-server"]
+  #     allow = [
+  #       {
+  #         protocol = "udp"
+  #         ports    = ["7000-8000"]
+  #       }
+  #     ]
+  #   }
+  # ]
 }

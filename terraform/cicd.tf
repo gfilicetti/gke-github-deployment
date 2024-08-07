@@ -13,8 +13,8 @@
 # limitations under the License.
 
 resource "google_artifact_registry_repository" "repo" {
-  location      = "us-west1"
-  repository_id = "repo-genai-quickstart"
-  description   = "GenAI Quickstart Artifact Registry."
+  location      = var.region
+  repository_id = "repo-${var.customer_id}"
+  description   = "Batch jobs Artifact Registry."
   format        = "DOCKER"
 }
