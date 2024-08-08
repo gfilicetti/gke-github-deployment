@@ -39,7 +39,7 @@ already authenticated andconfigured to work in that project via the `gcloud`
 command line.
 
 - `gcloud auth application-default login`
-- `gcloud config set <your-project-id>`
+- `gcloud config set project <your-project-id>`
 
 ### (Option 1) Manual deployment with Terraform cli.
 
@@ -50,9 +50,9 @@ The following steps below will walk you through the setup guide for *GenAI Quick
 #### 1) Clone this git repository
 
 ```bash
-git clone git@github.com:zaratsian/GenAI-quickstart-dev.git
+git clone https://github.com/gfilicetti/gke-github-deployment.git
 
-cd GenAI-quickstart-dev
+cd gke-github-deployment
 ```
 
 #### 2) Set ENV variable
@@ -66,7 +66,7 @@ export PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/nul
 Set default location for Google Cloud
 
 ```bash
-export LOCATION=us-west1
+export LOCATION=us-central1
 ```
 
 To better follow along with this quickstart guide, set `CUR_DIR` env variable
