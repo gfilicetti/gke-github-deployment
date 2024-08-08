@@ -23,7 +23,7 @@ module "vpc" {
   subnets = [
     {
       subnet_name           = "sn-${var.customer_id}-${var.region}"
-      subnet_ip             = "10.128.0.0/20"
+      subnet_ip             = "${var.subnet}"
       subnet_region         = "${var.region}"
       subnet_private_access = "true"
       subnet_flow_logs      = "false"

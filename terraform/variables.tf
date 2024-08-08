@@ -12,3 +12,8 @@ variable "region" {
   description = "Region to be added to all resources that will be created."
   type        = string
 }
+
+variable "subnet" {
+  description = "Region to be added to all resources that will be created."
+  type        = string
+}
