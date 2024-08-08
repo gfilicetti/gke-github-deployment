@@ -23,13 +23,13 @@ resource "google_service_account" "sa_gke_cluster" {
   project      = var.project_id
 }
 
-resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
-  service_account_id = google_service_account.sa_gke_cluster.name
-  role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-cluster]",
-  ]
-}
+# resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
+#   service_account_id = google_service_account.sa_gke_cluster.name
+#   role               = "roles/iam.workloadIdentityUser"
+#   members = [
+#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-cluster]",
+#   ]
+# }
 
 module "member_roles_gke_cluster" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
@@ -48,56 +48,56 @@ module "member_roles_gke_cluster" {
   ]
 }
 
-# Create a service account for GKE AI Platform access to Vertex AI
-resource "google_service_account" "sa_gke_aiplatform" {
-  account_id   = "sa-${var.customer_id}-gke-aiplatform"
-  display_name = "TF - GKE ai platform SA"
-  project      = var.project_id
-}
+# # Create a service account for GKE AI Platform access to Vertex AI
+# resource "google_service_account" "sa_gke_aiplatform" {
+#   account_id   = "sa-${var.customer_id}-gke-aiplatform"
+#   display_name = "TF - GKE ai platform SA"
+#   project      = var.project_id
+# }
 
-resource "google_service_account_iam_binding" "sa_gke_aiplatform_wi_binding" {
-  service_account_id = google_service_account.sa_gke_aiplatform.name
-  role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-aiplatform]",
-  ]
-}
+# resource "google_service_account_iam_binding" "sa_gke_aiplatform_wi_binding" {
+#   service_account_id = google_service_account.sa_gke_aiplatform.name
+#   role               = "roles/iam.workloadIdentityUser"
+#   members = [
+#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-aiplatform]",
+#   ]
+# }
 
-module "member_roles_gke_aiplatform" {
-  source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = google_service_account.sa_gke_aiplatform.email
-  prefix                  = "serviceAccount"
-  project_id              = var.project_id
-  project_roles = [
-    "roles/aiplatform.user",
-    "roles/storage.objectUser",
-  ]
-}
+# module "member_roles_gke_aiplatform" {
+#   source                  = "terraform-google-modules/iam/google//modules/member_iam"
+#   service_account_address = google_service_account.sa_gke_aiplatform.email
+#   prefix                  = "serviceAccount"
+#   project_id              = var.project_id
+#   project_roles = [
+#     "roles/aiplatform.user",
+#     "roles/storage.objectUser",
+#   ]
+# }
 
-# Create a service account for GKE telemetry collection
-resource "google_service_account" "sa_gke_telemetry" {
-  account_id   = "sa-${var.customer_id}-gke-telemetry"
-  display_name = "TF - GKE telemetry collection SA"
-  project      = var.project_id
-}
+# # Create a service account for GKE telemetry collection
+# resource "google_service_account" "sa_gke_telemetry" {
+#   account_id   = "sa-${var.customer_id}-gke-telemetry"
+#   display_name = "TF - GKE telemetry collection SA"
+#   project      = var.project_id
+# }
 
-resource "google_service_account_iam_binding" "sa_gke_telemetry_wi_binding" {
-  service_account_id = google_service_account.sa_gke_telemetry.name
-  role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-telemetry]",
-  ]
-}
+# resource "google_service_account_iam_binding" "sa_gke_telemetry_wi_binding" {
+#   service_account_id = google_service_account.sa_gke_telemetry.name
+#   role               = "roles/iam.workloadIdentityUser"
+#   members = [
+#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-telemetry]",
+#   ]
+# }
 
-module "member_roles_gke_telemetry" {
-  source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = google_service_account.sa_gke_telemetry.email
-  prefix                  = "serviceAccount"
-  project_id              = var.project_id
-  project_roles = [
-    "roles/cloudtrace.agent",
-  ]
-}
+# module "member_roles_gke_telemetry" {
+#   source                  = "terraform-google-modules/iam/google//modules/member_iam"
+#   service_account_address = google_service_account.sa_gke_telemetry.email
+#   prefix                  = "serviceAccount"
+#   project_id              = var.project_id
+#   project_roles = [
+#     "roles/cloudtrace.agent",
+#   ]
+# }
 
 # Add roles to the default Cloud Build service account
 module "member_roles_cloudbuild" {
