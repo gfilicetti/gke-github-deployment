@@ -123,7 +123,7 @@ module "member_roles_cloudbuild" {
 
 module "member_roles_default_compute" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = data.google_compute_default_service_account.default
+  service_account_address = data.google_compute_default_service_account.default.email
   prefix                  = "serviceAccount"
   project_id              = var.project_id
   project_roles = [
