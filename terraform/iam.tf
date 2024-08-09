@@ -48,6 +48,8 @@ module "member_roles_gke_cluster" {
     "roles/monitoring.viewer",
     "roles/stackdriver.resourceMetadata.writer",
     "roles/cloudtrace.agent",
+    "roles/container.admin",
+    "roles/container.clusterAdmin",
   ]
 }
 

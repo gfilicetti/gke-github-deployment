@@ -128,6 +128,27 @@
                       destination: CLOUD_LOGGING
             next: finish_workflow
         - create_k8s_job:
+            call: gke.create_job
+            args:
+              cluster_id: "gke-alanpoole-test"
+              namespace: "default"
+              project: "alanpoole-transcoding-on-gke"
+              location: "us-central1"
+              job:
+                apiVersion: "batch/v1"
+                kind: "Job"
+                metadata:
+                  name: "transcoding"
+                spec:
+                  template:
+                    spec:
+                      containers:
+                        - name: "transcoding"
+                          image: "us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:latest"
+                          command: []
+                          args: ["MEDIA","media.mp4"]
+                      restartPolicy: Never
+                  backoffLimit: 4
             next: finish_workflow
         - finish_workflow:
             next: end
