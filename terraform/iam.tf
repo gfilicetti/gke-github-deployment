@@ -120,3 +120,13 @@ module "member_roles_cloudbuild" {
     "roles/storage.objectAdmin",
   ]
 }
+
+module "member_roles_default_compute" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = data.google_compute_default_service_account.default
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    "roles/eventarc.eventReceiver",
+  ]
+}
