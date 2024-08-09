@@ -128,5 +128,8 @@ module "member_roles_default_compute" {
   project_id              = var.project_id
   project_roles = [
     "roles/eventarc.eventReceiver",
+    "roles/eventarc.viewer",
+    "roles/eventarc.developer",
+
   ]
 }
