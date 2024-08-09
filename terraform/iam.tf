@@ -23,6 +23,9 @@ resource "google_service_account" "sa_gke_cluster" {
   project      = var.project_id
 }
 
+data "google_compute_default_service_account" "default" {
+}
+
 # resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
 #   service_account_id = google_service_account.sa_gke_cluster.name
 #   role               = "roles/iam.workloadIdentityUser"

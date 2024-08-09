@@ -22,7 +22,7 @@ provider "kubernetes" {
 }
 
 module "gke" {
-  deletion_protection	     = false
+  deletion_protection        = false
   source                     = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
   version                    = "29.0.0"
   project_id                 = var.project_id
@@ -40,7 +40,7 @@ module "gke" {
   enable_private_endpoint    = true
   enable_private_nodes       = true
   master_ipv4_cidr_block     = "10.0.0.0/28"
-  master_authorized_networks = [ {cidr_block = "${var.subnet}", display_name = "internal"} ]
+  master_authorized_networks = [{ cidr_block = "${var.subnet}", display_name = "internal" }]
 
   # Need to allow 48 hour window in rolling 32 days For `maintenance_start_time`
   # & `end_time` only the specified time of the day is used, the specified date
