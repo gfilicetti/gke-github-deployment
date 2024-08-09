@@ -35,7 +35,9 @@ gcloud services enable eventarc.googleapis.com \
     workflows.googleapis.com \
     workflowexecutions.googleapis.com \
     compute.googleapis.com \
-    storage.googleapis.com
+    storage.googleapis.com \
+    transcoder.googleapis.com \
+    batch.googleapis.com
 ```
 
 ## Set Parameters
