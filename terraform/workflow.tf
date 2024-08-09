@@ -24,13 +24,14 @@ resource "google_workflows_workflow" "transcoding_workflow" {
   }
 
   user_env_vars = {
+    # Options: Transcoder API, Batch Compute API, or TBD GKE
     BACKEND_SVC          = "Batch Compute API"
-    DOCKER_IMAGE_URI     = "us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:latest"
-    GCS_DESTINATION      = "alanpoole-transcoding-on-gke-output"
+    DOCKER_IMAGE_URI     = "us-${var.region}-docker.pkg.dev/${var.project_id}/repo-${var.customer_id}/ffmpeg:latest"
+    GCS_DESTINATION      = "gcs-${var.project_id}-${var.customer_id}-test-output"
     MACHINE_CPU_MILLI    = "16000"
     MACHINE_MEMORY_MIB   = "65536"
     MACHINE_TYPE         = "c2-standard-16"
-    VPC_NETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/global/networks/default-vpc"
+    VPC_NETWORK_FULLNAME = module.vpc.network_name
   }
 
   source_contents = data.local_file.input_template.content
@@ -46,7 +47,7 @@ resource "google_eventarc_trigger" "primary" {
   }
   matching_criteria {
     attribute = "bucket"
-    value     = "gcs-${var.customer_id}-test-input"
+    value     = "gcs-${var.project_id}-${var.customer_id}-test-input"
   }
   destination {
     workflow = "projects/${var.project_id}/locations/${var.region}/workflows/workflow-${var.customer_id}-gcs-transcoding"

@@ -17,9 +17,3 @@ variable "subnet" {
   description = "Region to be added to all resources that will be created."
   type        = string
 }
-
-variable "services" {
-  description = "A list of Google Cloud services to enable."
-  type        = list(string)
-  default     = ["storage.googleapis.com", "eventarc.googleapis.com", "eventarcpublishing.googleapis.com", "workflows.googleapis.com", "workflowexecutions.googleapis.com", "compute.googleapis.com", "storage.googleapis.com", "transcoder.googleapis.com"]
-}
