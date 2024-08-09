@@ -7,23 +7,15 @@ PROJECT_ID=$(gcloud config get-value project)
 PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
 
 # GitHub Actions SA:
-GH_ACTIONS_SA="sa-tf-gh-actions@${PROJECT_ID}.iam.gserviceaccount.com"
+GH_ACTIONS_SA="sa-tf-gh-actions"
 
-# 1. Enable key Google Cloud service APIs
-gcloud services enable --project $PROJECT_ID \
-  aiplatform.googleapis.com \
-  artifactregistry.googleapis.com \
-  cloudbuild.googleapis.com \
-  cloudresourcemanager.googleapis.com \
-  compute.googleapis.com \
-  container.googleapis.com \
-  containerfilesystem.googleapis.com \
-  containerregistry.googleapis.com \
-  iam.googleapis.com \
-  servicecontrol.googleapis.com
+# 1. Create a Google Cloud Service Account.
+gcloud iam service-accounts create "${GH_ACTIONS_SA}" \
+  --project "${PROJECT_ID}"
 
-# 2. Add roles to normal Cloud Build service account
+# 2. Add roles to Google Cloud Service Account.
 for SUCCINCT_ROLE in \
+    viewer \
     artifactregistry.admin \
     cloudbuild.connectionAdmin \
     cloudbuild.builds.builder \
@@ -41,7 +33,7 @@ for SUCCINCT_ROLE in \
     storage.objectAdmin \
     ; do
   gcloud projects add-iam-policy-binding \
-    --member="serviceAccount:${GH_ACTIONS_SA}" \
+    --member="serviceAccount:${GH_ACTIONS_SA}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role "roles/$SUCCINCT_ROLE" "$PROJECT_ID" \
     --condition=None
 done

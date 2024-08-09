@@ -52,7 +52,9 @@ jobs:
         run: |
           terraform plan \
             -out=out.tfplan \
-            -var "project_id=${{ env.GCP_PROJECT_ID }}"
+            -var "project_id=${{ env.GCP_PROJECT_ID }}" \
+            -var "customer_id=gcp" \
+            -var "region=us-central1"
         continue-on-error: true
 
       - name: Terraform Apply

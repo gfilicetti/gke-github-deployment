@@ -113,3 +113,15 @@ module "member_roles_cloudbuild" {
     "roles/storage.objectAdmin",
   ]
 }
+
+# Add roles to the default Compute Engine service account
+module "member_roles_computeengine" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    "roles/artifactregistry.writer",
+    "roles/storage.objectUser"
+  ]
+}

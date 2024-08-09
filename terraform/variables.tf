@@ -6,14 +6,17 @@ variable "project_id" {
 variable "customer_id" {
   description = "ID to be added to all resources that will be created."
   type        = string
+  default     = "gcp"
 }
 
 variable "region" {
   description = "Region to be added to all resources that will be created."
   type        = string
+  default     = "us-central1"
 }
 
 variable "subnet" {
   description = "Region to be added to all resources that will be created."
   type        = string
+  default     = "10.128.0.0/20"
 }

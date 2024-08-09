@@ -14,7 +14,7 @@
 
 resource "google_artifact_registry_repository" "repo" {
   location      = var.region
-  repository_id = "repo-${var.customer_id}"
+  repository_id = "repo-batch-jobs"
   description   = "Batch jobs Artifact Registry."
   format        = "DOCKER"
 }
