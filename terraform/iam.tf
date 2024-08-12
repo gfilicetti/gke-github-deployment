@@ -16,14 +16,14 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+data "google_compute_default_service_account" "default" {
+}
+
 # Create a service account for GKE cluster
 resource "google_service_account" "sa_gke_cluster" {
   account_id   = "sa-${var.customer_id}-gke-cluster"
   display_name = "TF - GKE cluster SA"
   project      = var.project_id
-}
-
-data "google_compute_default_service_account" "default" {
 }
 
 resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
@@ -33,7 +33,7 @@ resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
     "serviceAccount:${var.project_id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
   ]
   depends_on = [
-  module.gke
+    module.gke
   ]
 }
 
@@ -44,67 +44,16 @@ module "member_roles_gke_cluster" {
   project_id              = var.project_id
   project_roles = [
     "roles/artifactregistry.reader",
+    "roles/cloudtrace.agent",
     "roles/container.developer",
     "roles/container.nodeServiceAgent",
     "roles/logging.logWriter",
     "roles/monitoring.metricWriter",
     "roles/monitoring.viewer",
     "roles/stackdriver.resourceMetadata.writer",
-    "roles/cloudtrace.agent",
     "roles/storage.objectUser",
   ]
 }
-
-# # Create a service account for GKE AI Platform access to Vertex AI
-# resource "google_service_account" "sa_gke_aiplatform" {
-#   account_id   = "sa-${var.customer_id}-gke-aiplatform"
-#   display_name = "TF - GKE ai platform SA"
-#   project      = var.project_id
-# }
-
-# resource "google_service_account_iam_binding" "sa_gke_aiplatform_wi_binding" {
-#   service_account_id = google_service_account.sa_gke_aiplatform.name
-#   role               = "roles/iam.workloadIdentityUser"
-#   members = [
-#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-aiplatform]",
-#   ]
-# }
-
-# module "member_roles_gke_aiplatform" {
-#   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-#   service_account_address = google_service_account.sa_gke_aiplatform.email
-#   prefix                  = "serviceAccount"
-#   project_id              = var.project_id
-#   project_roles = [
-#     "roles/aiplatform.user",
-#     "roles/storage.objectUser",
-#   ]
-# }
-
-# # Create a service account for GKE telemetry collection
-# resource "google_service_account" "sa_gke_telemetry" {
-#   account_id   = "sa-${var.customer_id}-gke-telemetry"
-#   display_name = "TF - GKE telemetry collection SA"
-#   project      = var.project_id
-# }
-
-# resource "google_service_account_iam_binding" "sa_gke_telemetry_wi_binding" {
-#   service_account_id = google_service_account.sa_gke_telemetry.name
-#   role               = "roles/iam.workloadIdentityUser"
-#   members = [
-#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-telemetry]",
-#   ]
-# }
-
-# module "member_roles_gke_telemetry" {
-#   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-#   service_account_address = google_service_account.sa_gke_telemetry.email
-#   prefix                  = "serviceAccount"
-#   project_id              = var.project_id
-#   project_roles = [
-#     "roles/cloudtrace.agent",
-#   ]
-# }
 
 # Add roles to the default Cloud Build service account
 module "member_roles_cloudbuild" {
@@ -113,26 +62,25 @@ module "member_roles_cloudbuild" {
   prefix                  = "serviceAccount"
   project_id              = var.project_id
   project_roles = [
+    "roles/artifactregistry.reader",
     "roles/artifactregistry.repoAdmin",
-    "roles/cloudbuild.connectionAdmin",
+    "roles/artifactregistry.serviceAgent",
+    "roles/batch.agentReporter",
+    "roles/batch.jobsEditor",
+    "roles/batch.serviceAgent",
     "roles/cloudbuild.builds.builder",
+    "roles/cloudbuild.connectionAdmin",
     "roles/container.developer",
+    "roles/eventarc.serviceAgent",
+    "roles/iam.serviceAccountUser",
+    "roles/logging.logWriter",
     "roles/storage.objectAdmin",
     "roles/storage.objectUser",
     "roles/storage.objectViewer",
-    "roles/batch.jobsEditor",
-    "roles/batch.serviceAgent",
-    "roles/batch.agentReporter",
-    "roles/eventarc.serviceAgent",
     "roles/transcoder.admin",
     "roles/transcoder.serviceAgent",
     "roles/workflows.invoker",
     "roles/workflows.serviceAgent",
-    "roles/logging.logWriter",
-    "roles/artifactregistry.serviceAgent",
-    "roles/artifactregistry.repoAdmin",
-    "roles/artifactregistry.reader",
-    "roles/iam.serviceAccountUser",
   ]
 }
 
@@ -143,10 +91,10 @@ module "member_roles_default_compute" {
   prefix                  = "serviceAccount"
   project_id              = var.project_id
   project_roles = [
+    "roles/artifactregistry.writer",
+    "roles/eventarc.developer",
     "roles/eventarc.eventReceiver",
     "roles/eventarc.viewer",
-    "roles/eventarc.developer",
-    "roles/artifactregistry.writer",
     "roles/storage.objectUser"
   ]
 }

@@ -24,4 +24,5 @@ variable "subnet" {
 variable "job_namespace" {
   description = "Namespace for jobs, for WI configuration"
   type        = string
+  default     = "jobs"
 }
