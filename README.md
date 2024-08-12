@@ -113,7 +113,17 @@ gcloud services enable --project $PROJECT_ID \
   containerfilesystem.googleapis.com \
   containerregistry.googleapis.com \
   iam.googleapis.com \
-  servicecontrol.googleapis.com
+  servicecontrol.googleapis.com \
+  eventarc.googleapis.com \
+  eventarcpublishing.googleapis.com \
+  workflows.googleapis.com \
+  workflowexecutions.googleapis.com \
+  compute.googleapis.com \
+  storage.googleapis.com \
+  batch.googleapis.com \
+  transcoder.googleapis.com \
+  pubsub.googleapis.com \
+  run.googleapis.com 
 ```
 
 ### (Option 1) Manual deployment with Terraform cli.

@@ -23,13 +23,19 @@ resource "google_service_account" "sa_gke_cluster" {
   project      = var.project_id
 }
 
-# resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
-#   service_account_id = google_service_account.sa_gke_cluster.name
-#   role               = "roles/iam.workloadIdentityUser"
-#   members = [
-#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-cluster]",
-#   ]
-# }
+data "google_compute_default_service_account" "default" {
+}
+
+resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
+  service_account_id = google_service_account.sa_gke_cluster.name
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
+  ]
+  depends_on = [
+  module.gke
+  ]
+}
 
 module "member_roles_gke_cluster" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
@@ -45,6 +51,7 @@ module "member_roles_gke_cluster" {
     "roles/monitoring.viewer",
     "roles/stackdriver.resourceMetadata.writer",
     "roles/cloudtrace.agent",
+    "roles/storage.objectUser",
   ]
 }
 
@@ -111,16 +118,34 @@ module "member_roles_cloudbuild" {
     "roles/cloudbuild.builds.builder",
     "roles/container.developer",
     "roles/storage.objectAdmin",
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer",
+    "roles/batch.jobsEditor",
+    "roles/batch.serviceAgent",
+    "roles/batch.agentReporter",
+    "roles/eventarc.serviceAgent",
+    "roles/transcoder.admin",
+    "roles/transcoder.serviceAgent",
+    "roles/workflows.invoker",
+    "roles/workflows.serviceAgent",
+    "roles/logging.logWriter",
+    "roles/artifactregistry.serviceAgent",
+    "roles/artifactregistry.repoAdmin",
+    "roles/artifactregistry.reader",
+    "roles/iam.serviceAccountUser",
   ]
 }
 
-# Add roles to the default Compute Engine service account
-module "member_roles_computeengine" {
+
+module "member_roles_default_compute" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+  service_account_address = data.google_compute_default_service_account.default.email
   prefix                  = "serviceAccount"
   project_id              = var.project_id
   project_roles = [
+    "roles/eventarc.eventReceiver",
+    "roles/eventarc.viewer",
+    "roles/eventarc.developer",
     "roles/artifactregistry.writer",
     "roles/storage.objectUser"
   ]
