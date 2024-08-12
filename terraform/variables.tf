@@ -17,3 +17,8 @@ variable "subnet" {
   description = "Region to be added to all resources that will be created."
   type        = string
 }
+
+variable "job_namespace" {
+  description = "Namespace for jobs, for WI configuration"
+  type        = string
+}

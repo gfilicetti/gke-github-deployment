@@ -26,13 +26,16 @@ resource "google_service_account" "sa_gke_cluster" {
 data "google_compute_default_service_account" "default" {
 }
 
-# resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
-#   service_account_id = google_service_account.sa_gke_cluster.name
-#   role               = "roles/iam.workloadIdentityUser"
-#   members = [
-#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-cluster]",
-#   ]
-# }
+resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
+  service_account_id = google_service_account.sa_gke_cluster.name
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
+  ]
+  depends_on = [
+  module.gke
+  ]
+}
 
 module "member_roles_gke_cluster" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
@@ -48,6 +51,7 @@ module "member_roles_gke_cluster" {
     "roles/monitoring.viewer",
     "roles/stackdriver.resourceMetadata.writer",
     "roles/cloudtrace.agent",
+    "roles/storage.objectUser",
   ]
 }
 
@@ -129,5 +133,18 @@ module "member_roles_cloudbuild" {
     "roles/artifactregistry.repoAdmin",
     "roles/artifactregistry.reader",
     "roles/iam.serviceAccountUser",
+  ]
+}
+
+module "member_roles_default_compute" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = data.google_compute_default_service_account.default.email
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    "roles/eventarc.eventReceiver",
+    "roles/eventarc.viewer",
+    "roles/eventarc.developer",
+
   ]
 }

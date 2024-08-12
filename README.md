@@ -110,7 +110,9 @@ gcloud services enable --project $PROJECT_ID \
   compute.googleapis.com \
   storage.googleapis.com \
   batch.googleapis.com \
-  transcoder.googleapis.com
+  transcoder.googleapis.com \
+  pubsub.googleapis.com \
+  run.googleapis.com 
 ```
 
 #### 5) Deploy infrastructure with Terraform
