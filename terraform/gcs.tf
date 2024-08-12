@@ -11,23 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-terraform {
-  required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.23.0"
-    }
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 5.40.0"
-    }
-  }
-
-  # TODO: Use this to store the TF state file in GCS
-  # backend "gcs" {}
+resource "google_storage_bucket" "gcs-input" {
+  name                        = "gcs-${var.project_id}-${var.customer_id}-test-input"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
 }
 
-provider "google" {
-  project = var.project_id
+resource "google_storage_bucket" "gcs-output" {
+  name                        = "gcs-${var.project_id}-${var.customer_id}-test-output"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
 }

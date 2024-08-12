@@ -1,0 +1,133 @@
+  main:
+    params: [event]
+    steps:
+        - log_event:
+            call: sys.log
+            args:
+                text: ${event}
+                severity: INFO
+        - extract_event_data:
+            assign:
+            - bucket: ${event.data.bucket}
+            - object: ${event.data.name}
+            - contentType: ${event.data.contentType}
+        - check_content_type:
+            switch:
+                - condition: ${not text.match_regex(contentType, "video") and not text.match_regex(contentType, "octet-stream")}
+                  return: ${"Media " + contentType + " not valid."}
+                  next: end
+            next: prep_transcoding_job
+        - prep_transcoding_job:
+            assign:
+            - project: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+            - location: ${sys.get_env("GOOGLE_CLOUD_LOCATION")}
+            - jobId: '${"transcoding-" + uuid.generate()}'
+            - imageUri: ${sys.get_env("DOCKER_IMAGE_URI")}
+            - gcsDestination: ${sys.get_env("GCS_DESTINATION")}
+            - machineType: ${sys.get_env("MACHINE_TYPE")}
+            - machineCpuMilli: ${sys.get_env("MACHINE_CPU_MILLI")}
+            - machineMemoryMib: ${sys.get_env("MACHINE_MEMORY_MIB")}
+            next: decide_backend_svc
+        - decide_backend_svc:
+            switch:
+              - condition: ${text.match_regex(sys.get_env("BACKEND_SVC"), "Transcoder API")}
+                next: call_transcoder_api
+              - condition: ${text.match_regex(sys.get_env("BACKEND_SVC"), "Batch Compute API")}
+                next: create_batch_job
+            next: create_k8s_job
+        - call_transcoder_api:
+            call: googleapis.transcoder.v1.projects.locations.jobs.create
+            args:
+                parent: ${"projects/" + project + "/locations/" + location}
+                body:
+                  name: "${jobId}"
+                  config:
+                    inputs:
+                      - key: ${event.data.name}
+                        uri: ${"gs://" + event.bucket + "/" + event.data.name}
+                    elementaryStreams:
+                      - key: "video-stream0"
+                        videoStream: 
+                          h264:
+                            widthPixels: 640
+                            heightPixels: 360
+                            frameRate: 30
+                            bitrateBps: 550000
+                            pixelFormat: "yuv420p"
+                            rateControlMode: "vbr"
+                            crfLevel: 21
+                            gopDuration: "3s"
+                            vbvSizeBits: 550000
+                            vbvFullnessBits: 495000
+                            entropyCoder: "cabac"
+                            bFrameCount: 3
+                            aqStrength: 1
+                            profile: "high"
+                            preset: "veryfast"
+                      - key: "audio-stream0"
+                        audioStream:
+                          codec: "aac"
+                          bitrateBps: 64000
+                          channelCount: 2
+                          channelLayout:
+                            - "fl"
+                            - "fr"
+                          sampleRateHertz: 48000
+                    muxStreams:
+                      - key: "sd"
+                        fileName: "sd.mp4"
+                        container: "mp4"
+                        elementaryStreams:
+                          - "video-stream0"
+                          - "audio-stream0"
+                    output:
+                      uri: ${"gs://" + gcsDestination + "/"}
+            next: finish_workflow
+        - create_batch_job:
+            call: googleapis.batch.v1.projects.locations.jobs.create
+            args:
+                parent: ${"projects/" + project + "/locations/" + location}
+                jobId: "${jobId}"
+                body:
+                    priority: 99
+                    taskGroups:
+                    - taskCount: 1
+                      parallelism: 1
+                      taskSpec:
+                        computeResource:
+                          cpuMilli: ${machineCpuMilli}
+                          memoryMib: ${machineMemoryMib}
+                        runnables:
+                        - container:
+                            imageUri: "${imageUri}"
+                            entrypoint: ''
+                            volumes:
+                            - "/mnt/disks/output:/output"
+                            - "/mnt/disks/input:/input"
+                        environment:
+                            variables:
+                              MEDIA: "${object}"
+                        volumes:
+                        - gcs:
+                            remotePath: "${bucket}"
+                          mountPath: "/mnt/disks/input"
+                        - gcs:
+                            remotePath: "${gcsDestination}"
+                          mountPath: "/mnt/disks/output"
+                    allocationPolicy:
+                      network:
+                        networkInterfaces:
+                          - network: ${sys.get_env("VPC_NETWORK_FULLNAME")}
+                            subnetwork: ${sys.get_env("VPC_SUBNETWORK_FULLNAME")}
+                            noExternalIpAddress: true
+                      instances:
+                      - policy:
+                          provisioningModel: SPOT
+                          machineType: "${machineType}"
+                    logsPolicy:
+                      destination: CLOUD_LOGGING
+            next: finish_workflow
+        - create_k8s_job:
+            next: finish_workflow
+        - finish_workflow:
+            next: end
