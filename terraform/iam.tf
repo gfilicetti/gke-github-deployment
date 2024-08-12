@@ -118,6 +118,21 @@ module "member_roles_cloudbuild" {
     "roles/cloudbuild.builds.builder",
     "roles/container.developer",
     "roles/storage.objectAdmin",
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer",
+    "roles/batch.jobsEditor",
+    "roles/batch.serviceAgent",
+    "roles/batch.agentReporter",
+    "roles/eventarc.serviceAgent",
+    "roles/transcoder.admin",
+    "roles/transcoder.serviceAgent",
+    "roles/workflows.invoker",
+    "roles/workflows.serviceAgent",
+    "roles/logging.logWriter",
+    "roles/artifactregistry.serviceAgent",
+    "roles/artifactregistry.repoAdmin",
+    "roles/artifactregistry.reader",
+    "roles/iam.serviceAccountUser",
   ]
 }
 
