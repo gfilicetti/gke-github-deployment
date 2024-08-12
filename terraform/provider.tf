@@ -24,8 +24,7 @@ terraform {
     }
   }
 
-  # TODO: Use this to store the TF state file in GCS
-  # backend "gcs" {}
+  backend "gcs" {}
 }
 
 provider "google" {

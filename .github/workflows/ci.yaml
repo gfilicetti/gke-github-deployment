@@ -1,0 +1,36 @@
+name: CloudBuild CI
+
+on:
+  workflow_dispatch
+
+jobs:
+  cloudbuild:
+    name: Build Container Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_WI_PROVIDER_ID: ${{ vars.GCP_WI_PROVIDER_ID }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud Project
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: sa-tf-gh-actions@${{ env.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+          workload_identity_provider: ${{ env.GCP_WI_PROVIDER_ID }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      - name: 'Submit CloudBuild with gcloud'
+        run: |
+          gcloud builds submit --config ./containers/ffmpeg/cloudbuild.yaml \
+            --region us-central1 \
+            --substitutions _PROJECT_ID=${{ env.GCP_PROJECT_ID }}

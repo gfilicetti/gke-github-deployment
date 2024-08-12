@@ -136,6 +136,7 @@ module "member_roles_cloudbuild" {
   ]
 }
 
+
 module "member_roles_default_compute" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
   service_account_address = data.google_compute_default_service_account.default.email
@@ -145,6 +146,7 @@ module "member_roles_default_compute" {
     "roles/eventarc.eventReceiver",
     "roles/eventarc.viewer",
     "roles/eventarc.developer",
-
+    "roles/artifactregistry.writer",
+    "roles/storage.objectUser"
   ]
 }
