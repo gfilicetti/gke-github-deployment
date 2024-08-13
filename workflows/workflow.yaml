@@ -35,12 +35,12 @@
               - condition: ${text.match_regex(event.data.name, "batchapi/")}
                 assign:
                   - BACKEND_SRV: "batchapi"
-                  - OUTPUT_PATH: ${"batchapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/" + text.replace_all(event.data.name, "batchapi/", "")}
+                  - OUTPUT_PATH: ${"batchapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/"}
                 next: create_batch_job
               - condition: true
                 assign:
                   - BACKEND_SRV: "gke"
-                  - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/" + event.data.name}
+                  - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/"}
                 next: create_k8s_job
             next: create_k8s_job # default
         - call_transcoder_api:
@@ -160,7 +160,7 @@
                         - name: "transcoding"
                           image: ${imageUri}
                           command: []
-                          args: ["MEDIA","media.mp4", "OUTPUT_PATH", "${OUTPUT_PATH}"]
+                          args: ["MEDIA","${event.data.name}", "OUTPUT_PATH", "${OUTPUT_PATH}"]
                       volumeMounts:
                         - name: gcs-fuse-input
                           mountPath: /input
