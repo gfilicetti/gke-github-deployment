@@ -24,14 +24,14 @@ resource "google_workflows_workflow" "transcoding_workflow" {
   }
 
   user_env_vars = {
-    DOCKER_IMAGE_URI     = "us-${var.region}-docker.pkg.dev/${var.project_id}/repo-${var.customer_id}/ffmpeg:latest"
+    DOCKER_IMAGE_URI     = "${var.region}-docker.pkg.dev/${var.project_id}/repo-batch-jobs/ffmpeg:latest"
     GCS_DESTINATION      = "gcs-${var.project_id}-${var.customer_id}-test-output"
     MACHINE_CPU_MILLI    = "16000"
     MACHINE_MEMORY_MIB   = "65536"
     MACHINE_TYPE         = "c2-standard-16"
     VPC_NETWORK_FULLNAME = module.vpc.network_name
     GKE_CLUSTER_NAME     = "gke-${var.customer_id}-test"
-    GKE_NAMESPACE        = "default"
+    GKE_NAMESPACE        = "${var.job_namespace}"
     VPC_NETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/global/networks/${module.vpc.network_name}"
     VPC_SUBNETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/regions/us-central1/subnetworks/sn-${var.customer_id}-${var.region}"
   }
