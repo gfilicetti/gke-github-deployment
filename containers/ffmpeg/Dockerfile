@@ -6,6 +6,6 @@ RUN apt update \
     && apt install -y --no-install-recommends util-linux curl mediainfo \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./entrypoint.sh /entrypoint.sh
+COPY --chmod=755 ./entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/bin/sh", "-c", "/entrypoint.sh"]
