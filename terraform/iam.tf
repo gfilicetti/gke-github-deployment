@@ -115,7 +115,9 @@ module "member_roles_default_compute" {
     # Workflows
     "roles/logging.logWriter",
     "roles/workflows.invoker",
-    "roles/workflows.serviceAgent"
+    "roles/workflows.serviceAgent",
+    # GKE
+    "roles/container.developer",
   ]
 }
 
