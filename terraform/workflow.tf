@@ -24,8 +24,6 @@ resource "google_workflows_workflow" "transcoding_workflow" {
   }
 
   user_env_vars = {
-    # Options: Transcoder API, Batch Compute API, or TBD GKE
-    BACKEND_SVC          = "Batch Compute API"
     DOCKER_IMAGE_URI     = "us-${var.region}-docker.pkg.dev/${var.project_id}/repo-${var.customer_id}/ffmpeg:latest"
     GCS_DESTINATION      = "gcs-${var.project_id}-${var.customer_id}-test-output"
     MACHINE_CPU_MILLI    = "16000"
