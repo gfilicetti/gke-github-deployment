@@ -29,7 +29,6 @@ resource "google_workflows_workflow" "transcoding_workflow" {
     MACHINE_CPU_MILLI    = "16000"
     MACHINE_MEMORY_MIB   = "65536"
     MACHINE_TYPE         = "c2-standard-16"
-    VPC_NETWORK_FULLNAME = module.vpc.network_name
     GKE_CLUSTER_NAME     = "gke-${var.customer_id}-test"
     GKE_NAMESPACE        = "${var.job_namespace}"
     VPC_NETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/global/networks/${module.vpc.network_name}"
