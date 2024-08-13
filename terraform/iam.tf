@@ -192,3 +192,16 @@ module "member_roles_pubsub_service_account" {
     "roles/iam.serviceAccountTokenCreator"
   ]
 }
+
+# Transcoder API service accounts needs to be able to read from GCS -input bucket and write to -output
+module "member_roles_transcoder_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # Cloud Storage
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer"
+  ]
+}
