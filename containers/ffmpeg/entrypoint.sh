@@ -28,6 +28,7 @@ _MEDIAINFO_SRC_START="$(date "+%F %T,%3N")"
 mediainfo "${_SRC}"/"${MEDIA}"
 _MEDIAINFO_SRC_END="$(date "+%F %T,%3N")"
 
+echo "### Creating Output Path ${_DST}"
 mkdir -p _DST
 
 lscpu | grep -q avx512
