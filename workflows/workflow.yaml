@@ -30,9 +30,9 @@
             next: decide_backend_svc
         - decide_backend_svc:
             switch:
-              - condition: ${text.match_regex(sys.get_env("BACKEND_SVC"), "Transcoder API")}
+              - condition: ${text.match_regex(event.data.name, "/transcoderapi/")}
                 next: call_transcoder_api
-              - condition: ${text.match_regex(sys.get_env("BACKEND_SVC"), "Batch Compute API")}
+              - condition: ${text.match_regex(event.data.name, "/batchapi/")}
                 next: create_batch_job
             next: create_k8s_job
         - call_transcoder_api:
