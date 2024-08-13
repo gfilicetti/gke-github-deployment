@@ -45,15 +45,14 @@ module "member_roles_gke_cluster" {
   project_roles = [
     "roles/artifactregistry.reader",
     "roles/cloudtrace.agent",
+    "roles/container.admin",
+    "roles/container.clusterAdmin",
     "roles/container.developer",
     "roles/container.nodeServiceAgent",
     "roles/logging.logWriter",
     "roles/monitoring.metricWriter",
     "roles/monitoring.viewer",
     "roles/stackdriver.resourceMetadata.writer",
-    "roles/cloudtrace.agent",
-    "roles/container.admin",
-    "roles/container.clusterAdmin",
     "roles/storage.objectUser",
   ]
 }
