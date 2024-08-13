@@ -32,83 +32,36 @@ Wait for kueue-controller change the status to `Running`.
 kubectl -n kueue-system get pods
 ```
 
+## Files
 
-## Create a batch job
+| name | description | modules | resources |
+|---|---|---|---|
+| [jobs-namespace-sa.yaml](./jobs-namespace-sa.yaml) | Create NS and SA. |  | `kubectl apply -f jobs-namespace-sa.yaml` |
+| [cluster-queue.yaml](./cluster-queue.yaml) | Cluster queue and resource quota. |  | `kubectl apply -f cluster-queue.yaml` |
+| [local-queue.yaml](./local-queue.yaml) | Local queue for different teams. |  | `kubectl apply -f local-queue.yaml` |
+| [resource-flavor.yaml](./resource-flavor.yaml) | Configure resource flavor. |  | `kubectl apply -f resource-flavor.yaml` |
+| [kueue-job-fuse-test.yaml](./kueue-job-fuse-test.yaml) | Add a job in a queue. |  | `kubectl create -f kueue-job-fuse-test.yaml` |
 
-Using the prebuilt [ffmpeg-container](../ffmpeg-container/README.md), published to Artifact Repository, kick off a new batch job in `us-central1-a` with the following configuration. Pass in the name the `-intput` video file as a variable `MEDIA=Big Buck Bunny Demo.mp4` to the container.
+You can create as many jobs as you want
 
 ```
-gcloud alpha batch jobs submit job-lza70prz --location us-central1 --network "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/global/networks/default-vpc" --subnetwork "https://www.googleapis.com/compute/v1/projects/alanpoole-transcoding-on-gke/regions/us-central1/subnetworks/default-vpc" --no-external-ip-address --config - <<EOD
-{
-  "taskGroups": [
-    {
-      "serviceAccount": {
-        "email": "141244229955-compute@developer.gserviceaccount.com",
-        "scopes": "https://www.googleapis.com/auth/cloud-platform"
-      },
-      "taskCount": "1",
-      "parallelism": "1",
-      "taskSpec": {
-        "computeResource": {
-            "cpuMilli": "16000",
-            "memoryMib": "65536"
-        },
-        "runnables": [
-          {
-            "container": {
-              "imageUri": "us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:latest",
-              "entrypoint": "",
-              "volumes": [
-                "/mnt/disks/input:/input",
-                "/mnt/disks/output:/output"
-              ]
-            },
-            "environment": {
-              "variables": {
-                "MEDIA": "Big Buck Bunny Demo.mp4"
-              }
-            }
-          }
-        ],
-        "volumes": [
-          {
-            "gcs": {
-              "remotePath": "alanpoole-transcoding-on-gke-input"
-            },
-            "mountPath": "/mnt/disks/input"
-          },
-          {
-            "gcs": {
-              "remotePath": "alanpoole-transcoding-on-gke-output"
-            },
-            "mountPath": "/mnt/disks/output"
-          }
-        ]
-      }
-    }
-  ],
-  "allocationPolicy": {
-    "instances": [
-      {
-        "policy": {
-          "provisioningModel": "SPOT",
-          "machineType": "c2-standard-16"
-        }
-      }
-    ],
-    "location": {
-      "allowedLocations": [
-        "zones/us-central1-a"
-      ]
-    }
-  },
-  "logsPolicy": {
-    "destination": "CLOUD_LOGGING"
-  }
-}
-EOD
+kubectl create -f kueue-job-fuse-test.yaml
 ```
 
-## Event-based triggers
+## Cleanup
 
-Follow the instructions on [event-driven-ffmpeg-transcoding](https://medium.com/google-cloud/event-driven-ffmpeg-transcoding-a-modern-solution-with-gcp-42995d5c3dbb) to setup event-based triggers on the Cloud Storage Bucket `-input` to kick off the Batch Job when a user adds a new video file.
+Delete k8s resources
+
+```
+kubectl delete -f local-queue.yaml
+kubectl delete -f cluster-queue.yaml
+kubectl delete -f resource-flavor.yaml
+```
+
+Uninstall Kueue
+
+```
+VERSION=v0.8.0
+kubectl delete -f \
+  https://github.com/kubernetes-sigs/kueue/releases/download/$VERSION/manifests.yaml
+```
