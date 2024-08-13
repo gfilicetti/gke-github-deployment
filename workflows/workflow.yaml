@@ -149,16 +149,36 @@
                 apiVersion: "batch/v1"
                 kind: "Job"
                 metadata:
-                  name: "transcoding"
+                  name: "${jobId}"
                 spec:
                   template:
+                    metadata:
+                      annotations:
+                        gke-gcsfuse/volumes: "true"
                     spec:
                       containers:
                         - name: "transcoding"
                           image: ${imageUri}
                           command: []
-                          args: ["MEDIA","media.mp4", "OUTPUT_PATH", OUTPUT_PATH]
+                          args: ["MEDIA","media.mp4", "OUTPUT_PATH", "${OUTPUT_PATH}"]
+                      volumeMounts:
+                        - name: gcs-fuse-input
+                          mountPath: /input
+                          readOnly: true
+                        - name: gcs-fuse-output
+                          mountPath: /output
                       restartPolicy: Never
+                volumes:
+                - name: gcs-fuse-input
+                  csi:
+                    driver: gcsfuse.csi.storage.gke.io
+                    volumeAttributes:
+                      bucketName: "${event.bucket}"
+                - name: gcs-fuse-output
+                  csi:
+                    driver: gcsfuse.csi.storage.gke.io
+                    volumeAttributes:
+                      bucketName: "${gcsDestination}"
                   backoffLimit: 4
             result: gkejob
             next: finish_workflow
@@ -169,5 +189,5 @@
               - condition: ${text.match_regex(event.data.name, "batchapi/")}
                 return: ${batchjob.name}
               - condition: true
-                return: ${gkejob.name}
+                return: ${gkejob.kind}
             next: end
