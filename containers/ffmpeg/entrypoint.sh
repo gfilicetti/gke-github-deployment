@@ -18,7 +18,7 @@ echo "### Transcoding ${MEDIA}"
 echo "### Output Path ${OUTPUT_PATH}"
 
 _SRC=/input
-_DST=${"/output/" + OUTPUT_PATH}
+_DST="/output/${OUTPUT_PATH}"
 
 _EXTENSION="${MEDIA##*.}"
 _BASENAME="$(basename "${MEDIA}")"
