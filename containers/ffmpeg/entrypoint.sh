@@ -28,6 +28,8 @@ _MEDIAINFO_SRC_START="$(date "+%F %T,%3N")"
 mediainfo "${_SRC}"/"${MEDIA}"
 _MEDIAINFO_SRC_END="$(date "+%F %T,%3N")"
 
+mkdir -p _DST
+
 lscpu | grep -q avx512
 [[ $? = 0 ]] && _ASM="avx512" || _ASM="avx2"
 
