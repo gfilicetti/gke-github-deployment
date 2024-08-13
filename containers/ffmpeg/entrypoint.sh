@@ -15,9 +15,10 @@ function exectime {
 _VERYSTART="$(date "+%F %T,%3N")"
 echo "### Start time: ${_VERYSTART}"
 echo "### Transcoding ${MEDIA}"
+echo "### Output Path ${OUTPUT_PATH}"
 
 _SRC=/input
-_DST=/output
+_DST=/output/${OUTPUT_PATH}
 
 _EXTENSION="${MEDIA##*.}"
 _BASENAME="$(basename "${MEDIA}")"

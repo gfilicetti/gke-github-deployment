@@ -1,0 +1,54 @@
+##### Yaml for Fusefs connection testing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jobs
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    iam.gke.io/gcp-service-account: <GKE_GCP_SA>@<PROJECT_ID>.iam.gserviceaccount.com
+  name: k8s-sa-cluster
+  namespace: jobs
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gcs-fuse-csi-job-example
+  namespace: jobs
+spec:
+  template:
+    metadata:
+      annotations:
+        gke-gcsfuse/volumes: "true"
+    spec:
+      serviceAccountName: k8s-sa-cluster
+      containers:
+      - name: writer
+        image: busybox
+        command:
+          - "/bin/sh"
+          - "-c"
+          - touch /input/test && echo $(date) >> /input/test && sleep 10
+        volumeMounts:
+        - name: gcs-fuse-csi-ephemeral-input
+          mountPath: /input
+      - name: reader
+        image: busybox
+        command:
+          - "/bin/sh"
+          - "-c"
+          - sleep 10 && cat /input/test
+        volumeMounts:
+        - name: gcs-fuse-csi-ephemeral-input
+          mountPath: /input
+          readOnly: true
+      volumes:
+      - name: gcs-fuse-csi-ephemeral-input
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: <BUCKET_NAME>
+      restartPolicy: Never
+  backoffLimit: 1

@@ -43,20 +43,4 @@ module "vpc" {
       },
     ]
   }
-
-  # ingress_rules = [
-  #   {
-  #     name          = "fw-batch-server"
-  #     description   = "Allow batch server traffic"
-  #     priority      = 1000
-  #     source_ranges = ["0.0.0.0/0"],
-  #     target_tags   = ["batch-server"]
-  #     allow = [
-  #       {
-  #         protocol = "udp"
-  #         ports    = ["7000-8000"]
-  #       }
-  #     ]
-  #   }
-  # ]
 }

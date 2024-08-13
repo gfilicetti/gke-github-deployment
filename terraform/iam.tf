@@ -16,6 +16,9 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+data "google_compute_default_service_account" "default" {
+}
+
 # Create a service account for GKE cluster
 resource "google_service_account" "sa_gke_cluster" {
   account_id   = "sa-${var.customer_id}-gke-cluster"
@@ -23,16 +26,16 @@ resource "google_service_account" "sa_gke_cluster" {
   project      = var.project_id
 }
 
-data "google_compute_default_service_account" "default" {
+resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
+  service_account_id = google_service_account.sa_gke_cluster.name
+  role               = "roles/iam.workloadIdentityUser"
+  members = [
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
+  ]
+  depends_on = [
+    module.gke
+  ]
 }
-
-# resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
-#   service_account_id = google_service_account.sa_gke_cluster.name
-#   role               = "roles/iam.workloadIdentityUser"
-#   members = [
-#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-cluster]",
-#   ]
-# }
 
 module "member_roles_gke_cluster" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
@@ -41,6 +44,7 @@ module "member_roles_gke_cluster" {
   project_id              = var.project_id
   project_roles = [
     "roles/artifactregistry.reader",
+    "roles/cloudtrace.agent",
     "roles/container.developer",
     "roles/container.nodeServiceAgent",
     "roles/logging.logWriter",
@@ -50,59 +54,9 @@ module "member_roles_gke_cluster" {
     "roles/cloudtrace.agent",
     "roles/container.admin",
     "roles/container.clusterAdmin",
+    "roles/storage.objectUser",
   ]
 }
-
-# # Create a service account for GKE AI Platform access to Vertex AI
-# resource "google_service_account" "sa_gke_aiplatform" {
-#   account_id   = "sa-${var.customer_id}-gke-aiplatform"
-#   display_name = "TF - GKE ai platform SA"
-#   project      = var.project_id
-# }
-
-# resource "google_service_account_iam_binding" "sa_gke_aiplatform_wi_binding" {
-#   service_account_id = google_service_account.sa_gke_aiplatform.name
-#   role               = "roles/iam.workloadIdentityUser"
-#   members = [
-#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-aiplatform]",
-#   ]
-# }
-
-# module "member_roles_gke_aiplatform" {
-#   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-#   service_account_address = google_service_account.sa_gke_aiplatform.email
-#   prefix                  = "serviceAccount"
-#   project_id              = var.project_id
-#   project_roles = [
-#     "roles/aiplatform.user",
-#     "roles/storage.objectUser",
-#   ]
-# }
-
-# # Create a service account for GKE telemetry collection
-# resource "google_service_account" "sa_gke_telemetry" {
-#   account_id   = "sa-${var.customer_id}-gke-telemetry"
-#   display_name = "TF - GKE telemetry collection SA"
-#   project      = var.project_id
-# }
-
-# resource "google_service_account_iam_binding" "sa_gke_telemetry_wi_binding" {
-#   service_account_id = google_service_account.sa_gke_telemetry.name
-#   role               = "roles/iam.workloadIdentityUser"
-#   members = [
-#     "serviceAccount:${var.project_id}.svc.id.goog[genai/k8s-sa-telemetry]",
-#   ]
-# }
-
-# module "member_roles_gke_telemetry" {
-#   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-#   service_account_address = google_service_account.sa_gke_telemetry.email
-#   prefix                  = "serviceAccount"
-#   project_id              = var.project_id
-#   project_roles = [
-#     "roles/cloudtrace.agent",
-#   ]
-# }
 
 # Add roles to the default Cloud Build service account
 module "member_roles_cloudbuild" {
@@ -111,10 +65,94 @@ module "member_roles_cloudbuild" {
   prefix                  = "serviceAccount"
   project_id              = var.project_id
   project_roles = [
+    "roles/artifactregistry.reader",
     "roles/artifactregistry.repoAdmin",
-    "roles/cloudbuild.connectionAdmin",
+    "roles/artifactregistry.serviceAgent",
+    "roles/batch.agentReporter",
+    "roles/batch.jobsEditor",
+    "roles/batch.serviceAgent",
     "roles/cloudbuild.builds.builder",
+    "roles/cloudbuild.connectionAdmin",
     "roles/container.developer",
+    "roles/eventarc.serviceAgent",
+    "roles/iam.serviceAccountUser",
+    "roles/logging.logWriter",
     "roles/storage.objectAdmin",
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer",
+    "roles/transcoder.admin",
+    "roles/transcoder.serviceAgent",
+    "roles/workflows.invoker",
+    "roles/workflows.serviceAgent",
+  ]
+}
+
+
+module "member_roles_default_compute" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = data.google_compute_default_service_account.default.email
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    "roles/iam.serviceAccountUser",
+    # Artifact Registry
+    "roles/artifactregistry.writer",
+    "roles/artifactregistry.serviceAgent",
+    "roles/artifactregistry.reader",
+    # Batch API
+    "roles/batch.jobsEditor",
+    "roles/batch.serviceAgent",
+    "roles/batch.agentReporter",
+    # EventArc
+    "roles/eventarc.serviceAgent",
+    "roles/eventarc.eventReceiver",
+    "roles/pubsub.publisher",
+    # Storage
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer",
+    # Transcoder API
+    "roles/transcoder.admin",
+    "roles/transcoder.serviceAgent",
+    # Workflows
+    "roles/logging.logWriter",
+    "roles/workflows.invoker",
+    "roles/workflows.serviceAgent"
+  ]
+}
+
+# Google Cloud Storage (GCS) default service account needs permission to publish PubSub messages (EventArc)
+module "member_roles_gcs_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # EventArc
+    "roles/pubsub.publisher"
+  ]
+}
+
+# PubSub needs these minimum permissions (GCS > EventArc > Workflow)
+module "member_roles_pubsub_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # PubSub
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+# Transcoder API service accounts needs to be able to read from GCS -input bucket and write to -output
+module "member_roles_transcoder_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # Cloud Storage
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer"
   ]
 }

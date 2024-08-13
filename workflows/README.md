@@ -55,6 +55,8 @@ export GCS_OUTPUT_BUCKET="alanpoole-transcoding-on-gke-output"
 
 Using Managed [Workflows](https://console.cloud.google.com/workflows) to create a services of steps to decide which backend transcoder service to send the newly uploaded file event to.
 
+> TODO: extract environment variables from ../terraform/workflow.tf
+
 ```
 gcloud workflows deploy $WORKFLOW_NAME \
     --description="A workflow that decides which backend transcoder service to send a newly uploaded GCP video file." \

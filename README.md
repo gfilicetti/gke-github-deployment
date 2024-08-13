@@ -3,9 +3,25 @@ This repository is a full example of a CI/CD pipeline using GitHub actions,
 terraform and other tech to create and deploy workloads to a GKE Autopilot
 installation.
 
+##### Table of Contents
+**[1. Objectives](#objectives)**
+
+**[2. Tech Used and Prerequisites](#tech-used-and-prerequisites)**
+
+**[3. Workload](#workload)**
+
+**[4. Getting started (Infrastructure Deployment)](#getting-started-infrastructure-deployment)**
+* [4.1. (Option 1) Manual deployment with Terraform cli](#option-1-manual-deployment-with-terraform-cli)
+* [4.2. (Option 2) Automation setup with GitHub Actions](#option-2-automation-setup-with-github-actions)
+
+**[5. Container Builds](#container-builds)**
+
+**[6. Troubleshooting](#troubleshooting)**
+
 ## Objectives
 1) Creating a GitHub Actions workflow and deployment strategy for deploying new
 Autopilot clusters.
+
 2) Creating a GitHub Actions workflow and deployment strategy for building a
 container and deploying it to an Autopilot cluster.
 
@@ -23,29 +39,93 @@ container and deploying it to an Autopilot cluster.
 ## Workload
 We will be deploying a container image of a customized 'ffmpeg' build to a GKE Autopilot Kubernetes cluster.
 
-## Notes
-- Due to the need for potentially 15k+ nodes, configuration and deployment of multiple Autopilot clusters must be supported.
+> __Note:__ Due to the need for potentially 15k+ nodes, configuration and deployment of multiple Autopilot clusters must be supported.
 
 ## Getting started (Infrastructure Deployment)
 
 There are 2 options for deployment:
 
-1) Manually running throught the Terraform deployment with `terraform` cli.
+1) [Option 1](#option-1-manual-deployment-with-terraform-cli): Manually running
+through the Terraform deployment with `terraform` cli.
 
-2) Setting up GitHub Actions and automating deplotments on [workflow dispatch](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow)
+2) [Option 2](#option-2-automation-setup-with-github-actions): Setting up GitHub
+Actions and automating deployments on [workflow dispatch](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow)
 
-For both options a fresh new Google Cloud Project is assumed, with the user
-already authenticated andconfigured to work in that project via the `gcloud`
-command line.
+But first! A few more steps are needed before carrying on to either option 1 or
+2.
 
-- `gcloud auth application-default login`
-- `gcloud config set project <your-project-id>`
+> __Note:__ Both options assume you already have a new project in Google Cloud
+> for which you have IAM permissions to deploy resources into.
+
+Confirm authentication to Google Cloud project and correct project is selected:
+
+```bash
+gcloud auth application-default login
+
+gcloud config set project <your-project-id>
+```
+
+Set your unique Project ID for Google Cloud:
+
+```bash
+export PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
+```
+
+Set default location for Google Cloud:
+
+```bash
+export LOCATION=us-central1
+```
+
+To better follow along with this quickstart guide, set `CUR_DIR` env variable:
+
+```bash
+export CUR_DIR=$(pwd)
+```
+
+Confirm user authentication to Google Cloud project:
+
+```bash
+gcloud auth list
+```
+
+Check if your authentication is ok and your project id is set:
+
+```bash
+gcloud projects describe $PROJECT_ID
+```
+
+You should see your `projectId` listed with an `ACTIVE` state.
+
+Finally, enable Google Cloud APIs:
+
+```bash
+gcloud services enable --project $PROJECT_ID \
+  aiplatform.googleapis.com \
+  artifactregistry.googleapis.com \
+  batch.googleapis.com \
+  cloudbuild.googleapis.com \
+  cloudresourcemanager.googleapis.com \
+  compute.googleapis.com \
+  container.googleapis.com \
+  containerfilesystem.googleapis.com \
+  containerregistry.googleapis.com \
+  eventarc.googleapis.com \
+  eventarcpublishing.googleapis.com \
+  iam.googleapis.com \
+  pubsub.googleapis.com \
+  run.googleapis.com \
+  servicecontrol.googleapis.com \
+  storage.googleapis.com \
+  transcoder.googleapis.com \
+  workflows.googleapis.com \
+  workflowexecutions.googleapis.com
+```
 
 ### (Option 1) Manual deployment with Terraform cli.
 
-The following steps below will walk you through the setup guide for *GenAI Quickstart*. The process will walk through enabling the proper **Google Cloud APIs**, creating the resources via **Terraform**, and deployment of the **Kubernetes manifests** needed to run the project.
-
-> __Note:__ These steps assume you already have a running project in Google Cloud for which you have IAM permissions to deploy resources into.
+The following steps below will walk you through the setup guide for running
+**Terraform** as the deployment process for cloud environment.
 
 #### 1) Clone this git repository
 
@@ -55,71 +135,23 @@ git clone https://github.com/gfilicetti/gke-github-deployment.git
 cd gke-github-deployment
 ```
 
-#### 2) Set ENV variable
-
-Set your unique Project ID for Google Cloud
+#### 2) Create remote state for Terraform in Google Cloud Storage
 
 ```bash
-export PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
+sh ./scripts/setup-tfstate.sh
 ```
 
-Set default location for Google Cloud
-
-```bash
-export LOCATION=us-central1
-```
-
-To better follow along with this quickstart guide, set `CUR_DIR` env variable
-
-```bash
-export CUR_DIR=$(pwd)
-```
-
-#### 3) Confirm user authentication to Google Cloud project
-
-```bash
-gcloud auth list
-```
-
-Check if your authentication is ok and your project id is set.
-
-```bash
-gcloud projects describe $PROJECT_ID
-```
-
-You should see the your `projectId` listed with an `ACTIVE` state.
-
-#### 4) Enable Google Cloud APIs
-
-```bash
-gcloud services enable --project $PROJECT_ID \
-  aiplatform.googleapis.com \
-  artifactregistry.googleapis.com \
-  cloudbuild.googleapis.com \
-  cloudresourcemanager.googleapis.com \
-  compute.googleapis.com \
-  container.googleapis.com \
-  containerfilesystem.googleapis.com \
-  containerregistry.googleapis.com \
-  iam.googleapis.com \
-  servicecontrol.googleapis.com \
-  eventarc.googleapis.com \
-  eventarcpublishing.googleapis.com \
-  workflows.googleapis.com \
-  workflowexecutions.googleapis.com \
-  compute.googleapis.com \
-  storage.googleapis.com \
-  batch.googleapis.com \
-  transcoder.googleapis.com
-```
-
-#### 5) Deploy infrastructure with Terraform
+#### 3) Set environment variables for unique Terraform variables
 
 ```bash
 cd $CUR_DIR/terraform
 
 cat terraform.example.tfvars | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
+```
 
+#### 4) Deploy infrastructure with Terraform
+
+```bash
 terraform init
 
 terraform plan
@@ -150,32 +182,22 @@ To assist in this we have 3 scripts that will assist in setup under `./scripts`:
 * `./scripts/enable-gh-actions.sh`
 * `./scripts/setup-tfstate.sh`
 
-#### 1) Create Fork of this repository
+#### 1) Create Fork of this repository and clone
 
 Setting up GitHub Actions for automated deployments with Terraform requires the
 Google Cloud administrator to create a [fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) of this repo, to personalize variable settings for unique cloud environment.
 
-#### 2) Confirm user authentication to Google Cloud project
-
 ```bash
-gcloud auth list
+git clone https://github.com/<your-cloned-repo-org>/gke-github-deployment.git
 ```
 
-Check if your authentication is ok and your project id is set.
-
-```bash
-gcloud projects describe $PROJECT_ID
-```
-
-You should see the your `projectId` listed with an `ACTIVE` state.
-
-#### 3) Enable IAM and Google Cloud service APIs for project
+#### 2) Enable IAM and Google Cloud service APIs for project
 
 ```bash
 sh ./scripts/enable-iam.sh
 ```
 
-#### 4) Enable Workload Identity federation with Google Cloud service account
+#### 3) Enable Workload Identity federation with Google Cloud service account
 
 ```bash
 sh ./scripts/enable-gh-actions.sh
@@ -200,20 +222,20 @@ GCP_WI_PROVIDER_ID: ${GCP_WI_PROVIDER_ID}
 ----------------------------------------
 ```
 
-#### 5) Setup GitHub Actions in Repository.
+#### 4) Setup GitHub Actions in Repository.
 
 With the key/value pair from the previous step. Configure the pair in your
 GitHub repository under **Settings > Secrets and variabls > Actions > Variables**
 
 ![Setup GitHub Actions in Repository](docs/img/gh-actions-env-setup.png)
 
-#### 6) Setup Terraform backend to maintain state remotely.
+#### 5) Setup Terraform backend to maintain state remotely.
 
 ```bash
 sh ./scripts/setup-tfstate.sh
 ```
 
-#### 7) Run workflow
+#### 6) Run workflow
 
 This concludes our one time setup and now all that is left is to run the
 workflow. Navigate to **Actions** tab in GitHub. You should notice 2 workflows,
@@ -225,6 +247,31 @@ resources at the end. Click **Terraform Deployment > Run workflow > Branch: main
 #### Project cleanup
 
 Run **Terraform DESTROY** workflow from GitHub Actions page.
+
+## Container builds
+
+This section describes the process for building and pushing containers to
+Artifact Registry, where they will later be used to deploy to a container
+runtime environment like GKE.
+
+If you setup your environment with GitHub Actions outlined [earlier](#option-2-automation-setup-with-github-actions),
+you can simply navigate to the **Actions** table and run **CloudBuild CI**
+workflow.
+
+As a second option, navigate to the directory of the container image you are
+building:
+
+```bash
+cd $CUR_DIR/containers/ffmpeg
+```
+
+And manually run the `gcloud` command to build:
+
+```bash
+gcloud builds submit --config ./cloudbuild.yaml \
+  --region us-central1 \
+  --substitutions _PROJECT_ID=$PROJECT_ID
+```
 
 ## Troubleshooting
 

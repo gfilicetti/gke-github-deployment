@@ -37,11 +37,11 @@ module "gke" {
   release_channel            = "RAPID" # RAPID was chosen for L4 support.
   kubernetes_version         = "1.29"  # We need the tip of 1.28 or 1.29 (not just default)
   service_account            = google_service_account.sa_gke_cluster.email
-  enable_private_endpoint    = true
+  # enable_private_endpoint    = true
   enable_private_nodes       = true
-  master_ipv4_cidr_block     = "10.0.0.0/28"
-  master_authorized_networks = [{ cidr_block = "${var.subnet}", display_name = "internal" }]
-
+  # master_ipv4_cidr_block     = "10.0.0.0/28"
+  # master_authorized_networks = [{ cidr_block = "${var.subnet}", display_name = "internal" }]
+  master_authorized_networks = [{ cidr_block = "0.0.0.0/0", display_name = "all" }]
   # Need to allow 48 hour window in rolling 32 days For `maintenance_start_time`
   # & `end_time` only the specified time of the day is used, the specified date
   # is ignored (https://cloud.google.com/composer/docs/specify-maintenance-windows#terraform)

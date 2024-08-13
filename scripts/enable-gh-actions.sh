@@ -2,12 +2,11 @@
 
 # Set GitHub "organization" and repo name:
 GITHUB_ORG=""
-GITHUB_REPO="gke-github-deployment"
 
 read -p "Enter GitHub organization or username: " GITHUB_ORG
-read -p "Enter GitHub repository name [${GITHUB_REPO}]: " GITHUB_REPO
+read -p "Enter GitHub repository name [gke-github-deployment]: " GITHUB_REPO
 
-GITHUB_REPO=${GITHUB_REPO:-${GITHUB_REPO}}
+GITHUB_REPO=${GITHUB_REPO:-gke-github-deployment}
 
 # Fetch Project ID:
 PROJECT_ID=$(gcloud config get-value project)
@@ -17,10 +16,6 @@ PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectN
 
 # GitHub Actions SA:
 GH_ACTIONS_SA="sa-tf-gh-actions"
-
-# 1. Create a Google Cloud Service Account.
-gcloud iam service-accounts create "${GH_ACTIONS_SA}" \
-  --project "${PROJECT_ID}"
 
 # 2. Create a Workload Identity Pool.
 gcloud iam workload-identity-pools create "github" \
