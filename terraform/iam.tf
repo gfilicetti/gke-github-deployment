@@ -53,6 +53,7 @@ module "member_roles_gke_cluster" {
     "roles/monitoring.metricWriter",
     "roles/monitoring.viewer",
     "roles/stackdriver.resourceMetadata.writer",
+    "roles/storage.admin",
     "roles/storage.objectUser",
   ]
 }
@@ -107,8 +108,8 @@ module "member_roles_default_compute" {
     "roles/eventarc.eventReceiver",
     "roles/pubsub.publisher",
     # Storage
+    "roles/storage.admin",
     "roles/storage.objectUser",
-    "roles/storage.objectViewer",
     # Transcoder API
     "roles/transcoder.admin",
     "roles/transcoder.serviceAgent",
