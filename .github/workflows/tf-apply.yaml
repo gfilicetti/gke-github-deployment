@@ -54,7 +54,8 @@ jobs:
             -out=out.tfplan \
             -var "project_id=${{ env.GCP_PROJECT_ID }}" \
             -var "customer_id=gcp" \
-            -var "region=us-central1"
+            -var "region=us-central1" \
+            -var "jobs_namespace=jobs"
         continue-on-error: true
 
       - name: Terraform Apply
