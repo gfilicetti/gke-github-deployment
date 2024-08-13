@@ -6,15 +6,10 @@
             args:
                 text: ${event}
                 severity: INFO
-        - extract_event_data:
-            assign:
-            - bucket: ${event.data.bucket}
-            - object: ${event.data.name}
-            - contentType: ${event.data.contentType}
         - check_content_type:
             switch:
-                - condition: ${not text.match_regex(contentType, "video") and not text.match_regex(contentType, "octet-stream")}
-                  return: ${"Media " + contentType + " not valid."}
+                - condition: ${not text.match_regex(event.data.contentType, "video") and not text.match_regex(event.data.contentType, "octet-stream")}
+                  return: ${"Media " + event.data.contentType + " not valid."}
                   next: end
             next: prep_transcoding_job
         - prep_transcoding_job:
@@ -27,14 +22,27 @@
             - machineType: ${sys.get_env("MACHINE_TYPE")}
             - machineCpuMilli: ${sys.get_env("MACHINE_CPU_MILLI")}
             - machineMemoryMib: ${sys.get_env("MACHINE_MEMORY_MIB")}
+            - gkeClusterName: ${sys.get_env("GKE_CLUSTER_NAME")}
+            - gkeNamespace: ${sys.get_env("GKE_NAMESPACE")}
             next: decide_backend_svc
         - decide_backend_svc:
             switch:
-              - condition: ${text.match_regex(sys.get_env("BACKEND_SVC"), "Transcoder API")}
+              - condition: ${text.match_regex(event.data.name, "transcoderapi/")}
+                assign:
+                  - BACKEND_SRV: "transcoderapi"
+                  - OUTPUT_PATH: ${"transcoderapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/" + text.replace_all(event.data.name, "transcoderapi/", "")}
                 next: call_transcoder_api
-              - condition: ${text.match_regex(sys.get_env("BACKEND_SVC"), "Batch Compute API")}
+              - condition: ${text.match_regex(event.data.name, "batchapi/")}
+                assign:
+                  - BACKEND_SRV: "batchapi"
+                  - OUTPUT_PATH: ${"batchapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/" + text.replace_all(event.data.name, "batchapi/", "")}
                 next: create_batch_job
-            next: create_k8s_job
+              - condition: true
+                assign:
+                  - BACKEND_SRV: "gke"
+                  - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/" + event.data.name}
+                next: create_k8s_job
+            next: create_k8s_job # default
         - call_transcoder_api:
             call: googleapis.transcoder.v1.projects.locations.jobs.create
             args:
@@ -81,7 +89,8 @@
                           - "video-stream0"
                           - "audio-stream0"
                     output:
-                      uri: ${"gs://" + gcsDestination + "/"}
+                      uri: ${"gs://" + gcsDestination + "/" + OUTPUT_PATH + "/"}
+            result: transcoderjob
             next: finish_workflow
         - create_batch_job:
             call: googleapis.batch.v1.projects.locations.jobs.create
@@ -106,10 +115,11 @@
                             - "/mnt/disks/input:/input"
                         environment:
                             variables:
-                              MEDIA: "${object}"
+                              MEDIA: "${event.data.name}"
+                              OUTPUT_PATH: ${OUTPUT_PATH}
                         volumes:
                         - gcs:
-                            remotePath: "${bucket}"
+                            remotePath: "${event.bucket}"
                           mountPath: "/mnt/disks/input"
                         - gcs:
                             remotePath: "${gcsDestination}"
@@ -126,14 +136,15 @@
                           machineType: "${machineType}"
                     logsPolicy:
                       destination: CLOUD_LOGGING
+            result: batchjob
             next: finish_workflow
         - create_k8s_job:
             call: gke.create_job
             args:
-              cluster_id: "gke-alanpoole-test"
-              namespace: "default"
-              project: "alanpoole-transcoding-on-gke"
-              location: "us-central1"
+              cluster_id: ${gkeClusterName}
+              namespace: ${gkeNamespace}
+              project: ${project}
+              location: ${location}
               job:
                 apiVersion: "batch/v1"
                 kind: "Job"
@@ -144,11 +155,19 @@
                     spec:
                       containers:
                         - name: "transcoding"
-                          image: "us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:latest"
+                          image: ${imageUri}
                           command: []
-                          args: ["MEDIA","media.mp4"]
+                          args: ["MEDIA","media.mp4", "OUTPUT_PATH", OUTPUT_PATH]
                       restartPolicy: Never
                   backoffLimit: 4
+            result: gkejob
             next: finish_workflow
         - finish_workflow:
+            switch:
+              - condition: ${text.match_regex(event.data.name, "transcoderapi/")}
+                return: ${transcoderjob.name}
+              - condition: ${text.match_regex(event.data.name, "batchapi/")}
+                return: ${batchjob.name}
+              - condition: true
+                return: ${gkejob.name}
             next: end

@@ -32,6 +32,8 @@ resource "google_workflows_workflow" "transcoding_workflow" {
     MACHINE_MEMORY_MIB   = "65536"
     MACHINE_TYPE         = "c2-standard-16"
     VPC_NETWORK_FULLNAME = module.vpc.network_name
+    GKE_CLUSTER_NAME     = "gke-${var.customer_id}-test"
+    GKE_NAMESPACE        = "default"
   }
 
   source_contents = data.local_file.input_template.content
