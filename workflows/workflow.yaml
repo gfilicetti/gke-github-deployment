@@ -22,6 +22,8 @@
             - machineType: ${sys.get_env("MACHINE_TYPE")}
             - machineCpuMilli: ${sys.get_env("MACHINE_CPU_MILLI")}
             - machineMemoryMib: ${sys.get_env("MACHINE_MEMORY_MIB")}
+            - gkeClusterName: ${sys.get_env("GKE_CLUSTER_NAME")}
+            - gkeNamespace: ${sys.get_env("GKE_NAMESPACE")}
             next: decide_backend_svc
         - decide_backend_svc:
             switch:
@@ -137,6 +139,28 @@
             result: batchjob
             next: finish_workflow
         - create_k8s_job:
+            call: gke.create_job
+            args:
+              cluster_id: ${gkeClusterName}
+              namespace: ${gkeNamespace}
+              project: ${project}
+              location: ${location}
+              job:
+                apiVersion: "batch/v1"
+                kind: "Job"
+                metadata:
+                  name: "transcoding"
+                spec:
+                  template:
+                    spec:
+                      containers:
+                        - name: "transcoding"
+                          image: ${imageUri}
+                          command: []
+                          args: ["MEDIA","media.mp4", "OUTPUT_PATH", OUTPUT_PATH]
+                      restartPolicy: Never
+                  backoffLimit: 4
+            result: gkejob
             next: finish_workflow
         - finish_workflow:
             switch:
@@ -144,4 +168,6 @@
                 return: ${transcoderjob.name}
               - condition: ${text.match_regex(event.data.name, "batchapi/")}
                 return: ${batchjob.name}
+              - condition: true
+                return: ${gkejob.name}
             next: end
