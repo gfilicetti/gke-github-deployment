@@ -35,12 +35,12 @@
               - condition: ${text.match_regex(event.data.name, "batchapi/")}
                 assign:
                   - BACKEND_SRV: "batchapi"
-                  - OUTPUT_PATH: ${"batchapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/"}
+                  - OUTPUT_PATH: ${"batchapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
                 next: create_batch_job
               - condition: true
                 assign:
                   - BACKEND_SRV: "gke"
-                  - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/"}
+                  - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
                 next: create_k8s_job
             next: create_k8s_job # default
         - call_transcoder_api:
