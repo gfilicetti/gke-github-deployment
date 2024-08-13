@@ -143,10 +143,52 @@ module "member_roles_default_compute" {
   prefix                  = "serviceAccount"
   project_id              = var.project_id
   project_roles = [
+    # Batch API
+    "roles/batch.jobsEditor",
+    "roles/batch.serviceAgent",
+    "roles/batch.agentReporter",
+    # Workflows
+    "roles/workflows.invoker",
+    "roles/workflows.serviceAgent",
+    "roles/logging.logWriter",
+    # EventArc
+    "roles/eventarc.serviceAgent",
     "roles/eventarc.eventReceiver",
-    "roles/eventarc.viewer",
-    "roles/eventarc.developer",
+    "roles/pubsub.publisher",
+    # Transcoder API
+    "roles/transcoder.admin",
+    "roles/transcoder.serviceAgent",
+    # Artifact Registry
     "roles/artifactregistry.writer",
-    "roles/storage.objectUser"
+    "roles/artifactregistry.serviceAgent",
+    "roles/artifactregistry.reader",
+    "roles/iam.serviceAccountUser",
+    # Storage
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer"
+  ]
+}
+
+# Google Cloud Storage (GCS) default service account needs permission to publish PubSub messages (EventArc)
+module "member_roles_gcs_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # EventArc
+    "roles/pubsub.publisher"
+  ]
+}
+
+# PubSub needs these minimum permissions (GCS > EventArc > Workflow)
+module "member_roles_pubsub_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # PubSub
+    "roles/iam.serviceAccountTokenCreator"
   ]
 }
