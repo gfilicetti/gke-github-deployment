@@ -1,0 +1,13 @@
+##### Yaml for Fusefs connection testing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jobs
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    iam.gke.io/gcp-service-account: <GKE_GCP_SA>@<PROJECT_ID>.iam.gserviceaccount.com ## Need to change SA and PROJECT_ID
+  name: k8s-sa-cluster
+  namespace: jobs
