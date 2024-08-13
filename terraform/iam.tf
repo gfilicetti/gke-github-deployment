@@ -91,10 +91,65 @@ module "member_roles_default_compute" {
   prefix                  = "serviceAccount"
   project_id              = var.project_id
   project_roles = [
+    "roles/iam.serviceAccountUser",
+    # Artifact Registry
     "roles/artifactregistry.writer",
-    "roles/eventarc.developer",
+    "roles/artifactregistry.serviceAgent",
+    "roles/artifactregistry.reader",
+    # Batch API
+    "roles/batch.jobsEditor",
+    "roles/batch.serviceAgent",
+    "roles/batch.agentReporter",
+    # EventArc
+    "roles/eventarc.serviceAgent",
     "roles/eventarc.eventReceiver",
-    "roles/eventarc.viewer",
-    "roles/storage.objectUser"
+    "roles/pubsub.publisher",
+    # Storage
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer",
+    # Transcoder API
+    "roles/transcoder.admin",
+    "roles/transcoder.serviceAgent",
+    # Workflows
+    "roles/logging.logWriter",
+    "roles/workflows.invoker",
+    "roles/workflows.serviceAgent"
+  ]
+}
+
+# Google Cloud Storage (GCS) default service account needs permission to publish PubSub messages (EventArc)
+module "member_roles_gcs_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # EventArc
+    "roles/pubsub.publisher"
+  ]
+}
+
+# PubSub needs these minimum permissions (GCS > EventArc > Workflow)
+module "member_roles_pubsub_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # PubSub
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+}
+
+# Transcoder API service accounts needs to be able to read from GCS -input bucket and write to -output
+module "member_roles_transcoder_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = "service-${data.google_project.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
+  prefix                  = "serviceAccount"
+  project_id              = var.project_id
+  project_roles = [
+    # Cloud Storage
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer"
   ]
 }
