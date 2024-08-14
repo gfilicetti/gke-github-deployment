@@ -30,6 +30,7 @@ for SUCCINCT_ROLE in \
     resourcemanager.projectIamAdmin \
     run.developer \
     run.invoker \
+    storage.admin \
     storage.objectAdmin \
     ; do
   gcloud projects add-iam-policy-binding \
