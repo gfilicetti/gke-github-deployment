@@ -24,7 +24,7 @@ provider "kubernetes" {
 module "gke" {
   deletion_protection        = false
   source                     = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
-  version                    = "29.0.0"
+  version                    = "32.0.0"
   project_id                 = var.project_id
   name                       = "gke-${var.customer_id}-test"
   region                     = var.region
@@ -37,8 +37,10 @@ module "gke" {
   release_channel            = "RAPID" # RAPID was chosen for L4 support.
   kubernetes_version         = "1.29"  # We need the tip of 1.28 or 1.29 (not just default)
   service_account            = google_service_account.sa_gke_cluster.email
+  # Google Cloud Storage (GCS) Fuse
+  gcs_fuse_csi_driver = true
   # enable_private_endpoint    = true
-  enable_private_nodes       = true
+  enable_private_nodes = true
   # master_ipv4_cidr_block     = "10.0.0.0/28"
   # master_authorized_networks = [{ cidr_block = "${var.subnet}", display_name = "internal" }]
   master_authorized_networks = [{ cidr_block = "0.0.0.0/0", display_name = "all" }]

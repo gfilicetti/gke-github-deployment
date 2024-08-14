@@ -14,7 +14,7 @@
 
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "8.0.0"
+  version = "9.1.0"
 
   project_id   = var.project_id
   network_name = "vpc-${var.customer_id}"
@@ -28,6 +28,7 @@ module "vpc" {
       subnet_private_access = "true"
       subnet_flow_logs      = "false"
       description           = "Subnet for var.region"
+      subnet_private_access = true
     }
   ]
 
