@@ -135,6 +135,7 @@ module "member_roles_gcs_service_account" {
 }
 
 # PubSub needs these minimum permissions (GCS > EventArc > Workflow)
+# Hint: PubSub SA can take ~10 minutes to show up in a newly created project.
 module "member_roles_pubsub_service_account" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
   service_account_address = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
