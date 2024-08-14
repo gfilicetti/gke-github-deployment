@@ -164,7 +164,12 @@
                         - name: "transcoding"
                           image: ${imageUri}
                           command: []
-                          args: ["--MEDIA","${event.data.name}", "--OUTPUT_PATH", "${OUTPUT_PATH}"]
+                          args: []
+                          env:
+                          - name: MEDIA
+                            value: "${event.data.name}"
+                          - name: OUTPUT_PATH
+                            value: "${OUTPUT_PATH}"
                       volumeMounts:
                         - name: gcs-fuse-input
                           mountPath: /input
