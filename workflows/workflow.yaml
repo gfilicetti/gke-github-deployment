@@ -163,7 +163,7 @@
                       containers:
                         - name: "transcoding"
                           image: ${imageUri}
-                          command: []
+                          command: ["/bin/sh", "-c", "/entrypoint.sh"]
                           args: []
                           env:
                           - name: MEDIA
