@@ -18,6 +18,8 @@ installation.
 
 **[6. Troubleshooting](#troubleshooting)**
 
+![High level architecture](docs/img/architecture-diagram.png "High level architecture")
+
 ## Objectives
 1) Creating a GitHub Actions workflow and deployment strategy for deploying new
 Autopilot clusters.

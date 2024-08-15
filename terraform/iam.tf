@@ -135,6 +135,7 @@ module "member_roles_gcs_service_account" {
 }
 
 # PubSub needs these minimum permissions (GCS > EventArc > Workflow)
+# Hint: PubSub SA can take ~10 minutes to show up in a newly created project.
 module "member_roles_pubsub_service_account" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
   service_account_address = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
@@ -146,7 +147,9 @@ module "member_roles_pubsub_service_account" {
   ]
 }
 
+# TODO(alanpoole): re-enable after investigating ~30-min delay in availability of this SA.
 # Transcoder API service accounts needs to be able to read from GCS -input bucket and write to -output
+/*
 module "member_roles_transcoder_service_account" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
   service_account_address = "service-${data.google_project.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
@@ -158,3 +161,4 @@ module "member_roles_transcoder_service_account" {
     "roles/storage.objectViewer"
   ]
 }
+*/

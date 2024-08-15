@@ -14,13 +14,13 @@
 resource "google_storage_bucket" "gcs-input" {
   name                        = "gcs-${var.project_id}-${var.customer_id}-test-input"
   location                    = var.region
-  force_destroy               = true
+  force_destroy               = false
   uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket" "gcs-output" {
   name                        = "gcs-${var.project_id}-${var.customer_id}-test-output"
   location                    = var.region
-  force_destroy               = true
+  force_destroy               = false
   uniform_bucket_level_access = true
 }
