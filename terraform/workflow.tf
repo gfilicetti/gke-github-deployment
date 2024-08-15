@@ -11,12 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-data "local_file" "input_template" {
-  filename = "../workflows/workflow.yaml"
+data "local_file" "upload_input_template" {
+  filename = "../workflows/upload-event-workflow.yaml"
+}
+data "local_file" "bulk_input_template" {
+  filename = "../workflows/bulk-workflow.yaml"
+}
+data "local_file" "job_input_template" {
+  filename = "../workflows/create-job-workflow.yaml"
 }
 
-resource "google_workflows_workflow" "transcoding_workflow" {
-  name        = "workflow-${var.customer_id}-gcs-transcoding"
+resource "google_workflows_workflow" "event_transcoding_workflow" {
+  name        = "upload-event-gcs-${var.customer_id}-transcoding"
   region      = var.region
   description = "Upon upload of a new video file to GCS, this workload picks the most appropriate backend transcoding service to execute the job."
   labels = {
@@ -35,7 +41,29 @@ resource "google_workflows_workflow" "transcoding_workflow" {
     VPC_SUBNETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/regions/${var.region}/subnetworks/sn-${var.customer_id}-${var.region}"
   }
 
-  source_contents = data.local_file.input_template.content
+  source_contents = data.local_file.upload_input_template.content
+}
+
+resource "google_workflows_workflow" "bulk_transcoding_workflow" {
+  name        = "bulk-${var.customer_id}-transcoding"
+  region      = var.region
+  description = "Establish a bulk transcoding request and kick off the backend jobs."
+  labels = {
+    env = "transcoding"
+  }
+
+  source_contents = data.local_file.bulk_input_template.content
+}
+
+resource "google_workflows_workflow" "job_transcoding_workflow" {
+  name        = "schedule-job-${var.customer_id}-transcoding"
+  region      = var.region
+  description = "Establish a transcoding job in the appropriate backend service."
+  labels = {
+    env = "transcoding"
+  }
+
+  source_contents = data.local_file.bulk_input_template.content
 }
 
 resource "google_eventarc_trigger" "primary" {
@@ -48,9 +76,9 @@ resource "google_eventarc_trigger" "primary" {
   }
   matching_criteria {
     attribute = "bucket"
-    value     = "gcs-${var.project_id}-${var.customer_id}-test-input"
+    value     = resource.google_storage_bucket.gcs-input.name
   }
   destination {
-    workflow = "projects/${var.project_id}/locations/${var.region}/workflows/workflow-${var.customer_id}-gcs-transcoding"
+    workflow = "projects/${var.project_id}/locations/${var.region}/workflows/${resource.google_workflows_workflow.event_transcoding_workflow.name}"
   }
 }
