@@ -27,13 +27,13 @@ resource "google_workflows_workflow" "event_transcoding_workflow" {
   }
 
   user_env_vars = {
-    DOCKER_IMAGE_URI   = "${var.region}-docker.pkg.dev/${var.project_id}/repo-batch-jobs/ffmpeg:latest"
-    GCS_DESTINATION    = "${resource.google_storage_bucket.gcs-output.name}"
-    MACHINE_CPU_MILLI  = "16000"
-    MACHINE_MEMORY_MIB = "65536"
-    MACHINE_TYPE       = "c2-standard-16"
-    GKE_CLUSTER_NAME   = "${module.gke.name}"
-    GKE_NAMESPACE      = "${var.job_namespace}"
+    DOCKER_IMAGE_URI        = "${var.region}-docker.pkg.dev/${var.project_id}/repo-batch-jobs/ffmpeg:latest"
+    GCS_DESTINATION         = "${resource.google_storage_bucket.gcs-output.name}"
+    MACHINE_CPU_MILLI       = "16000"
+    MACHINE_MEMORY_MIB      = "65536"
+    MACHINE_TYPE            = "c2-standard-16"
+    GKE_CLUSTER_NAME        = "${module.gke.name}"
+    GKE_NAMESPACE           = "${var.job_namespace}"
     VPC_NETWORK_FULLNAME    = "${module.vpc.network_self_link}"
     VPC_SUBNETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/regions/${var.region}/subnetworks/sn-${var.customer_id}-${var.region}"
   }
@@ -50,7 +50,7 @@ resource "google_workflows_workflow" "bulk_transcoding_workflow" {
   }
 
   user_env_vars = {
-    EVENT_WORKFLOW_NAME = resource.google_workflows_workflow.event_transcoding_workflow.name
+    EVENT_WORKFLOW_NAME = "upload-event-gcs-${var.customer_id}-transcoding"
   }
 
   source_contents = data.local_file.bulk_input_template.content
