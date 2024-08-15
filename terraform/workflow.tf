@@ -50,7 +50,7 @@ resource "google_workflows_workflow" "bulk_transcoding_workflow" {
   }
 
   user_env_vars = {
-    EVENT_WORKFLOW_NAME = "upload-event-gcs-${var.customer_id}-transcoding"
+    EVENT_WORKFLOW_NAME = resource.google_workflows_workflow.event_transcoding_workflow.name
   }
 
   source_contents = data.local_file.bulk_input_template.content
