@@ -19,17 +19,15 @@ echo "### Output Path ${OUTPUT_PATH}"
 
 _SRC=/input
 _DST="/output/${OUTPUT_PATH}"
+_STATS="${_DST}"/"stats.txt"
 
 _EXTENSION="${MEDIA##*.}"
 _BASENAME="$(basename "${MEDIA}")"
 _FILENAME="${_BASENAME%.*}"
 
-_MEDIAINFO_SRC_START="$(date "+%F %T,%3N")"
-mediainfo "${_SRC}"/"${MEDIA}"
-_MEDIAINFO_SRC_END="$(date "+%F %T,%3N")"
-
-echo "### Creating Output Path ${_DST}"
-mkdir -p _DST
+_MEDIAINFO_SRC_START="$(date "+%F %T,%3N")" >> "${_DST}"
+mediainfo "${_SRC}"/"${MEDIA}" >> "${_DST}"
+_MEDIAINFO_SRC_END="$(date "+%F %T,%3N")" >> "${_DST}"
 
 lscpu | grep -q avx512
 [[ $? = 0 ]] && _ASM="avx512" || _ASM="avx2"
@@ -47,14 +45,14 @@ ffmpeg \
 	"${_DST}"/"${_FILENAME}-hd.mp4"
 _FFMPEG_END="$(date "+%F %T,%3N")"
 
-_MEDIAINFO_DST_START="$(date "+%F %T,%3N")"
-mediainfo "${_DST}"/"${_FILENAME}-hd.mp4"
-_MEDIAINFO_DST_END="$(date "+%F %T,%3N")"
+_MEDIAINFO_DST_START="$(date "+%F %T,%3N")" >> "${_DST}"
+mediainfo "${_DST}"/"${_FILENAME}-hd.mp4" >> "${_DST}"
+_MEDIAINFO_DST_END="$(date "+%F %T,%3N")" >> "${_DST}"
 
-exectime "${_MEDIAINFO_SRC_START}" "${_MEDIAINFO_SRC_END}" "original Mediainfo"
-exectime "${_FFMPEG_START}" "${_FFMPEG_END}" "FFMpeg transcoding"
-exectime "${_MEDIAINFO_DST_START}" "${_MEDIAINFO_DST_END}" "transcoded Mediainfo"
-_VERYEND="$(date "+%F %T,%3N")"
+exectime "${_MEDIAINFO_SRC_START}" "${_MEDIAINFO_SRC_END}" "original Mediainfo" >> "${_DST}"
+exectime "${_FFMPEG_START}" "${_FFMPEG_END}" "FFMpeg transcoding" >>"${_DST}"
+exectime "${_MEDIAINFO_DST_START}" "${_MEDIAINFO_DST_END}" "transcoded Mediainfo" >> "${_DST}"
+_VERYEND="$(date "+%F %T,%3N")" >> "${_DST}"
 
-exectime "${_VERYSTART}" "${_VERYEND}" "the entire process"
+exectime "${_VERYSTART}" "${_VERYEND}" "the entire process" >> "${_DST}"
 echo "### Ending at: $(date "+%F %T,%3N")"
