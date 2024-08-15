@@ -79,3 +79,10 @@ gcloud eventarc triggers create $WORKFLOW_NAME-trigger \
     --event-filters="bucket=${GCS_INPUT_BUCKET}" \
     --service-account=$DEFAULT_SA
 ```
+
+
+## Bulk Workflow
+
+Use the `batch` workflow to define a list of video files and kick off the above workflow for each. As an example, view the [batch-example.yson](batch-example.json) file.
+
+![screenshot of bulk workflow](../docs/img/bulk-workflow.png)
