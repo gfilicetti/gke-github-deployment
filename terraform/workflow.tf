@@ -17,9 +17,6 @@ data "local_file" "upload_input_template" {
 data "local_file" "bulk_input_template" {
   filename = "../workflows/bulk-workflow.yaml"
 }
-data "local_file" "job_input_template" {
-  filename = "../workflows/create-job-workflow.yaml"
-}
 
 resource "google_workflows_workflow" "event_transcoding_workflow" {
   name        = "upload-event-gcs-${var.customer_id}-transcoding"
@@ -52,15 +49,8 @@ resource "google_workflows_workflow" "bulk_transcoding_workflow" {
     env = "transcoding"
   }
 
-  source_contents = data.local_file.bulk_input_template.content
-}
-
-resource "google_workflows_workflow" "job_transcoding_workflow" {
-  name        = "schedule-job-${var.customer_id}-transcoding"
-  region      = var.region
-  description = "Establish a transcoding job in the appropriate backend service."
-  labels = {
-    env = "transcoding"
+  user_env_vars = {
+    EVENT_WORKFLOW_NAME = resource.google_workflows_workflow.event_transcoding_workflow.name
   }
 
   source_contents = data.local_file.bulk_input_template.content
