@@ -75,7 +75,7 @@
                         - create_job:
                             call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
                             args:
-                              workflow_id: ${sys.get_ENV("EVENT_WORKFLOW_NAME")}
+                              workflow_id: ${sys.get_env("EVENT_WORKFLOW_NAME")}
                               location: ${sys.get_env("GOOGLE_CLOUD_LOCATION")}
                               project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
                               argument:
