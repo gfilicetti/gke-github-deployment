@@ -24,13 +24,16 @@ for SUCCINCT_ROLE in \
     compute.networkAdmin \
     compute.securityAdmin \
     container.clusterAdmin \
+    eventarc.developer \
     iam.serviceAccountAdmin \
     iam.serviceAccountUser \
     pubsub.subscriber \
     resourcemanager.projectIamAdmin \
     run.developer \
     run.invoker \
+    storage.admin \
     storage.objectAdmin \
+    workflows.editor \
     ; do
   gcloud projects add-iam-policy-binding \
     --member="serviceAccount:${GH_ACTIONS_SA}@${PROJECT_ID}.iam.gserviceaccount.com" \
