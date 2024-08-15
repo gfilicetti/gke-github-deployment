@@ -1,0 +1,92 @@
+  main:
+    params: [json_file]
+    steps:
+        - log_event:
+            call: sys.log
+            args:
+                text: ${json_file}
+                severity: INFO
+        - define:
+            assign:
+                - current_bucket_name: ""
+                - bucket_names: []
+                - current_file_name: ""
+                - files: []
+                - b: 0
+                - f: 0
+                - BACKEND_SRV: json_file.backend_service
+                - BATCH_NAME: json_file.name
+        - check_condition_buckets:
+            switch:
+              - condition: ${len(json_file.buckets) > b}
+                next: iterate_buckets
+            next: exit_loop
+        - check_condition_files:
+            switch:
+              - condition: ${len(json_file.buckets[0].files) > f}
+                next: iterate_files
+            next: check_condition_buckets
+        - iterate_buckets:
+            assign:
+                - current_bucket_name: ${json_file.buckets[0].name}
+                - bucket_names: ${list.concat(bucket_names, current_bucket_name)}
+                - b: ${b+1}
+            next: check_condition_files
+        - iterate_files:
+            assign:
+                - current_file_name: ${"gs://" + current_bucket_name + "/" + json_file.buckets[b-1].files[f].name}
+                - files: ${list.concat(files, current_file_name)}
+                - f: ${f+1}
+            next: check_condition_files
+        - exit_loop:
+            call: process_video_files
+            args:
+                FILES: ${files}
+                BACKEND_SRV: ${BACKEND_SRV}
+                BATCH_NAME: ${BATCH_NAME}
+            result: contentTypes
+        - done:
+            return: ${contentTypes}
+
+  # Kick off a transcode job for each file
+  process_video_files:
+    params: [BATCH_NAME, BACKEND_SRV, FILES]
+    steps:
+        - assign:
+            assign:
+                - jobResults: []
+        - schedule_job_foreach:
+            parallel:
+                shared: [jobResults]
+                for:
+                    value: FILE_FULL_NAME
+                    in: ${FILES}
+                    steps:
+                        - extract_gcs_object:
+                            assign:
+                              - BUCKET_NAME: ${text.split(text.replace_all(FILE_FULL_NAME, "gs://",""), "/")[0]}
+                              - FILE_NAME: ${text.replace_all(FILE_FULL_NAME, ("gs://" + BUCKET_NAME + "/"), "")}
+                        - metadata:
+                            call: googleapis.storage.v1.objects.get
+                            args:
+                                bucket: ${BUCKET_NAME}
+                                object: ${text.url_encode(FILE_NAME)}
+                            result: gcsfile
+                        - create_job:
+                            call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
+                            args:
+                              workflow_id: ${sys.get_env("EVENT_WORKFLOW_NAME")}
+                              location: ${sys.get_env("GOOGLE_CLOUD_LOCATION")}
+                              project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+                              argument:
+                                bucket: "${BUCKET_NAME}"
+                                data:
+                                  name: "${FILE_NAME}"
+                            result: jobResult
+                        - output:
+                            assign:
+                                - jobResults: ${list.concat(jobResults, jobResult)}
+        - done:
+            return: ${jobResults}
+
+
