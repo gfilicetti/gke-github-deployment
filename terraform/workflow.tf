@@ -59,7 +59,7 @@ resource "google_workflows_workflow" "bulk_transcoding_workflow" {
 resource "google_eventarc_trigger" "primary" {
   name            = "trigger-${var.customer_id}-gcs-transcoding"
   location        = var.region
-  service_account = data.google_compute_default_service_account.default.email
+  service_account = google_service_account.eventarc.email
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.storage.object.v1.finalized"
@@ -71,4 +71,9 @@ resource "google_eventarc_trigger" "primary" {
   destination {
     workflow = "projects/${var.project_id}/locations/${var.region}/workflows/${resource.google_workflows_workflow.event_transcoding_workflow.name}"
   }
+
+  depends_on = [
+    google_project_service.eventarc,
+    google_project_iam_member.storage_sa_publisher
+  ]
 }

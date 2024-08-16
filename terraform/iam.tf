@@ -124,6 +124,38 @@ module "member_roles_default_compute" {
 
 # Built in GCP Service Account (SA) permissions
 
+# Enable Eventarc API
+resource "google_project_service" "eventarc" {
+  service            = "eventarc.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Enable Pub/Sub API
+resource "google_project_service" "pubsub" {
+  service            = "pubsub.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Create a dedicated service account
+resource "google_service_account" "eventarc" {
+  account_id   = "eventarc-trigger-sa"
+  display_name = "Eventarc Trigger Service Account"
+}
+
+# Grant permission to receive Eventarc events
+resource "google_project_iam_member" "eventreceiver" {
+  project = data.google_project.project.id
+  role    = "roles/eventarc.eventReceiver"
+  member  = "serviceAccount:${google_service_account.eventarc.email}"
+}
+
+# Grant permission to publish events to Workflows
+resource "google_project_iam_member" "eventworkflowinvoke" {
+  project = data.google_project.project.id
+  role    = "roles/workflows.invoker"
+  member  = "serviceAccount:${google_service_account.eventarc.email}"
+}
+
 # Google Cloud Storage (GCS) default service account needs permission to publish 
 # PubSub messages (EventArc)
 resource "google_project_service_identity" "storage_sa" {
