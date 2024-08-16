@@ -111,7 +111,7 @@ module "member_roles_cloudbuild" {
 # Add roles to the default Compute service account
 module "member_roles_default_compute" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = data.google_compute_default_service_account.default.email
+  service_account_address = local.service_accounts_default.compute
   prefix                  = "serviceAccount"
   project_id              = local.project.id
   project_roles = [
@@ -148,7 +148,7 @@ module "member_roles_default_compute" {
 # Add roles to the default Google Cloud Storage (GCS) service account
 module "member_roles_gcs_service_account" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = data.google_storage_project_service_account.default.email_address
+  service_account_address = local.service_accounts_default.storage
   prefix                  = "serviceAccount"
   project_id              = local.project.id
   project_roles = [

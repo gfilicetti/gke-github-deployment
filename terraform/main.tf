@@ -1,6 +1,6 @@
 locals {
   project = {
-    id      = local.project.id
+    id      = var.project_id
     name    = data.google_project.project.name
     number  = data.google_project.project.number
   }
@@ -16,6 +16,8 @@ locals {
     cloudbuild   = "${local.project.number}@cloudbuild.gserviceaccount.com"
     transcoder   = "service-${local.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
     pubsub       = "service-${local.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+    compute      = data.google_compute_default_service_account.default.email
+    storage      = data.google_storage_project_service_account.default.email_address
   }
   service_account_cloud_services = (
     "${local.project.number}@cloudservices.gserviceaccount.com"
