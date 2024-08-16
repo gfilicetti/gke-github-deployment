@@ -32,7 +32,6 @@ resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
   role               = "roles/iam.workloadIdentityUser"
   members = [
     "serviceAccount:${local.project.id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
-    "serviceAccount:${local.project.id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
   ]
   depends_on = [
     module.gke
