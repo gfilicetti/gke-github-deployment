@@ -27,7 +27,7 @@ resource "google_workflows_workflow" "event_transcoding_workflow" {
   }
 
   user_env_vars = {
-    DOCKER_IMAGE_URI        = "${var.region}-docker.pkg.dev/${var.project_id}/repo-batch-jobs/ffmpeg:latest"
+    DOCKER_IMAGE_URI        = "${var.region}-docker.pkg.dev/${var.container_build_project_id}/repo-batch-jobs/ffmpeg:latest"
     GCS_DESTINATION         = "${resource.google_storage_bucket.gcs-output.name}"
     MACHINE_CPU_MILLI       = "16000"
     MACHINE_MEMORY_MIB      = "65536"

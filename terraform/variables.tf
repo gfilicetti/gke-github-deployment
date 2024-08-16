@@ -26,3 +26,9 @@ variable "job_namespace" {
   type        = string
   default     = "jobs"
 }
+
+variable "container_build_project_id" {
+  description = "Unique project id for the Google Cloud build and/or hosted container. By default, the same project as the rest of the components, but can be different."
+  type        = string
+  default     = ""
+}
