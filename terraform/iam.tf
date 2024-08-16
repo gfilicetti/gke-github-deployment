@@ -122,7 +122,8 @@ module "member_roles_default_compute" {
   ]
 }
 
-# Google Cloud Storage (GCS) default service account needs permission to publish PubSub messages (EventArc)
+# Google Cloud Storage (GCS) default service account needs permission to publish 
+# PubSub messages (EventArc)
 module "member_roles_gcs_service_account" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
   service_account_address = "service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
@@ -134,31 +135,37 @@ module "member_roles_gcs_service_account" {
   ]
 }
 
+# Built in GCP Service Account (SA) permissions
+
 # PubSub needs these minimum permissions (GCS > EventArc > Workflow)
-# Hint: PubSub SA can take ~10 minutes to show up in a newly created project.
-module "member_roles_pubsub_service_account" {
-  source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-  prefix                  = "serviceAccount"
-  project_id              = var.project_id
-  project_roles = [
-    # PubSub
-    "roles/iam.serviceAccountTokenCreator"
-  ]
+resource "google_project_service_identity" "pubsub_sa" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "pubsub.googleapis.com"
 }
 
-# TODO(alanpoole): re-enable after investigating ~30-min delay in availability of this SA.
-# Transcoder API service accounts needs to be able to read from GCS -input bucket and write to -output
-/*
-module "member_roles_transcoder_service_account" {
-  source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = "service-${data.google_project.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
-  prefix                  = "serviceAccount"
-  project_id              = var.project_id
-  project_roles = [
-    # Cloud Storage
-    "roles/storage.objectUser",
-    "roles/storage.objectViewer"
-  ]
+resource "google_project_iam_member" "pubsub_sa_token" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = google_project_service_identity.pubsub_sa.member
 }
-*/
+
+# Transcoder API service accounts needs to be able to read from 
+# GCS -input bucket and write to -output
+resource "google_project_service_identity" "transcoder_sa" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "transcoder.googleapis.com"
+}
+
+resource "google_project_iam_member" "transcoder_sa_gcs_readwrite" {
+  project = var.project_id
+  role    = "roles/storage.objectUser"
+  member  = google_project_service_identity.transcoder_sa.member
+}
+
+resource "google_project_iam_member" "transcoder_sa_gcs_viewer" {
+  project = var.project_id
+  role    = "roles/storage.objectViewer"
+  member  = google_project_service_identity.transcoder_sa.member
+}
