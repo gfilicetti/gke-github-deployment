@@ -27,7 +27,7 @@ resource "google_workflows_workflow" "event_transcoding_workflow" {
   }
 
   user_env_vars = {
-    DOCKER_IMAGE_URI        = "${var.region}-docker.pkg.dev/${var.container_build_project_id}/repo-batch-jobs/ffmpeg:latest"
+    DOCKER_IMAGE_URI        = "${var.region}-docker.pkg.dev/${local.project.id}/repo-batch-jobs/ffmpeg:latest"
     GCS_DESTINATION         = "${resource.google_storage_bucket.gcs-output.name}"
     MACHINE_CPU_MILLI       = "16000"
     MACHINE_MEMORY_MIB      = "65536"
@@ -35,7 +35,7 @@ resource "google_workflows_workflow" "event_transcoding_workflow" {
     GKE_CLUSTER_NAME        = "${module.gke.name}"
     GKE_NAMESPACE           = "${var.job_namespace}"
     VPC_NETWORK_FULLNAME    = "${module.vpc.network_self_link}"
-    VPC_SUBNETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/regions/${var.region}/subnetworks/sn-${var.customer_id}-${var.region}"
+    VPC_SUBNETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${local.project.id}/regions/${var.region}/subnetworks/sn-${var.customer_id}-${var.region}"
   }
 
   source_contents = data.local_file.upload_input_template.content
@@ -69,11 +69,12 @@ resource "google_eventarc_trigger" "primary" {
     value     = resource.google_storage_bucket.gcs-input.name
   }
   destination {
-    workflow = "projects/${var.project_id}/locations/${var.region}/workflows/${resource.google_workflows_workflow.event_transcoding_workflow.name}"
+    workflow = "projects/${local.project.id}/locations/${var.region}/workflows/${resource.google_workflows_workflow.event_transcoding_workflow.name}"
   }
 
   depends_on = [
-    google_project_service.eventarc,
-    google_project_iam_member.storage_sa_publisher
+    google_project_service_identity.service_identity,
+    module.member_roles_default_compute,
+    module.member_roles_gcs_service_account
   ]
 }
