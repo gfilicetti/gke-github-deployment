@@ -149,6 +149,13 @@ resource "google_project_iam_member" "eventreceiver" {
   member  = "serviceAccount:${google_service_account.eventarc.email}"
 }
 
+# Grant permission to publish events to Workflows
+resource "google_project_iam_member" "eventworkflowinvoke" {
+  project = data.google_project.project.id
+  role    = "roles/workflows.invoker"
+  member  = "serviceAccount:${google_service_account.eventarc.email}"
+}
+
 # Google Cloud Storage (GCS) default service account needs permission to publish 
 # PubSub messages (EventArc)
 resource "google_project_service_identity" "storage_sa" {
