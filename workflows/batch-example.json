@@ -1,0 +1,22 @@
+{
+    "name": "batch-example-1234",
+    "backend_service": "batchapi",
+    "buckets": [
+        {
+            "name": "gcs-avian-circuit-432608-c0-gcp-test-input",
+            "location": "us-central1",
+            "files": [
+                {
+                    "name": "video-0.mp4"
+                },
+                {
+                    "name": "batchapi/bunny.mp4"
+                },
+                {
+                    "name": "transcoderapi/video-0.mp4"
+                }
+            ]
+        }
+    ],
+    "http_endpoints": []
+}

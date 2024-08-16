@@ -1,3 +1,6 @@
+  # Execute the Google Cloud Storage (GCS) Object Uploaded Event
+  #
+  #
   main:
     params: [event]
     steps:
@@ -6,13 +9,7 @@
             args:
                 text: ${event}
                 severity: INFO
-        - check_content_type:
-            switch:
-                - condition: ${not text.match_regex(event.data.contentType, "video") and not text.match_regex(event.data.contentType, "octet-stream")}
-                  return: ${"Media " + event.data.contentType + " not valid."}
-                  next: end
-            next: assign_backend_vars
-        - assign_backend_vars:
+        - assign_vars:
             switch:
               - condition: ${text.match_regex(event.data.name, "transcoderapi/")}
                 assign:
@@ -26,19 +23,16 @@
                 assign:
                   - BACKEND_SRV: "gke"
                   - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
-            next: prep_transcoding_job
-        - prep_transcoding_job:
+            next: prep_job
+        - prep_job:
             assign:
-            - project: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
-            - location: ${sys.get_env("GOOGLE_CLOUD_LOCATION")}
-            - jobId: '${"transcoding-" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}'
-            - imageUri: ${sys.get_env("DOCKER_IMAGE_URI")}
-            - gcsDestination: ${sys.get_env("GCS_DESTINATION")}
-            - machineType: ${sys.get_env("MACHINE_TYPE")}
-            - machineCpuMilli: ${sys.get_env("MACHINE_CPU_MILLI")}
-            - machineMemoryMib: ${sys.get_env("MACHINE_MEMORY_MIB")}
-            - gkeClusterName: ${sys.get_env("GKE_CLUSTER_NAME")}
-            - gkeNamespace: ${sys.get_env("GKE_NAMESPACE")}
+                - project: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+                - location: ${sys.get_env("GOOGLE_CLOUD_LOCATION")}
+                - jobId: '${"transcoding-" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}'
+                - imageUri: ${sys.get_env("DOCKER_IMAGE_URI")}
+                - gcsDestination: ${sys.get_env("GCS_DESTINATION")}
+                - gkeClusterName: ${sys.get_env("GKE_CLUSTER_NAME")}
+                - gkeNamespace: ${sys.get_env("GKE_NAMESPACE")}
             next: create_output_folder
         - create_output_folder:
             call: googleapis.storage.v1.objects.insert
@@ -49,22 +43,68 @@
         - decide_backend_svc:
             switch:
               - condition: ${BACKEND_SRV == "transcoderapi"}
-                next: call_transcoder_api
+                call: schedule_transcoder_job
+                args:
+                    JOB_ID: ${jobId}
+                    BUCKET_NAME: ${event.bucket}
+                    FILE_NAME: ${event.data.name}
+                    PROJECT: ${project}
+                    LOCATION: ${location}
+                    OUTPUT_BUCKET_NAME: ${gcsDestination}
+                    OUTPUT_PATH: ${OUTPUT_PATH}
+                result: transcoderjob
               - condition: ${BACKEND_SRV == "batchapi"}
-                next: create_batch_job
+                call: schedule_batch_job
+                args:
+                    JOB_ID: ${jobId}
+                    BUCKET_NAME: ${event.bucket}
+                    FILE_NAME: ${event.data.name}
+                    PROJECT: ${project}
+                    LOCATION: ${location}
+                    OUTPUT_BUCKET_NAME: ${gcsDestination}
+                    OUTPUT_PATH: ${OUTPUT_PATH}
+                    CONTAINER_IMAGE_URL: ${imageUri}
+                result: batchjob
               - condition: ${BACKEND_SRV == "gke"}
-                next: create_k8s_job
-            next: create_k8s_job # default
+                call: schedule_k8s_job
+                args:
+                    JOB_ID: ${jobId}
+                    BUCKET_NAME: ${event.bucket}
+                    FILE_NAME: ${event.data.name}
+                    PROJECT: ${project}
+                    LOCATION: ${location}
+                    OUTPUT_BUCKET_NAME: ${gcsDestination}
+                    OUTPUT_PATH: ${OUTPUT_PATH}
+                    CONTAINER_IMAGE_URL: ${imageUri}
+                    GKE_CLUSTER_NAME: ${gkeClusterName}
+                    GKE_NAMESPACE: ${gkeNamespace}
+                result: gkejob
+        - finish_workflow:
+            switch:
+              - condition: ${BACKEND_SRV == "transcoderapi"}
+                return: ${transcoderjob.name}
+              - condition: ${BACKEND_SRV == "batchapi"}
+                return: ${batchjob.name}
+              - condition: ${BACKEND_SRV == "gke"}
+                return: ${gkejob.kind}
+
+
+  # Call the Transcoder API to process the video file
+  #
+  #
+  schedule_transcoder_job:
+    params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_PATH]
+    steps:
         - call_transcoder_api:
             call: googleapis.transcoder.v1.projects.locations.jobs.create
             args:
-                parent: ${"projects/" + project + "/locations/" + location}
+                parent: ${"projects/" + PROJECT + "/locations/" + LOCATION}
                 body:
-                  name: "${jobId}"
+                  name: "${JOB_ID}"
                   config:
                     inputs:
-                      - key: ${event.data.name}
-                        uri: ${"gs://" + event.bucket + "/" + event.data.name}
+                      - key: ${FILE_NAME}
+                        uri: ${"gs://" + BUCKET_NAME + "/" + FILE_NAME}
                     elementaryStreams:
                       - key: "video-stream0"
                         videoStream: 
@@ -101,14 +141,20 @@
                           - "video-stream0"
                           - "audio-stream0"
                     output:
-                      uri: ${"gs://" + gcsDestination + "/" + OUTPUT_PATH + "/"}
+                      uri: ${"gs://" + OUTPUT_BUCKET_NAME + "/" + OUTPUT_PATH + "/"}
             result: transcoderjob
-            next: finish_workflow
-        - create_batch_job:
+
+  # Establish a Batch Compute Engine (GCE) Job to process the video file
+  #
+  #
+  schedule_batch_job:
+    params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_PATH, CONTAINER_IMAGE_URL]
+    steps:
+        - call_batch_api:
             call: googleapis.batch.v1.projects.locations.jobs.create
             args:
-                parent: ${"projects/" + project + "/locations/" + location}
-                jobId: "${jobId}"
+                parent: ${"projects/" + PROJECT + "/locations/" + LOCATION}
+                jobId: "${JOB_ID}"
                 body:
                     priority: 99
                     taskGroups:
@@ -117,25 +163,25 @@
 
                       taskSpec:
                         computeResource:
-                          cpuMilli: ${machineCpuMilli}
-                          memoryMib: ${machineMemoryMib}
+                          cpuMilli: ${sys.get_env("MACHINE_CPU_MILLI")}
+                          memoryMib: ${sys.get_env("MACHINE_MEMORY_MIB")}
                         runnables:
                         - container:
-                            imageUri: "${imageUri}"
+                            imageUri: "${CONTAINER_IMAGE_URL}"
                             entrypoint: ''
                             volumes:
                             - "/mnt/disks/output:/output"
                             - "/mnt/disks/input:/input"
                         environment:
                             variables:
-                              MEDIA: "${event.data.name}"
+                              MEDIA: "${FILE_NAME}"
                               OUTPUT_PATH: ${OUTPUT_PATH}
                         volumes:
                         - gcs:
-                            remotePath: "${event.bucket}"
+                            remotePath: "${BUCKET_NAME}"
                           mountPath: "/mnt/disks/input"
                         - gcs:
-                            remotePath: "${gcsDestination}"
+                            remotePath: "${OUTPUT_BUCKET_NAME}"
                           mountPath: "/mnt/disks/output"
                     allocationPolicy:
                       serviceAccount:
@@ -149,24 +195,29 @@
                       instances:
                       - policy:
                           provisioningModel: SPOT
-                          machineType: "${machineType}"
+                          machineType: ${sys.get_env("MACHINE_TYPE")}
                     logsPolicy:
                       destination: CLOUD_LOGGING
             result: batchjob
-            next: finish_workflow
+
+  # Create a Kubernetes Job to process the video file inside the GKE cluster
+  #
+  schedule_k8s_job:
+    params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_PATH, CONTAINER_IMAGE_URL, GKE_CLUSTER_NAME, GKE_NAMESPACE]
+    steps:
         - create_k8s_job:
             call: gke.create_job
             args:
-              cluster_id: ${gkeClusterName}
-              namespace: ${gkeNamespace}
-              project: ${project}
-              location: ${location}
+              cluster_id: ${GKE_CLUSTER_NAME}
+              namespace: ${GKE_NAMESPACE}
+              project: ${PROJECT}
+              location: ${LOCATION}
               job:
                 apiVersion: "batch/v1"
                 kind: "Job"
                 metadata:
-                  name: "${jobId}"
-                  namespace: ${gkeNamespace}
+                  name: "${JOB_ID}"
+                  namespace: ${GKE_NAMESPACE}
                 spec:
                   template:
                     metadata:
@@ -176,14 +227,14 @@
                       serviceAccountName: k8s-sa-cluster
                       containers:
                       - name: transcoding
-                        image: ${imageUri}
+                        image: ${CONTAINER_IMAGE_URL}
                         command:
                           - "/bin/sh"
                           - "-c"
                           - ./entrypoint.sh
                         env:
                         - name: MEDIA
-                          value: "${event.data.name}"
+                          value: "${FILE_NAME}"
                         - name: OUTPUT_PATH
                           value: "${OUTPUT_PATH}"
                         volumeMounts:
@@ -198,22 +249,12 @@
                         csi:
                           driver: gcsfuse.csi.storage.gke.io
                           volumeAttributes:
-                            bucketName: "${event.bucket}"
+                            bucketName: "${BUCKET_NAME}"
                       - name: gcs-fuse-output
                         csi:
                           driver: gcsfuse.csi.storage.gke.io
                           volumeAttributes:
-                            bucketName: "${gcsDestination}"
+                            bucketName: "${OUTPUT_BUCKET_NAME}"
                       restartPolicy: Never
                   backoffLimit: 1
             result: gkejob
-            next: finish_workflow
-        - finish_workflow:
-            switch:
-              - condition: ${text.match_regex(event.data.name, "transcoderapi/")}
-                return: ${transcoderjob.name}
-              - condition: ${text.match_regex(event.data.name, "batchapi/")}
-                return: ${batchjob.name}
-              - condition: true
-                return: ${gkejob.kind}
-            next: end
