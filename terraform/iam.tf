@@ -12,36 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-data "google_project" "project" {
-  project_id = var.project_id
+# Create a service account for Eventarc Trigger
+resource "google_service_account" "eventarc" {
+  account_id   = "eventarc-trigger-sa"
+  display_name = "TF - Eventarc Trigger SA"
+  project      =  local.project.id
 }
 
-data "google_compute_default_service_account" "default" {
-}
 
 # Create a service account for GKE cluster
 resource "google_service_account" "sa_gke_cluster" {
   account_id   = "sa-${var.customer_id}-gke-cluster"
   display_name = "TF - GKE cluster SA"
-  project      = var.project_id
+  project      = local.project.id
 }
 
 resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
   service_account_id = google_service_account.sa_gke_cluster.name
   role               = "roles/iam.workloadIdentityUser"
   members = [
-    "serviceAccount:${var.project_id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
+    "serviceAccount:${local.project.id}.svc.id.goog[${var.job_namespace}/k8s-sa-cluster]",
   ]
   depends_on = [
     module.gke
   ]
 }
 
+# Add roles to the created GKE cluster service account
 module "member_roles_gke_cluster" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
   service_account_address = google_service_account.sa_gke_cluster.email
   prefix                  = "serviceAccount"
-  project_id              = var.project_id
+  project_id              = local.project.id
   project_roles = [
     "roles/artifactregistry.reader",
     "roles/cloudtrace.agent",
@@ -56,14 +58,30 @@ module "member_roles_gke_cluster" {
     "roles/storage.admin",
     "roles/storage.objectUser",
   ]
+
+  depends_on = [google_project_service_identity.service_identity ]
+}
+
+# Add roles to the created EventArc service account
+module "member_roles_eventarc_trigger" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = google_service_account.eventarc.email
+  prefix                  = "serviceAccount"
+  project_id              = local.project.id
+  project_roles = [
+    "roles/eventarc.eventReceiver",
+    "roles/workflows.invoker"
+  ]
+
+  depends_on = [google_project_service_identity.service_identity ]
 }
 
 # Add roles to the default Cloud Build service account
 module "member_roles_cloudbuild" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = "${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  service_account_address = local.service_accounts_default.cloudbuild
   prefix                  = "serviceAccount"
-  project_id              = var.project_id
+  project_id              = local.project.id
   project_roles = [
     "roles/artifactregistry.reader",
     "roles/artifactregistry.repoAdmin",
@@ -85,14 +103,16 @@ module "member_roles_cloudbuild" {
     "roles/workflows.invoker",
     "roles/workflows.serviceAgent",
   ]
+
+  depends_on = [google_project_service_identity.service_identity ]
 }
 
-
+# Add roles to the default Compute service account
 module "member_roles_default_compute" {
   source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = data.google_compute_default_service_account.default.email
+  service_account_address = local.service_accounts_default.compute
   prefix                  = "serviceAccount"
-  project_id              = var.project_id
+  project_id              = local.project.id
   project_roles = [
     "roles/iam.serviceAccountUser",
     # Artifact Registry
@@ -107,6 +127,8 @@ module "member_roles_default_compute" {
     "roles/eventarc.serviceAgent",
     "roles/eventarc.eventReceiver",
     "roles/pubsub.publisher",
+    # GKE
+    "roles/container.developer",
     # Storage
     "roles/storage.admin",
     "roles/storage.objectUser",
@@ -117,91 +139,50 @@ module "member_roles_default_compute" {
     "roles/logging.logWriter",
     "roles/workflows.invoker",
     "roles/workflows.serviceAgent",
-    # GKE
-    "roles/container.developer",
   ]
+
+  depends_on = [google_project_service_identity.service_identity ]
 }
 
-# Built in GCP Service Account (SA) permissions
+# Add roles to the default Google Cloud Storage (GCS) service account
+module "member_roles_gcs_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = local.service_accounts_default.storage
+  prefix                  = "serviceAccount"
+  project_id              = local.project.id
+  project_roles = [
+    # EventArc
+    "roles/pubsub.publisher"
+  ]
 
-# Enable Eventarc API
-resource "google_project_service" "eventarc" {
-  service            = "eventarc.googleapis.com"
-  disable_on_destroy = false
-}
-
-# Enable Pub/Sub API
-resource "google_project_service" "pubsub" {
-  service            = "pubsub.googleapis.com"
-  disable_on_destroy = false
-}
-
-# Create a dedicated service account
-resource "google_service_account" "eventarc" {
-  account_id   = "eventarc-trigger-sa"
-  display_name = "Eventarc Trigger Service Account"
-}
-
-# Grant permission to receive Eventarc events
-resource "google_project_iam_member" "eventreceiver" {
-  project = data.google_project.project.id
-  role    = "roles/eventarc.eventReceiver"
-  member  = "serviceAccount:${google_service_account.eventarc.email}"
-}
-
-# Grant permission to publish events to Workflows
-resource "google_project_iam_member" "eventworkflowinvoke" {
-  project = data.google_project.project.id
-  role    = "roles/workflows.invoker"
-  member  = "serviceAccount:${google_service_account.eventarc.email}"
-}
-
-# Google Cloud Storage (GCS) default service account needs permission to publish 
-# PubSub messages (EventArc)
-resource "google_project_service_identity" "storage_sa" {
-  provider = google-beta
-  project  = var.project_id
-  service  = "storage.googleapis.com"
-}
-
-resource "google_project_iam_member" "storage_sa_publisher" {
-  project = var.project_id
-  role    = "roles/pubsub.publisher"
-  # storage_sa.member does not return an email address
-  # gcloud beta services identity create --service storage.googleapis.com doesn't either
-  # hard code the email address for this GCP managed SA 
-  member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+  depends_on = [ google_project_service_identity.service_identity ]
 }
 
 # PubSub needs these minimum permissions (GCS > EventArc > Workflow)
-resource "google_project_service_identity" "pubsub_sa" {
-  provider = google-beta
-  project  = var.project_id
-  service  = "pubsub.googleapis.com"
+module "member_roles_pubsub_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = local.service_accounts_default.pubsub
+  prefix                  = "serviceAccount"
+  project_id              = local.project.id
+  project_roles = [
+    # PubSub
+    "roles/iam.serviceAccountTokenCreator"
+  ]
+
+  depends_on = [ google_project_service_identity.service_identity ]
 }
 
-resource "google_project_iam_member" "pubsub_sa_token" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = google_project_service_identity.pubsub_sa.member
-}
+# Transcoder API service accounts needs to be able to read from GCS -input bucket and write to -output
+module "member_roles_transcoder_service_account" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = local.service_accounts_default.transcoder
+  prefix                  = "serviceAccount"
+  project_id              = local.project.id
+  project_roles = [
+    # Cloud Storage
+    "roles/storage.objectUser",
+    "roles/storage.objectViewer"
+  ]
 
-# Transcoder API service accounts needs to be able to read from 
-# GCS -input bucket and write to -output
-resource "google_project_service_identity" "transcoder_sa" {
-  provider = google-beta
-  project  = var.project_id
-  service  = "transcoder.googleapis.com"
-}
-
-resource "google_project_iam_member" "transcoder_sa_gcs_readwrite" {
-  project = var.project_id
-  role    = "roles/storage.objectUser"
-  member  = google_project_service_identity.transcoder_sa.member
-}
-
-resource "google_project_iam_member" "transcoder_sa_gcs_viewer" {
-  project = var.project_id
-  role    = "roles/storage.objectViewer"
-  member  = google_project_service_identity.transcoder_sa.member
+  depends_on = [ google_project_service_identity.service_identity ]
 }
