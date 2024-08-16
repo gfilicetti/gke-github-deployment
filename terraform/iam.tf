@@ -122,20 +122,24 @@ module "member_roles_default_compute" {
   ]
 }
 
+# Built in GCP Service Account (SA) permissions
+
 # Google Cloud Storage (GCS) default service account needs permission to publish 
 # PubSub messages (EventArc)
-module "member_roles_gcs_service_account" {
-  source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = "service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
-  prefix                  = "serviceAccount"
-  project_id              = var.project_id
-  project_roles = [
-    # EventArc
-    "roles/pubsub.publisher"
-  ]
+resource "google_project_service_identity" "storage_sa" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "storage.googleapis.com"
 }
 
-# Built in GCP Service Account (SA) permissions
+resource "google_project_iam_member" "storage_sa_publisher" {
+  project = var.project_id
+  role    = "roles/pubsub.publisher"
+  # storage_sa.member does not return an email address
+  # gcloud beta services identity create --service storage.googleapis.com doesn't either
+  # hard code the email address for this GCP managed SA 
+  member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+}
 
 # PubSub needs these minimum permissions (GCS > EventArc > Workflow)
 resource "google_project_service_identity" "pubsub_sa" {
