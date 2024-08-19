@@ -118,6 +118,7 @@ gcloud services enable --project $PROJECT_ID \
   pubsub.googleapis.com \
   run.googleapis.com \
   servicecontrol.googleapis.com \
+  serviceusage.googleapis.com \
   storage.googleapis.com \
   transcoder.googleapis.com \
   workflows.googleapis.com \
