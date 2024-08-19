@@ -236,7 +236,7 @@
                         - name: MEDIA
                           value: "${FILE_NAME}"
                         - name: OUTPUT_PATH
-                          value: "${OUTPUT_PATH}"
+                          value: "/"
                         volumeMounts:
                         - name: gcs-fuse-input
                           mountPath: /input
@@ -255,6 +255,7 @@
                           driver: gcsfuse.csi.storage.gke.io
                           volumeAttributes:
                             bucketName: "${OUTPUT_BUCKET_NAME}"
+                            mountOptions: ${"only-dir=" + OUTPUT_PATH}
                       restartPolicy: Never
                   backoffLimit: 1
             result: gkejob
