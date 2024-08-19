@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: jobs
+  generateName: sample-job-pi
+  annotations:
+    kueue.x-k8s.io/queue-name: lq-team-a # Point to the LocalQueue
+    kueue.x-k8s.io/priority-class: high-priority
+spec:
+  ttlSecondsAfterFinished: 60 # Job will be deleted after 60 seconds
+  template:
+    metadata:
+      annotations:
+        gke-gcsfuse/volumes: "true"
+    spec:
+      serviceAccountName: k8s-sa-cluster
+      containers:
+      - name: pi
+        image: busybox
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "250m"
+        command: 
+          - "/bin/sh"
+          - "-c"
+          - export HOST=$(hostname) && echo "scale=2000; 4*a(1)" | BC_LINE_LENGTH=0 bc -l >> /output/${HOST}pi.out && sleep 10
+        volumeMounts:
+        - name: gcs-fuse-csi-ephemeral-output
+          mountPath: /output
+      volumes:
+      - name: gcs-fuse-csi-ephemeral-output
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: <BUCKET NAME>
+      restartPolicy: Never
+  backoffLimit: 1
