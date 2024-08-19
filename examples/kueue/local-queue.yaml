@@ -4,7 +4,7 @@ metadata:
   namespace: jobs # LocalQueue under jobs namespace
   name: lq-team-a
 spec:
-  clusterQueue: cluster-queue # Point to the ClusterQueue
+  clusterQueue: cluster-queue-a # Point to the ClusterQueue
 ---
 apiVersion: kueue.x-k8s.io/v1beta1
 kind: LocalQueue
@@ -12,4 +12,4 @@ metadata:
   namespace: jobs # LocalQueue under jobs namespace
   name: lq-team-b
 spec:
-  clusterQueue: cluster-queue # Point to the ClusterQueue
+  clusterQueue: cluster-queue-b # Point to the ClusterQueue
