@@ -6,7 +6,7 @@ This project has a number of examples of using Github Actions with Google Cloud,
 - Invoking Cloud Build to build our container for ffmpeg
 
 ## Setting up GitHub Actions for Google Cloud
-To setup GitHub Actions securely with our Google Cloud environment we will need to do a one time setup for [Workload Identity federation through a Google Cloud service account](https://github.com/google-github-actions/auth?tab=readme-ov-file#workload-identity-federation-through-a-service-account).
+To setup GitHub Actions securely with our Google Cloud environment we will need to do a one time setup for Workload Identity federation through a Google Cloud service account. [More info here.](https://github.com/google-github-actions/auth?tab=readme-ov-file#workload-identity-federation-through-a-service-account)
 
 To assist in this we will run the following 3 scripts:
 
@@ -20,7 +20,7 @@ To assist in this we will run the following 3 scripts:
 
 Setting up GitHub Actions for automated deployments with Terraform requires the Google Cloud administrator to create a fork of this repository, to personalize variable settings for your unique cloud environment.
 
-1. Create a fork of this repository on the GitHub site. [Instructions here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
+1. Create a fork of this repository on the GitHub site. [Instructions here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
 
 2. Clone your new fork:
 
@@ -30,15 +30,15 @@ Setting up GitHub Actions for automated deployments with Terraform requires the 
 
 ### Enable IAM and Google Cloud Service Accounts 
 
-    ```bash
-    sh ./scripts/enable-iam.sh
-    ```
+```bash
+sh ./scripts/enable-iam.sh
+```
 
 ### Enable Workload Identity Federation 
 
-    ```bash
-    sh ./scripts/enable-gh-actions.sh
-    ```
+```bash
+sh ./scripts/enable-gh-actions.sh
+```
 
 You will be prompted for 2 inputs:
 
