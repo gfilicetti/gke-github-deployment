@@ -20,7 +20,7 @@
               - condition: ${text.match_regex(event.data.name, "transcoderapi/")}
                 assign:
                   - BACKEND_SRV: "transcoderapi"
-                  - OUTPUT_PATH: ${"transcoderapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID") + "/" + text.replace_all(event.data.name, "transcoderapi/", "")}
+                  - OUTPUT_PATH: ${"transcoderapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
               - condition: ${text.match_regex(event.data.name, "batchapi/")}
                 assign:
                   - BACKEND_SRV: "batchapi"
@@ -88,11 +88,11 @@
         - finish_workflow:
             switch:
               - condition: ${BACKEND_SRV == "transcoderapi"}
-                return: ${transcoderjob.name}
+                return: ${transcoderjob}
               - condition: ${BACKEND_SRV == "batchapi"}
-                return: ${batchjob.name}
+                return: ${batchjob}
               - condition: ${BACKEND_SRV == "gke"}
-                return: ${gkejob.kind}
+                return: ${gkejob}
 
 
   # Call the Transcoder API to process the video file
@@ -149,6 +149,8 @@
                     output:
                       uri: ${"gs://" + OUTPUT_BUCKET_NAME + "/" + OUTPUT_PATH + "/"}
             result: transcoderjob
+        - result:
+            return: ${transcoderjob}
 
   # Establish a Batch Compute Engine (GCE) Job to process the video file
   #
@@ -205,6 +207,8 @@
                     logsPolicy:
                       destination: CLOUD_LOGGING
             result: batchjob
+        - result:
+            return: ${batchjob}
 
   # Create a Kubernetes Job to process the video file inside the GKE cluster
   #
@@ -250,6 +254,10 @@
                         - name: gcs-fuse-output
                           mountPath: /output
                           readOnly: false
+                        resources:
+                            requests:
+                                cpu: 16
+                                memory: 64Gi
                       volumes:
                       - name: gcs-fuse-input
                         csi:
@@ -264,3 +272,5 @@
                       restartPolicy: Never
                   backoffLimit: 1
             result: gkejob
+        - result:
+            return: ${gkejob}
