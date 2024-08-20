@@ -79,9 +79,11 @@
                               location: ${sys.get_env("GOOGLE_CLOUD_LOCATION")}
                               project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
                               argument:
+                                backend_service: "${BACKEND_SRV}"
                                 bucket: "${BUCKET_NAME}"
                                 data:
                                   name: "${FILE_NAME}"
+                                  contentType: "${gcsfile.contentType}"
                             result: jobResult
                         - output:
                             assign:
