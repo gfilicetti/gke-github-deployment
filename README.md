@@ -75,3 +75,18 @@ There are 2 options for deployment:
 1. Run the `terraform` CLI on the command line directly. [See instructions here.](./terraform/README.md)
 
 2. Use a GitHub Action to run all the Terraform configuration files. [See instructions here.](./github-actions/README.md)
+
+## Building Container Images
+
+Instructions for building container images can be [found here](./containers/README.md).
+
+## Kueue
+
+Kueue is a Kubernetes-native system that manages job quotas by determining when jobs should wait, start, or be preempted.
+
+Instructions for setting up Kueue in your environment can be [found here](./examples/kueue/README.md).
+
+## Batch Compute Jobs
+For one-time or routine batch processing, the [Compute Engine Batch](https://cloud.google.com/batch/docs/create-run-job) service can be used to define a job template, setup quota, schedule 1-N jobs, clean up, and monitor/troubleshoot jobs as they run.
+
+Instructions for setting up Batch Compute Jobs in your environment can be [found here](./examples/batch-compute-jobs/README.md).
