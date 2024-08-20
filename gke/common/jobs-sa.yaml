@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    iam.gke.io/gcp-service-account: sa-CUSTOMER_ID-gke-cluster@PROJECT_ID.iam.gserviceaccount.com ## Need to change SA and PROJECT_ID
+  name: k8s-sa-cluster
+  namespace: JOBS_NAMESPACE
