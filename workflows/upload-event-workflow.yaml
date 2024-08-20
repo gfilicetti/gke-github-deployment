@@ -244,6 +244,10 @@
                         - name: gcs-fuse-output
                           mountPath: /output
                           readOnly: false
+                        resources:
+                            requests:
+                                cpu: 16
+                                memory: 64Gi
                       volumes:
                       - name: gcs-fuse-input
                         csi:
