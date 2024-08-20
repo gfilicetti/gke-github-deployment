@@ -9,6 +9,12 @@
             args:
                 text: ${event}
                 severity: INFO
+        - check_content_type:
+            switch:
+                - condition: ${not text.match_regex(contentType, "video") and not text.match_regex(contentType, "octet-stream")}
+                  return: ${"Media " + contentType + " not valid."}
+                  next: end
+            next: assign_vars
         - assign_vars:
             switch:
               - condition: ${text.match_regex(event.data.name, "transcoderapi/")}
