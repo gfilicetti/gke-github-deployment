@@ -183,13 +183,13 @@
                         environment:
                             variables:
                               MEDIA: "${FILE_NAME}"
-                              OUTPUT_PATH: ${OUTPUT_PATH}
+                              OUTPUT_PATH: "/"
                         volumes:
                         - gcs:
                             remotePath: "${BUCKET_NAME}"
                           mountPath: "/mnt/disks/input"
                         - gcs:
-                            remotePath: "${OUTPUT_BUCKET_NAME}"
+                            remotePath: ${OUTPUT_BUCKET_NAME + "/" + OUTPUT_PATH}
                           mountPath: "/mnt/disks/output"
                     allocationPolicy:
                       serviceAccount:
@@ -246,7 +246,7 @@
                         - name: MEDIA
                           value: "${FILE_NAME}"
                         - name: OUTPUT_PATH
-                          value: "${OUTPUT_PATH}"
+                          value: "/"
                         volumeMounts:
                         - name: gcs-fuse-input
                           mountPath: /input
@@ -269,6 +269,7 @@
                           driver: gcsfuse.csi.storage.gke.io
                           volumeAttributes:
                             bucketName: "${OUTPUT_BUCKET_NAME}"
+                            mountOptions: ${"only-dir=" + OUTPUT_PATH}
                       restartPolicy: Never
                   backoffLimit: 1
             result: gkejob

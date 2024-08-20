@@ -15,10 +15,9 @@ function exectime {
 _VERYSTART="$(date "+%F %T,%3N")"
 echo "### Start time: ${_VERYSTART}"
 echo "### Transcoding ${MEDIA}"
-echo "### Output Path ${OUTPUT_PATH}"
 
 _SRC=/input
-_DST="/output/${OUTPUT_PATH}"
+_DST="/output"
 _STATS="${_DST}"/"stats.txt"
 
 _EXTENSION="${MEDIA##*.}"
@@ -31,6 +30,8 @@ _MEDIAINFO_SRC_END="$(date "+%F %T,%3N")" >> "${_STATS}"
 
 lscpu | grep -q avx512
 [[ $? = 0 ]] && _ASM="avx512" || _ASM="avx2"
+
+touch "${_DST}"/"${_FILENAME}-hd.mp4"
 
 _FFMPEG_START="$(date "+%F %T,%3N")"
 ffmpeg \
