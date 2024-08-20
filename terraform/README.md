@@ -17,7 +17,7 @@ The following steps will walk you through setting up **Terraform** to provision 
     cat terraform.example.tfvars | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
     ```
 
-3. Deploy infrastructure with Terraform
+3. Deploy infrastructure with Terraform:
 
     ```bash
     terraform init
