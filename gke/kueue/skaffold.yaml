@@ -23,4 +23,6 @@ manifests:
   - ./resource-flavor.yaml
   - ./job-priority.yaml
 deploy:
+  statusCheckDeadlineSeconds: 300
+  # tolerateFailuresUntilDeadline: true
   kubectl: {}
