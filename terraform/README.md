@@ -2,7 +2,7 @@
 This folder contains Terraform configuration files to provision the infrastructure needed for this project.
 
 ## Provisioning Infrastructure
-The following steps will walk you through the setup guide for running **Terraform** as the deployment process for cloud environment.
+The following steps will walk you through setting up **Terraform** to provision infrastruction in Google Cloud.
 
 1. Create remote state for Terraform in Google Cloud Storage:
 
@@ -20,7 +20,6 @@ The following steps will walk you through the setup guide for running **Terrafor
 3. Deploy infrastructure with Terraform
 
     ```bash
-    cd ./terraform
     terraform init
     terraform plan
     terraform apply
@@ -30,7 +29,7 @@ The following steps will walk you through the setup guide for running **Terrafor
 
 ## Tearing Down Infrastructure
 
-1. Delete infrastructure with Terraform
+1. Tear down all infrastructure created using Terraform:
 
     ```bash
     cd ./terraform
