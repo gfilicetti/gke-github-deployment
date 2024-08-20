@@ -32,6 +32,8 @@ We will be deploying a container image of a customized 'ffmpeg' build to a GKE A
 
 > __Note:__ Due to the need for potentially 15k+ nodes, configuration and deployment of multiple Autopilot clusters must be supported.
 
+Instructions for building container images can be [found here](./containers/README.md).
+
 ## Setting up your Project
 
 1. First authenticate to Google Cloud:

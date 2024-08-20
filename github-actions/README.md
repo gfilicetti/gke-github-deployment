@@ -30,11 +30,17 @@ Setting up GitHub Actions for automated deployments with Terraform requires the 
 
 ### Enable IAM and Google Cloud Service Accounts 
 
+Run this script:
+
 ```bash
 sh ./scripts/enable-iam.sh
 ```
 
+This will create a new Service Account and give it all necessary roles.
+
 ### Enable Workload Identity Federation 
+
+Run this script: 
 
 ```bash
 sh ./scripts/enable-gh-actions.sh
@@ -50,8 +56,8 @@ Make note of the returned output from running this script. It will look like thi
 ```
 ----- GITHUB ACTIONS ENV KEY/VALUE -----
 
-GCP_PROJECT_ID: ${PROJECT_ID}
-GCP_WI_PROVIDER_ID: ${GCP_WI_PROVIDER_ID}
+GCP_PROJECT_ID: <your-project-id>
+GCP_WI_PROVIDER_ID: <workload-id-provider-id>
 
 ----------------------------------------
 ```
@@ -63,7 +69,7 @@ You will need these values to finish setting up GitHub Actions.
 With the 2 key/value pairs outputted from the script in the previous step, follow these steps:
 
 1. In the Settings tab on the GitHub page for your fork, go to: **Secrets and Variables > Actions** 
-1. Click on the Variables tab
+1. Click on the **Variables** tab
 1. Click the **New repository variable** green button
 1. Enter in your key value pairs
 
@@ -73,13 +79,13 @@ You should see two entries that look like this:
 
 ## Provisioning with Terraform
 
-1. Create remote state for Terraform in Google Cloud Storage (this is only required the first time you use the Terraform GitHub actions):
+0. (One time only) Create remote state for Terraform in Google Cloud Storage:
 
   ```bash
   sh ./scripts/setup-tfstate.sh
   ```
 
-2. Now that our one time set up is finished, follow these steps to invoke the GitHub Action that will run terraform to provision our infrastructure.
+1. Follow these steps to invoke the GitHub Action that will run terraform to provision our infrastructure.
     1. Navigate to the **Actions** tab in GitHub
     1. On the left side, click **Terraform Deployment**
     1. On the right side, click the **Run workflow** button
