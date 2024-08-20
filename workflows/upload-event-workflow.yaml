@@ -21,6 +21,8 @@
                 assign:
                   - BACKEND_SRV: "transcoderapi"
                   - OUTPUT_PATH: ${"transcoderapi/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+                  - SPLIT_FILE_NAME: ${text.split(event.data.name, "/")}
+                  - OUTPUT_FILE_NAME: ${SPLIT_FILE_NAME[len(SPLIT_FILE_NAME) - 1]}
               - condition: ${text.match_regex(event.data.name, "batchapi/")}
                 assign:
                   - BACKEND_SRV: "batchapi"
@@ -57,6 +59,7 @@
                     PROJECT: ${project}
                     LOCATION: ${location}
                     OUTPUT_BUCKET_NAME: ${gcsDestination}
+                    OUTPUT_FILE_NAME: ${OUTPUT_FILE_NAME}
                     OUTPUT_PATH: ${OUTPUT_PATH}
                 result: transcoderjob
               - condition: ${BACKEND_SRV == "batchapi"}
@@ -99,7 +102,7 @@
   #
   #
   schedule_transcoder_job:
-    params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_PATH]
+    params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_FILE_NAME, OUTPUT_PATH]
     steps:
         - call_transcoder_api:
             call: googleapis.transcoder.v1.projects.locations.jobs.create
@@ -141,7 +144,7 @@
                           sampleRateHertz: 48000
                     muxStreams:
                       - key: "sd"
-                        fileName: "sd.mp4"
+                        fileName: ${OUTPUT_FILE_NAME}
                         container: "mp4"
                         elementaryStreams:
                           - "video-stream0"
