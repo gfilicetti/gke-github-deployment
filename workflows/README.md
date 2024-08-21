@@ -1,6 +1,6 @@
 # Deploy Managed Workflows
 
-It is common to use a [Managed Workflow](https://cloud.google.com/workflows/docs) to connect newly uploaded video file, in [Google Cloud Storage](https://cloud.google.com/storage/docs) (GCS) as an example, to the most appropriate backend transcoding service: [Transcoder API](https://cloud.google.com/transcoder/docs), [Batch Compute API](https://cloud.google.com/batch/docs), and a [Kubernetes Engine kueue](https://cloud.google.com/kubernetes-engine/docs/tutorials/kueue-intro).
+It is common to use a [Managed Workflow](https://cloud.google.com/workflows/docs) to connect newly uploaded video files, in [Google Cloud Storage](https://cloud.google.com/storage/docs) (GCS) as an example, to the most appropriate backend transcoding service: [Transcoder API](https://cloud.google.com/transcoder/docs), [Batch Compute API](https://cloud.google.com/batch/docs), and a [Kubernetes Engine kueue](https://cloud.google.com/kubernetes-engine/docs/tutorials/kueue-intro).
 
 By default, the `Upload Event` workflow listens to a new video file being uploaded to the `-upload` GCS bucket and subscribes to an [EventArc](https://cloud.google.com/eventarc/docs) event. It then processes the upload event, decides which backend to send the video to, and calls that appropriate backend. By default, the newly uploaded video files are sent to [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/docs/tutorials/kueue-intro) (GKE).
 
