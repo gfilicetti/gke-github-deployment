@@ -1,0 +1,6 @@
+##### Yaml for Fusefs connection testing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: job_namespace
+
