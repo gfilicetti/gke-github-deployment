@@ -34,7 +34,7 @@ We will be deploying a container image of a customized 'ffmpeg' build to a GKE A
 
 Instructions for building container images can be [found here](./containers/README.md).
 
-## Setting up your Project
+## Initializing up your Project
 
 1. First authenticate to Google Cloud:
 
@@ -68,13 +68,17 @@ Instructions for building container images can be [found here](./containers/READ
   ./scripts/enable-api.sh
   ```
 
-## Provision Infrastructure
+## Provisioning Infrastructure
 
 There are 2 options for deployment:
 
 1. Run the `terraform` CLI on the command line directly. [See instructions here.](./terraform/README.md)
 
 2. Use a GitHub Action to run all the Terraform configuration files. [See instructions here.](./github-actions/README.md)
+
+## Setting up GitHub Actions
+
+Instructions for setting up and using GitHub Actions can be [found here](./github-actions/README.md)
 
 ## Building Container Images
 
