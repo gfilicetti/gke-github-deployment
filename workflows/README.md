@@ -8,6 +8,10 @@ Additionally, a `Bulk Upload` workflow can be used to define a batch of videos t
 
 > TODO: diagram Upload a file to -input GCS bucket -> eventarc -> workflow -> {api, batch, k8s} -> -output gcs bucket
 
+## Workflows UI
+
+Open the https://console.cloud.google.com/workflows UI in the appropriate GCP project.
+
 ## Upload Event Workflow
 
 The `Upload Event` is automatically called when a new video file is uploaded to the `-input` Google Cloud Storage (GCS) bucket. Event data, such as video metadata, is sent from GCS to the Workflow as an input.
@@ -36,15 +40,15 @@ The `Upload Event` is automatically called when a new video file is uploaded to 
 By default, the [Terraform](../terraform/workflow.tf) is configured with the following environmental variables:
 
 ```
-    DOCKER_IMAGE_URI        = "${var.region}-docker.pkg.dev/${local.project.id}/repo-batch-jobs/ffmpeg:latest"
-    GCS_DESTINATION         = "${resource.google_storage_bucket.gcs-output.name}"
+    DOCKER_IMAGE_URI        = URI of container image
+    GCS_DESTINATION         = output GCS Bucket
     MACHINE_CPU_MILLI       = "16000"
     MACHINE_MEMORY_MIB      = "65536"
     MACHINE_TYPE            = "c2-standard-16"
-    GKE_CLUSTER_NAME        = "${module.gke.name}"
-    GKE_NAMESPACE           = "${var.job_namespace}"
-    VPC_NETWORK_FULLNAME    = "${module.vpc.network_self_link}"
-    VPC_SUBNETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${local.project.id}/regions/${var.region}/subnetworks/sn-${var.customer_id}-${var.region}"
+    GKE_CLUSTER_NAME        = The name of the GKE Cluster
+    GKE_NAMESPACE           = The namespace for Jobs to be submitted to GKE
+    VPC_NETWORK_FULLNAME    = Default VPC Network
+    VPC_SUBNETWORK_FULLNAME = Default subnet
 ```
 
 ### Resources
@@ -66,6 +70,8 @@ For each Kubernetes Job created, the Kueue Job namespace and resources are defin
                                 cpu: 16
                                 memory: 64Gi
 ```
+
+`MACHINE_TYPE` can be defined for the Batch API requests.
 
 ### Container variables & GCSFuse
 
