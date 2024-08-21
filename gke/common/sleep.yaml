@@ -3,18 +3,19 @@ kind: Job
 metadata:
   name: sleep
 spec:
-  parallelism: 4
-  backoffLimit: 0
+  ttlSecondsAfterFinished: 10
+  # parallelism: 4
+  # backoffLimit: 0
   template:
-    spec:
+    spec:    
       # priorityClassName: low-priority
       terminationGracePeriodSeconds: 0
       containers:
-      - name: ubuntu-container
+      - name: wait-container
         image: ubuntu
         command: ["sleep"]
-        args: ["300"]
+        args: ["120"]
         resources:
           requests:
-            cpu: "16"
+            cpu: "1"
       restartPolicy: Never
