@@ -14,6 +14,7 @@ The following steps will walk you through setting up **Terraform** to provision 
 
     ```bash
     cd ./terraform
+    export PROJECT_ID=$(gcloud config get-value core/project)
     cat terraform.example.tfvars | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
     ```
 
