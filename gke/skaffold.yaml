@@ -23,16 +23,6 @@ deploy:
     flags:
       apply:
       - --server-side
----
-apiVersion: skaffold/v3
-kind: Config
-metadata:
-  name: kueue-sleep
-manifests:
-  rawYaml:
-  - ./common/sleep.yaml
-deploy:
-  kubectl: {}
 # ---
 # apiVersion: skaffold/v3
 # kind: Config
