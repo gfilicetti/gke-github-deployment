@@ -1,0 +1,49 @@
+# Copyright 2023 Google LLC All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: kueue-install
+manifests:
+  rawYaml:
+  - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/manifests.yaml
+deploy:
+  kubectl:
+    flags:
+      apply:
+      - --server-side
+# ---
+# apiVersion: skaffold/v3
+# kind: Config
+# metadata:
+#   name: kueue-addons
+# manifests:
+#   rawYaml:
+#   - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/prometheus.yaml
+#   - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/visibility-api.yaml
+# deploy:
+#   kubectl:
+#     flags:
+#       apply:
+#       - --server-side
+---
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: gke-skaffold-config
+requires:
+- configs: ["common-k8s-cfg"]
+  path: ./common/skaffold.yaml
+- configs: ["kueue-cfg"]
+  path: ./kueue/skaffold.yaml
