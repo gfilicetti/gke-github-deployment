@@ -14,8 +14,8 @@
                 - files: []
                 - b: 0
                 - f: 0
-                - BACKEND_SRV: json_file.backend_service
-                - BATCH_NAME: json_file.name
+                - BACKEND_SRV: ${json_file.backend_service}
+                - BATCH_NAME: ${json_file.name}
         - check_condition_buckets:
             switch:
               - condition: ${len(json_file.buckets) > b}
