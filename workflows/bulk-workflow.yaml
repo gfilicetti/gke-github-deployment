@@ -44,9 +44,9 @@
                 FILES: ${files}
                 BACKEND_SRV: ${BACKEND_SRV}
                 BATCH_NAME: ${BATCH_NAME}
-            result: contentTypes
+            result: jobResults
         - done:
-            return: ${contentTypes}
+            return: ${jobResults}
 
   # Kick off a transcode job for each file
   process_video_files:
