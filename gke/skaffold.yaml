@@ -24,6 +24,20 @@ deploy:
       apply:
       - --server-side
 ---
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: kueue-addons
+manifests:
+  rawYaml:
+  - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/prometheus.yaml
+  - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/visibility-api.yaml
+deploy:
+  kubectl:
+    flags:
+      apply:
+      - --server-side
+---
 apiVersion: skaffold/v4beta1
 kind: Config
 metadata:
