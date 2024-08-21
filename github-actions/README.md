@@ -77,7 +77,7 @@ You should see two entries that look like this:
 
 ![Setup GitHub Actions in Repository](../docs/img/gh-actions-env-setup.png)
 
-## Provisioning with Terraform
+## Provisioning Infrastructure with Terraform
 
 0. (One time only) Create remote state for Terraform in Google Cloud Storage:
 
@@ -94,7 +94,7 @@ You should see two entries that look like this:
 
 ![Run Terraform deployment workflow](../docs/img/gh-actions-workflow-run.png)
 
-## Tearing down with Terraform
+## Tearing Down Infrastructure with Terraform
 
 Using the method above, run the: **Terraform DESTROY** GitHub action.
 
