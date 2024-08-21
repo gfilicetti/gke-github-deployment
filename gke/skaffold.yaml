@@ -30,8 +30,9 @@ metadata:
   name: kueue-addons
 manifests:
   rawYaml:
-  - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/prometheus.yaml
-  - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/visibility-api.yaml
+  - ./common/sleep.yaml
+  # - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/prometheus.yaml
+  # - https://github.com/kubernetes-sigs/kueue/releases/download/v0.8.0/visibility-api.yaml
 deploy:
   kubectl:
     flags:

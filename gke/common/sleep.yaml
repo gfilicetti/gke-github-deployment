@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sleep
+spec:
+  parallelism: 4
+  backoffLimit: 0
+  template:
+    spec:
+      # priorityClassName: low-priority
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: ubuntu-container
+        image: ubuntu
+        command: ["sleep"]
+        args: ["300"]
+        resources:
+          requests:
+            cpu: "16"
+      restartPolicy: Never
