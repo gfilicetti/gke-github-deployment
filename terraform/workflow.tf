@@ -36,6 +36,8 @@ resource "google_workflows_workflow" "event_transcoding_workflow" {
     GKE_NAMESPACE           = "${var.job_namespace}"
     VPC_NETWORK_FULLNAME    = "${module.vpc.network_self_link}"
     VPC_SUBNETWORK_FULLNAME = "https://www.googleapis.com/compute/v1/projects/${local.project.id}/regions/${var.region}/subnetworks/sn-${var.customer_id}-${var.region}"
+    BQ_JOBS_STATS_DATASET   = "transcoder_jobs_${var.customer_id}"
+    BQ_JOBS_STATS_TABLE     = "jobs"
   }
 
   source_contents = data.local_file.upload_input_template.content

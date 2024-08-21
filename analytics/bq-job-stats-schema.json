@@ -1,0 +1,32 @@
+[
+    {
+        "description": "Unique Job identifier",
+        "mode": "REQUIRED",
+        "name": "JobId",
+        "type": "STRING"
+    },
+    {
+        "description": "Date the video file was uploaded or initiated in the Job Workflow.",
+        "mode": "REQUIRED",
+        "name": "createdDateTime",
+        "type": "DATETIME"
+    },
+    {
+        "description": "The backend transcoding service that was used for the job.",
+        "mode": "NULLABLE",
+        "name": "BackendSrv",
+        "type": "STRING"
+    },
+    {
+        "description": "The URI of the uploaded/initiated video file, commonly a Google Cloud Storage (GCS) object.",
+        "mode": "NULLABLE",
+        "name": "FileURI",
+        "type": "STRING"
+    },
+    {
+        "description": "The content type of the uploaded/initated video file.",
+        "mode": "NULLABLE",
+        "name": "contentType",
+        "type": "STRING"
+    }
+]

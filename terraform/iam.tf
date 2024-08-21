@@ -139,6 +139,8 @@ module "member_roles_default_compute" {
     "roles/logging.logWriter",
     "roles/workflows.invoker",
     "roles/workflows.serviceAgent",
+    # BigQuery
+    "roles/bigquery.dataEditor",
   ]
 
   depends_on = [google_project_service_identity.service_identity ]
