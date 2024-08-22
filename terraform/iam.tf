@@ -141,6 +141,7 @@ module "member_roles_default_compute" {
     "roles/workflows.serviceAgent",
     # BigQuery
     "roles/bigquery.dataEditor",
+    "roles/bigquery.user",
   ]
 
   depends_on = [google_project_service_identity.service_identity ]
@@ -194,4 +195,16 @@ resource "google_project_iam_member" "bigquery_sa_objects" {
   role    = "roles/storage.objectViewer"
   project = local.project.id
   member  = "serviceAccount:${resource.google_bigquery_connection.cloud_resource_connection.cloud_resource[0].service_account_id}"
+}
+
+# Logs Sink SA needs to be able to write to BigQuery
+resource "google_project_iam_binding" "bq-log-sink-writer" {
+  project = var.project_id
+  role = "roles/bigquery.dataEditor"
+
+  members = [
+    google_logging_project_sink.bq-log-sink-gke-events.writer_identity,
+    google_logging_project_sink.bq-log-sink-workflow-events.writer_identity,
+    google_logging_project_sink.bq-log-sink-batch-events.writer_identity
+  ]
 }
