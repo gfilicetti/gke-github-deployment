@@ -1,16 +1,3 @@
-#!/bin/bash
-# setup-gke.sh LOCAL_STATE AUTO_APPROVE
-# This script sets up GKE with common configuration and all the extra things we're installing
-# NOTE: This is the untouched script used initially
-
-#asset vars
-LOCAL_STATE=${1:-"false"}
-AUTO_APPROVE=${2:-"false"}
-
-#project vars
-LOCATION=${5:-"us-central1"}
-PROJECT_ID=${6:-$(gcloud config get project)}
-
 #Clone the repo
 git clone git@github.com:ggiovanejr/gke-github-deployment-giovanejr.git
 
