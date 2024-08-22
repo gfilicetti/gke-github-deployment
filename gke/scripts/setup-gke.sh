@@ -12,7 +12,7 @@ PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
 cd ../../terraform
 
 # add the project ID to tfvars
-cat terraform.example.tfvars | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
+cat terraform.tfvars.example | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
 
 # Optional: Remove GCS backend and save state locally
 if [[ "$LOCAL_STATE" != "false" ]]; then
