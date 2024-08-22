@@ -16,7 +16,13 @@ For Kueue, we'll be doing two things, using Skaffold to install the framework it
 
 ## Setup script
 
-Run this one script to setup everything, namely it will:
+Run this one script to setup everything we need for GKE:
+
+```bash
+sh ./scripts/setup-gke.sh
+```
+
+This script will:
 
 - Run Terraform
     - This should be a no-op because you've already run it, but we need to get the output variables.
@@ -24,7 +30,3 @@ Run this one script to setup everything, namely it will:
 - Run Skaffold to install Kueue
 - Run Skaffold for basic configuration
 - Run Skaffold to configure Kueue
-
-```bash
-sh ./scripts/setup-gke.sh
-```
