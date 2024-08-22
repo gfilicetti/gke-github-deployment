@@ -1,39 +1,23 @@
-# GKE + ueue
+# GKE Setup and Configuration
 
-## One copy to deploy
+In this section, we will setup and configure some things on GKE using by multiple components as well as what we need for individual components.
 
-```
-#Clone the repo
-git clone git@github.com:ggiovanejr/gke-github-deployment-giovanejr.git
+We will be using [Skaffold](https://skaffold.dev/docs/) to stand up the Kubernetes configuration.
 
-cd gke-github-deployment-giovanejr
-cd terraform/
+## Configuring Common Components
 
-#Get project_ID and adding to the tfvars
-export PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
-cat terraform.example.tfvars |sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
+If you haven't already, please make sure the infrastructure is setup already using Terraform. Instructions can be [found here](../terraform/README.md).
 
-#Optional removing GCS backend
-sed -i -e 's:backend:#backend:g' provider.tf
+The Skaffold file for common components can be [found here](./common/skaffold.yaml).
 
-#Terraform
-terraform init
-terraform plan
-terraform apply -auto-approve
+## Configuring Kueue
 
-#Replacing variables
-if gcloud container clusters get-credentials `terraform output -raw gke_name`  --region `terraform output -raw region` --project `terraform output -raw project_id`; then
-  for i in `terraform output|awk '{print $1}'`; do 
-    value=`terraform output -raw $i`; 
-    for j in ` grep $i -rl ../gke/*`; do 
-      sed -i -e "s:$i:$value:g" $j
-    done
-  done
-fi
+For Kueue, we'll be doing two things, using Skaffold to install the framework itself and then using Skaffold to set up Kueue to our specs. 
 
-#Deploying
-cd ../gke/
-skaffold run -m kueue-install
-sleep 20 #Recommended to avoid failures with the kueue isntallation
-skaffold run -m gke-skaffold-config
+## Setup script
+
+Run this one script to setup everything:
+
+```bash
+./scripts/setup-gke.sh
 ```

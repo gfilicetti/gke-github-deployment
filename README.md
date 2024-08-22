@@ -20,11 +20,11 @@ It includes working examples of:
 - [GitHub Actions](https://docs.github.com/en/actions)
 - [GKE Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
 - [Kueue](https://kueue.sigs.k8s.io/docs/overview/)
+- [Skaffold](https://skaffold.dev/docs/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [gcloud](https://cloud.google.com/sdk/docs/install)
 - Future TBD:
   - Helm charts
-  - skaffold
   - ArgoCD
 
 ## Workload
@@ -65,7 +65,7 @@ Instructions for building container images can be [found here](./containers/READ
 5. Enable all the needed Google Cloud APIs by running this script:
 
   ```bash
-  ./scripts/enable-api.sh
+  sh ./scripts/enable-api.sh
   ```
 
 ## Provisioning Infrastructure
@@ -75,6 +75,10 @@ There are 2 options for deployment:
 1. Run the `terraform` CLI on the command line directly. [See instructions here.](./terraform/README.md)
 
 2. Use a GitHub Action to run all the Terraform configuration files. [See instructions here.](./github-actions/README.md)
+
+## Setting up GKE
+
+Instructions for setting up GKE can be [found here](./gke/README.md)
 
 ## Setting up GitHub Actions
 
