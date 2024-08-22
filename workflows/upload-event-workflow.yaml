@@ -236,7 +236,11 @@
                 kind: "Job"
                 metadata:
                   name: "${JOB_ID}"
+                  # generateName: sample-job-pi
                   namespace: ${GKE_NAMESPACE}
+                  annotations:
+                    kueue.x-k8s.io/queue-name: lq-team-b
+                    # kueue.x-k8s.io/priority-class: high-priority
                 spec:
                   template:
                     metadata:
