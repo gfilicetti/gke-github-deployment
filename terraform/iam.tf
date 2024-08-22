@@ -188,3 +188,10 @@ module "member_roles_transcoder_service_account" {
 
   depends_on = [ google_project_service_identity.service_identity ]
 }
+
+# BigQuery Connection to Google Cloud Storage (GCS) using SA
+resource "google_project_iam_member" "bigquery_sa_objects" {
+  role    = "roles/storage.objectViewer"
+  project = local.project.id
+  member  = "serviceAccount:${resource.google_bigquery_connection.cloud_resource_connection.cloud_resource[0].service_account_id}"
+}

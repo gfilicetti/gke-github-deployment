@@ -37,3 +37,62 @@ module "bigquery" {
     env = "transcoding"
   }
 }
+
+resource "google_bigquery_connection" "cloud_resource_connection" {
+  connection_id = "bq-biglake-gcp-resources"
+  location      = var.region
+  friendly_name = "BigQuery to GCP Resources Connection"
+  description   = "Connect with other GCP Resources, such as Google Cloud Storage (GCS) objects."
+  cloud_resource {}
+}
+
+# This defines a BigQuery object table with manual metadata caching.
+resource "google_bigquery_table" "gcs_objects_input" {
+  deletion_protection = false
+  table_id            = "gcs-objects-input"
+  dataset_id          = module.bigquery.bigquery_dataset.dataset_id
+  external_data_configuration {
+    connection_id = google_bigquery_connection.cloud_resource_connection.name
+    autodetect    = false
+    # `object_metadata is` required for object tables. For more information, see
+    # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_table#object_metadata
+    object_metadata = "SIMPLE"
+    # This defines the source for the prior object table.
+    source_uris = [
+      "gs://${resource.google_storage_bucket.gcs-input.name}/*",
+    ]
+
+    metadata_cache_mode = "MANUAL"
+  }
+
+  # This ensures that the connection can access the bucket
+  # before Terraform creates a table.
+  depends_on = [
+    google_project_iam_member.bigquery_sa_objects
+  ]
+}
+
+resource "google_bigquery_table" "gcs_objects_output" {
+  deletion_protection = false
+  table_id            = "gcs-objects-output"
+  dataset_id          = module.bigquery.bigquery_dataset.dataset_id
+  external_data_configuration {
+    connection_id = google_bigquery_connection.cloud_resource_connection.name
+    autodetect    = false
+    # `object_metadata is` required for object tables. For more information, see
+    # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_table#object_metadata
+    object_metadata = "SIMPLE"
+    # This defines the source for the prior object table.
+    source_uris = [
+      "gs://${resource.google_storage_bucket.gcs-output.name}/*",
+    ]
+
+    metadata_cache_mode = "MANUAL"
+  }
+
+  # This ensures that the connection can access the bucket
+  # before Terraform creates a table.
+  depends_on = [
+    google_project_iam_member.bigquery_sa_objects
+  ]
+}
