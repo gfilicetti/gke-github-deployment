@@ -21,9 +21,9 @@ The following steps will walk you through setting up **Terraform** to provision 
 3. Deploy infrastructure with Terraform:
 
     ```bash
-    terraform init
-    terraform plan
-    terraform apply
+    terraform init -backend-config=bkt-tfstate-${PROJECT_ID}
+    terraform plan -out=out.tfplan
+    terraform apply "out.tfplan"
     ```
 
 > __Note:__ The deployment of cloud resources can take between 5 - 10 minutes.
