@@ -8,15 +8,7 @@ This project has a number of examples of using Github Actions with Google Cloud,
 ## Setting up GitHub Actions for Google Cloud
 To setup GitHub Actions securely with our Google Cloud environment we will need to do a one time setup for Workload Identity federation through a Google Cloud service account. [More info here.](https://github.com/google-github-actions/auth?tab=readme-ov-file#workload-identity-federation-through-a-service-account)
 
-To assist in this we will run the following 3 scripts:
-
-```bash
-./scripts/enable-iam.sh
-./scripts/enable-gh-actions.sh
-./scripts/setup-tfstate.sh
-```
-
-### Create Fork 
+### Create a Fork 
 
 Setting up GitHub Actions for automated deployments with Terraform requires the Google Cloud administrator to create a fork of this repository, to personalize variable settings for your unique cloud environment.
 

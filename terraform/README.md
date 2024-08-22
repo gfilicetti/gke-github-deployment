@@ -21,7 +21,7 @@ The following steps will walk you through setting up **Terraform** to provision 
 3. Deploy infrastructure with Terraform:
 
     ```bash
-    terraform init -backend-config=bkt-tfstate-${PROJECT_ID}
+    terraform init -backend-config="bucket=bkt-tfstate-${PROJECT_ID}"
     terraform plan -out=out.tfplan
     terraform apply "out.tfplan"
     ```
