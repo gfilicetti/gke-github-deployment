@@ -180,7 +180,7 @@ crash.*.log
 # to change depending on the environment.
 *.tfvars
 *.tfvars.json
-!terraform.example.tfvars
+!terraform.tfvars.example
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in

@@ -19,7 +19,7 @@ cd terraform/
 
 #Get project_ID and adding to the tfvars
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
-cat terraform.example.tfvars |sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
+cat terraform.tfvars.example | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
 
 #Optional removing GCS backend
 sed -i -e 's:backend:#backend:g' provider.tf
