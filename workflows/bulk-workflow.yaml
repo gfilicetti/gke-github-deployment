@@ -84,7 +84,6 @@
                                 data:
                                   name: "${FILE_NAME}"
                                   contentType: "${gcsfile.contentType}"
-                                  timeCreated: "${gcsfile.timeCreated}"
                             result: jobResult
                         - output:
                             assign:
