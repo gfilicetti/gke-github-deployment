@@ -16,9 +16,10 @@ For Kueue, we'll be doing two things, using Skaffold to install the framework it
 
 ## Setup script
 
-Run this one script to setup everything, namely:
+Run this one script to setup everything, namely it will:
 
-- Run Terraform (if it hasn't already been run)
+- Run Terraform
+    - This should be a no-op because you've already run it, but we need to get the output variables.
 - Replace tokens in all config files in the `gke` folder with the real values that Terraform outputs.
 - Run Skaffold to install Kueue
 - Run Skaffold for basic configuration
