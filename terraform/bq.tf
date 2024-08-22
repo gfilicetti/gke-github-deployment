@@ -116,10 +116,12 @@ resource "google_bigquery_table" "job-stats-summary" {
       input.generation as input_file_generation,
       input.content_type as input_file_content_type,
       input.size as input_file_content_size,
-      output.URI as output_file_uri,
-      output.generation as outputfile_generation,
-      output.content_type as output_file_content_type,
-      output.size as output_file_content_size,
+      ARRAY_AGG(STRUCT(
+          output.URI,
+          output.generation,
+          output.content_type,
+          output.size
+      )) AS output_files
     FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS j
     LEFT JOIN `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gcs_objects_input.table_id}` AS input 
       ON j.FileURI = input.URI
@@ -137,6 +139,8 @@ resource "google_bigquery_table" "job-stats-summary" {
       output.URI_PARTS[SAFE_OFFSET(2)] = "${resource.google_storage_bucket.gcs-output.name}"
       AND output.URI_PARTS[SAFE_OFFSET(3)] = j.BackendSrv
       AND output.URI_PARTS[SAFE_OFFSET(4)] = j.JobId
+    GROUP BY
+      ALL
     EOF
   }
 
