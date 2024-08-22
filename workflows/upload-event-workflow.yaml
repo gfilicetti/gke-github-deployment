@@ -37,6 +37,21 @@
                 assign:
                   - BACKEND_SRV: "gke"
                   - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+            next: bq_job_insert
+        - bq_job_insert:
+            call: googleapis.bigquery.v2.tabledata.insertAll
+            args:
+              projectId: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+              datasetId: ${sys.get_env("BQ_JOBS_STATS_DATASET")}
+              tableId: ${sys.get_env("BQ_JOBS_STATS_TABLE")}
+              body: # TableDataInsertAllRequest
+                rows:
+                  - json:
+                        JobId: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+                        createdDateTime: ${text.split(time.format(sys.now(), "UTC"), "Z")[0]}
+                        BackendSrv: ${BACKEND_SRV}
+                        fileURI: ${"gs://" + event.bucket + "/" + event.data.name}
+                        contentType: ${event.data.contentType}
             next: prep_job
         - prep_job:
             assign:
