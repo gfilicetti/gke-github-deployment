@@ -47,7 +47,7 @@ if gcloud container clusters get-credentials $TF_CLUSTER --region $TF_REGION --p
     key=`awk -F',' '{print $1}' <<< "$output"`
     value=`awk -F',' '{print $2}' <<< "$output"`
     for file in `grep $key -rl ../gke/*`; do
-      printf "sed -i -e 's:$key:$value:g' $file\n"
+      sed -i -e 's:$key:$value:g' $file
     done
   done
 fi
