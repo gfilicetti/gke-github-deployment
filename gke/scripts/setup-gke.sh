@@ -56,8 +56,9 @@ if gcloud container clusters get-credentials $TF_CLUSTER --region $TF_REGION --p
   for output in ${outputs[@]}; do
     key=`awk -F',' '{print $1}' <<< "$output"`
     value=`awk -F',' '{print $2}' <<< "$output"`
-    for file in `grep ${key} -rl *.yaml`; do
-      sed -i -e 's:${key}:${value}:g' $file
+    #for file in `grep ${key} -rl *.yaml`; do
+    for file in `grep -rl --include "*.yaml" ${key}`; do
+      sed -i -e "s:${key}:${value}:g" ${file}
     done
   done
 
