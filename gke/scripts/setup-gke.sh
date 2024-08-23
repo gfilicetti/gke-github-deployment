@@ -50,6 +50,7 @@ if TF_OUTPUT_JSON=`terraform output -json`; then
 else 
   printf "ERROR: Terraform output values are NOT found. Make sure you have run Terraform successfully.\n"
   exit 1
+fi
 
 TF_CLUSTER=`jq -r '.gke_name.value' <<< $TF_OUTPUT_JSON`
 TF_REGION=`jq -r '.region.value' <<< $TF_OUTPUT_JSON`
