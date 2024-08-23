@@ -16,15 +16,17 @@ cat terraform.tfvars.example | sed -e "s:your-unique-project-id:${PROJECT_ID}:g"
 
 # Optional: If we're using local state, we will remove the GCS backend setting from terraform
 if [[ "$LOCAL_STATE" != "false" ]]; then
-    sed -i -e "s:backend:#backend:g" provider.tf
+  sed -i -e "s:backend:#backend:g" provider.tf
+fi
 
 # Run Terraform (auto approve if the flag is set)
 terraform init -backend-config="bucket=bkt-tfstate-${PROJECT_ID}"
 terraform plan -out=out.tfplan
 if [[ "$AUTO_APPROVE" != "false" ]]; then
-    terraform apply "out.tfplan" -auto-approve
+  terraform apply "out.tfplan" -auto-approve
 else
-    terraform apply "out.tfplan"
+  terraform apply "out.tfplan"
+fi
 
 # Get back into the GKE folder
 cd ../gke
