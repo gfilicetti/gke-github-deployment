@@ -37,21 +37,6 @@
                 assign:
                   - BACKEND_SRV: "gke"
                   - OUTPUT_PATH: ${"gke/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
-            next: bq_job_insert
-        - bq_job_insert:
-            call: googleapis.bigquery.v2.tabledata.insertAll
-            args:
-              projectId: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
-              datasetId: ${sys.get_env("BQ_JOBS_STATS_DATASET")}
-              tableId: ${sys.get_env("BQ_JOBS_STATS_TABLE")}
-              body: # TableDataInsertAllRequest
-                rows:
-                  - json:
-                        JobId: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
-                        createdDateTime: ${text.split(time.format(sys.now(), "UTC"), "Z")[0]}
-                        BackendSrv: ${BACKEND_SRV}
-                        fileURI: ${"gs://" + event.bucket + "/" + event.data.name}
-                        contentType: ${event.data.contentType}
             next: prep_job
         - prep_job:
             assign:
@@ -62,6 +47,7 @@
                 - gcsDestination: ${sys.get_env("GCS_DESTINATION")}
                 - gkeClusterName: ${sys.get_env("GKE_CLUSTER_NAME")}
                 - gkeNamespace: ${sys.get_env("GKE_NAMESPACE")}
+                - createdDateTime: ${text.split(time.format(sys.now(), "UTC"), "Z")[0]}
             next: create_output_folder
         - create_output_folder:
             call: googleapis.storage.v1.objects.insert
@@ -82,7 +68,7 @@
                     OUTPUT_BUCKET_NAME: ${gcsDestination}
                     OUTPUT_FILE_NAME: ${OUTPUT_FILE_NAME}
                     OUTPUT_PATH: ${OUTPUT_PATH}
-                result: transcoderjob
+                result: transcodersubprocessresp
               - condition: ${BACKEND_SRV == "batchapi"}
                 call: schedule_batch_job
                 args:
@@ -94,7 +80,7 @@
                     OUTPUT_BUCKET_NAME: ${gcsDestination}
                     OUTPUT_PATH: ${OUTPUT_PATH}
                     CONTAINER_IMAGE_URL: ${imageUri}
-                result: batchjob
+                result: batchjobsubprocessresp
               - condition: ${BACKEND_SRV == "gke"}
                 call: schedule_k8s_job
                 args:
@@ -108,15 +94,42 @@
                     CONTAINER_IMAGE_URL: ${imageUri}
                     GKE_CLUSTER_NAME: ${gkeClusterName}
                     GKE_NAMESPACE: ${gkeNamespace}
-                result: gkejob
-        - finish_workflow:
+                result: gkejobsubprocess
+            next: prep_result
+        - prep_result:
             switch:
               - condition: ${BACKEND_SRV == "transcoderapi"}
-                return: ${transcoderjob}
+                assign:
+                  - requestJson: ${transcodersubprocessresp.request}
+                  - resultJson: ${transcodersubprocessresp.response}
               - condition: ${BACKEND_SRV == "batchapi"}
-                return: ${batchjob}
+                assign:
+                  - requestJson: ${batchjobsubprocessresp.request}
+                  - resultJson: ${batchjobsubprocessresp.response}
               - condition: ${BACKEND_SRV == "gke"}
-                return: ${gkejob}
+                assign:
+                  - requestJson: ${gkejobsubprocess.request}
+                  - resultJson: ${gkejobsubprocess.response}
+            next: bq_job_insert
+        - bq_job_insert:
+            call: googleapis.bigquery.v2.tabledata.insertAll
+            args:
+              projectId: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+              datasetId: ${sys.get_env("BQ_JOBS_STATS_DATASET")}
+              tableId: ${sys.get_env("BQ_JOBS_STATS_TABLE")}
+              body: # TableDataInsertAllRequest
+                rows:
+                  - json:
+                        JobId: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+                        createdDateTime: ${createdDateTime}
+                        BackendSrv: ${BACKEND_SRV}
+                        fileURI: ${"gs://" + event.bucket + "/" + event.data.name}
+                        contentType: ${event.data.contentType}
+                        requestJson: ${json.encode_to_string(requestJson)}
+                        responseJson: ${json.encode_to_string(resultJson)}
+            next: finish_workflow
+        - finish_workflow:
+            return: ${resultJson}
 
 
   # Call the Transcoder API to process the video file
@@ -125,56 +138,63 @@
   schedule_transcoder_job:
     params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_FILE_NAME, OUTPUT_PATH]
     steps:
+        - build_request:
+            assign:
+              - request:
+                  parent: ${"projects/" + PROJECT + "/locations/" + LOCATION}
+                  body:
+                    name: "${JOB_ID}"
+                    config:
+                      inputs:
+                        - key: ${FILE_NAME}
+                          uri: ${"gs://" + BUCKET_NAME + "/" + FILE_NAME}
+                      elementaryStreams:
+                        - key: "video-stream0"
+                          videoStream: 
+                            h264:
+                              widthPixels: 640
+                              heightPixels: 360
+                              frameRate: 30
+                              bitrateBps: 550000
+                              pixelFormat: "yuv420p"
+                              rateControlMode: "vbr"
+                              crfLevel: 21
+                              gopDuration: "3s"
+                              vbvSizeBits: 550000
+                              vbvFullnessBits: 495000
+                              entropyCoder: "cabac"
+                              bFrameCount: 3
+                              aqStrength: 1
+                              profile: "high"
+                              preset: "veryfast"
+                        - key: "audio-stream0"
+                          audioStream:
+                            codec: "aac"
+                            bitrateBps: 64000
+                            channelCount: 2
+                            channelLayout:
+                              - "fl"
+                              - "fr"
+                            sampleRateHertz: 48000
+                      muxStreams:
+                        - key: "sd"
+                          fileName: ${OUTPUT_FILE_NAME}
+                          container: "mp4"
+                          elementaryStreams:
+                            - "video-stream0"
+                            - "audio-stream0"
+                      output:
+                        uri: ${"gs://" + OUTPUT_BUCKET_NAME + "/" + OUTPUT_PATH + "/"}
         - call_transcoder_api:
             call: googleapis.transcoder.v1.projects.locations.jobs.create
-            args:
-                parent: ${"projects/" + PROJECT + "/locations/" + LOCATION}
-                body:
-                  name: "${JOB_ID}"
-                  config:
-                    inputs:
-                      - key: ${FILE_NAME}
-                        uri: ${"gs://" + BUCKET_NAME + "/" + FILE_NAME}
-                    elementaryStreams:
-                      - key: "video-stream0"
-                        videoStream: 
-                          h264:
-                            widthPixels: 640
-                            heightPixels: 360
-                            frameRate: 30
-                            bitrateBps: 550000
-                            pixelFormat: "yuv420p"
-                            rateControlMode: "vbr"
-                            crfLevel: 21
-                            gopDuration: "3s"
-                            vbvSizeBits: 550000
-                            vbvFullnessBits: 495000
-                            entropyCoder: "cabac"
-                            bFrameCount: 3
-                            aqStrength: 1
-                            profile: "high"
-                            preset: "veryfast"
-                      - key: "audio-stream0"
-                        audioStream:
-                          codec: "aac"
-                          bitrateBps: 64000
-                          channelCount: 2
-                          channelLayout:
-                            - "fl"
-                            - "fr"
-                          sampleRateHertz: 48000
-                    muxStreams:
-                      - key: "sd"
-                        fileName: ${OUTPUT_FILE_NAME}
-                        container: "mp4"
-                        elementaryStreams:
-                          - "video-stream0"
-                          - "audio-stream0"
-                    output:
-                      uri: ${"gs://" + OUTPUT_BUCKET_NAME + "/" + OUTPUT_PATH + "/"}
+            args: 
+              parent: ${"projects/" + PROJECT + "/locations/" + LOCATION}
+              body: ${request.body}
             result: transcoderjob
         - result:
-            return: ${transcoderjob}
+            return:
+              request: ${request}
+              response: ${transcoderjob}
 
   # Establish a Batch Compute Engine (GCE) Job to process the video file
   #
@@ -182,124 +202,142 @@
   schedule_batch_job:
     params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_PATH, CONTAINER_IMAGE_URL]
     steps:
+        - build_request:
+            assign:
+              - request:
+                  parent: ${"projects/" + PROJECT + "/locations/" + LOCATION}
+                  jobId: "${JOB_ID}"
+                  body:
+                      priority: 99
+                      taskGroups:
+                      - taskCount: 1
+                        parallelism: 1
+
+                        taskSpec:
+                          computeResource:
+                            cpuMilli: ${sys.get_env("MACHINE_CPU_MILLI")}
+                            memoryMib: ${sys.get_env("MACHINE_MEMORY_MIB")}
+                          runnables:
+                          - container:
+                              imageUri: "${CONTAINER_IMAGE_URL}"
+                              entrypoint: ''
+                              volumes:
+                              - "/mnt/disks/output:/output"
+                              - "/mnt/disks/input:/input"
+                          environment:
+                              variables:
+                                MEDIA: "${FILE_NAME}"
+                                OUTPUT_PATH: "/"
+                          volumes:
+                          - gcs:
+                              remotePath: "${BUCKET_NAME}"
+                            mountPath: "/mnt/disks/input"
+                          - gcs:
+                              remotePath: ${OUTPUT_BUCKET_NAME + "/" + OUTPUT_PATH}
+                            mountPath: "/mnt/disks/output"
+                      allocationPolicy:
+                        serviceAccount:
+                          email: ${sys.get_env("GOOGLE_CLOUD_PROJECT_NUMBER") + "-compute@developer.gserviceaccount.com"}
+                          scopes: ["https://www.googleapis.com/auth/cloud-platform"]
+                        network:
+                          networkInterfaces:
+                            - network: ${sys.get_env("VPC_NETWORK_FULLNAME")}
+                              subnetwork: ${sys.get_env("VPC_SUBNETWORK_FULLNAME")}
+                              noExternalIpAddress: true
+                        instances:
+                        - policy:
+                            provisioningModel: SPOT
+                            machineType: ${sys.get_env("MACHINE_TYPE")}
+                      logsPolicy:
+                        destination: CLOUD_LOGGING
         - call_batch_api:
             call: googleapis.batch.v1.projects.locations.jobs.create
             args:
                 parent: ${"projects/" + PROJECT + "/locations/" + LOCATION}
                 jobId: "${JOB_ID}"
-                body:
-                    priority: 99
-                    taskGroups:
-                    - taskCount: 1
-                      parallelism: 1
-
-                      taskSpec:
-                        computeResource:
-                          cpuMilli: ${sys.get_env("MACHINE_CPU_MILLI")}
-                          memoryMib: ${sys.get_env("MACHINE_MEMORY_MIB")}
-                        runnables:
-                        - container:
-                            imageUri: "${CONTAINER_IMAGE_URL}"
-                            entrypoint: ''
-                            volumes:
-                            - "/mnt/disks/output:/output"
-                            - "/mnt/disks/input:/input"
-                        environment:
-                            variables:
-                              MEDIA: "${FILE_NAME}"
-                              OUTPUT_PATH: "/"
-                        volumes:
-                        - gcs:
-                            remotePath: "${BUCKET_NAME}"
-                          mountPath: "/mnt/disks/input"
-                        - gcs:
-                            remotePath: ${OUTPUT_BUCKET_NAME + "/" + OUTPUT_PATH}
-                          mountPath: "/mnt/disks/output"
-                    allocationPolicy:
-                      serviceAccount:
-                        email: ${sys.get_env("GOOGLE_CLOUD_PROJECT_NUMBER") + "-compute@developer.gserviceaccount.com"}
-                        scopes: ["https://www.googleapis.com/auth/cloud-platform"]
-                      network:
-                        networkInterfaces:
-                          - network: ${sys.get_env("VPC_NETWORK_FULLNAME")}
-                            subnetwork: ${sys.get_env("VPC_SUBNETWORK_FULLNAME")}
-                            noExternalIpAddress: true
-                      instances:
-                      - policy:
-                          provisioningModel: SPOT
-                          machineType: ${sys.get_env("MACHINE_TYPE")}
-                    logsPolicy:
-                      destination: CLOUD_LOGGING
+                body: ${request.body}
             result: batchjob
         - result:
-            return: ${batchjob}
+            return: 
+              request: ${request}
+              response: ${batchjob}
 
   # Create a Kubernetes Job to process the video file inside the GKE cluster
   #
   schedule_k8s_job:
     params: [JOB_ID, BUCKET_NAME, FILE_NAME, PROJECT, LOCATION, OUTPUT_BUCKET_NAME, OUTPUT_PATH, CONTAINER_IMAGE_URL, GKE_CLUSTER_NAME, GKE_NAMESPACE]
     steps:
+        - build_request:
+            assign:
+              - request:
+                  cluster_id: ${GKE_CLUSTER_NAME}
+                  namespace: ${GKE_NAMESPACE}
+                  project: ${PROJECT}
+                  location: ${LOCATION}
+                  job:
+                    apiVersion: "batch/v1"
+                    kind: "Job"
+                    metadata:
+                      name: "${JOB_ID}"
+                      # generateName: sample-job-pi
+                      namespace: ${GKE_NAMESPACE}
+                      annotations:
+                        kueue.x-k8s.io/queue-name: lq-team-b
+                        # kueue.x-k8s.io/priority-class: high-priority
+                    spec:
+                      template:
+                        metadata:
+                          annotations:
+                            gke-gcsfuse/volumes: "true"
+                        spec:
+                          serviceAccountName: k8s-sa-cluster
+                          containers:
+                          - name: transcoding
+                            image: ${CONTAINER_IMAGE_URL}
+                            command:
+                              - "/bin/sh"
+                              - "-c"
+                              - ./entrypoint.sh
+                            env:
+                            - name: MEDIA
+                              value: "${FILE_NAME}"
+                            - name: OUTPUT_PATH
+                              value: "/"
+                            volumeMounts:
+                            - name: gcs-fuse-input
+                              mountPath: /input
+                              readOnly: true
+                            - name: gcs-fuse-output
+                              mountPath: /output
+                              readOnly: false
+                            resources:
+                                requests:
+                                    cpu: 16
+                                    memory: 64Gi
+                          volumes:
+                          - name: gcs-fuse-input
+                            csi:
+                              driver: gcsfuse.csi.storage.gke.io
+                              volumeAttributes:
+                                bucketName: "${BUCKET_NAME}"
+                          - name: gcs-fuse-output
+                            csi:
+                              driver: gcsfuse.csi.storage.gke.io
+                              volumeAttributes:
+                                bucketName: "${OUTPUT_BUCKET_NAME}"
+                                mountOptions: ${"only-dir=" + OUTPUT_PATH}
+                          restartPolicy: Never
+                      backoffLimit: 1
         - create_k8s_job:
             call: gke.create_job
-            args:
-              cluster_id: ${GKE_CLUSTER_NAME}
-              namespace: ${GKE_NAMESPACE}
-              project: ${PROJECT}
-              location: ${LOCATION}
-              job:
-                apiVersion: "batch/v1"
-                kind: "Job"
-                metadata:
-                  name: "${JOB_ID}"
-                  # generateName: sample-job-pi
-                  namespace: ${GKE_NAMESPACE}
-                  annotations:
-                    kueue.x-k8s.io/queue-name: lq-team-b
-                    # kueue.x-k8s.io/priority-class: high-priority
-                spec:
-                  template:
-                    metadata:
-                      annotations:
-                        gke-gcsfuse/volumes: "true"
-                    spec:
-                      serviceAccountName: k8s-sa-cluster
-                      containers:
-                      - name: transcoding
-                        image: ${CONTAINER_IMAGE_URL}
-                        command:
-                          - "/bin/sh"
-                          - "-c"
-                          - ./entrypoint.sh
-                        env:
-                        - name: MEDIA
-                          value: "${FILE_NAME}"
-                        - name: OUTPUT_PATH
-                          value: "/"
-                        volumeMounts:
-                        - name: gcs-fuse-input
-                          mountPath: /input
-                          readOnly: true
-                        - name: gcs-fuse-output
-                          mountPath: /output
-                          readOnly: false
-                        resources:
-                            requests:
-                                cpu: 16
-                                memory: 64Gi
-                      volumes:
-                      - name: gcs-fuse-input
-                        csi:
-                          driver: gcsfuse.csi.storage.gke.io
-                          volumeAttributes:
-                            bucketName: "${BUCKET_NAME}"
-                      - name: gcs-fuse-output
-                        csi:
-                          driver: gcsfuse.csi.storage.gke.io
-                          volumeAttributes:
-                            bucketName: "${OUTPUT_BUCKET_NAME}"
-                            mountOptions: ${"only-dir=" + OUTPUT_PATH}
-                      restartPolicy: Never
-                  backoffLimit: 1
+            args: 
+                cluster_id: ${GKE_CLUSTER_NAME}
+                namespace: ${GKE_NAMESPACE}
+                project: ${PROJECT}
+                location: ${LOCATION}
+                job: ${request.args.job}
             result: gkejob
         - result:
-            return: ${gkejob}
+            return: 
+              request: ${request}
+              response: ${gkejob}
