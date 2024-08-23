@@ -11,6 +11,14 @@ PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
 # get into the terraform folder
 cd ../terraform
 
+# first check that we already have the TF state bucket created
+if gcloud -q storage buckets describe gs://bkt-tfstate-${PROJECT_ID} >/dev/null 2>&1; then
+  printf "Terraform remote state bucket is found, continuing..\n"
+else 
+  printf "ERROR: Terraform remote state bucket is NOT found. Make sure to run ./scripts/setup-tfstate.sh first.\n"
+  exit 1
+fi
+
 # add the project ID to tfvars
 cat terraform.tfvars.example | sed -e "s:your-unique-project-id:${PROJECT_ID}:g" > terraform.tfvars
 
