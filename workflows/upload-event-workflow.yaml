@@ -14,13 +14,21 @@
                 - condition: ${not text.match_regex(event.data.contentType, "video") and not text.match_regex(event.data.contentType, "octet-stream")}
                   return: ${"Media " + event.data.contentType + " not valid."}
                   next: end
+            next: assign_backend_service
+        - assign_backend_service:
+            try:
+              assign:
+                - backend_service: ${event.backend_service}
+            except:
+              assign:
+                - backend_service: ""
             next: assign_vars
         - assign_vars:
             switch:
-              - condition: ${event.backend_service != ""} # Defined by bulk-upload
+              - condition: ${backend_service != ""} # Defined by bulk-upload
                 assign:
-                  - BACKEND_SRV: ${event.backend_service}
-                  - OUTPUT_PATH: ${event.backend_service + "/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+                  - BACKEND_SRV: ${backend_service}
+                  - OUTPUT_PATH: ${backend_service + "/" + sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
                   - SPLIT_FILE_NAME: ${text.split(event.data.name, "/")}
                   - OUTPUT_FILE_NAME: ${SPLIT_FILE_NAME[len(SPLIT_FILE_NAME) - 1]}
               - condition: ${text.match_regex(event.data.name, "transcoderapi/")} # GCS file path
