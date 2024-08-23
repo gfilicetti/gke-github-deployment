@@ -60,9 +60,10 @@ if gcloud container clusters get-credentials $TF_CLUSTER --region $TF_REGION --p
       sed -i -e 's:$key:$value:g' $file
     done
   done
-fi
 
-# Deploy with Skaffold (it is recommended to pause between calls to avoid a race condition)
-skaffold run -m kueue-install
-sleep 20 
-skaffold run -m gke-skaffold-config
+  # Deploy with Skaffold (it is recommended to pause between calls to avoid a race condition)
+  skaffold run -m kueue-install
+  sleep 20 
+  skaffold run -m gke-skaffold-config
+
+fi
