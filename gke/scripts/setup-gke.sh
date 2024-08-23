@@ -9,7 +9,7 @@ AUTO_APPROVE=${2:-"false"}
 PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
 
 # get into the terraform folder
-cd ../../terraform
+cd ../terraform
 
 # add the project ID to tfvars
 cat terraform.tfvars.example | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
