@@ -12,11 +12,11 @@ PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
 cd ../terraform
 
 # add the project ID to tfvars
-cat terraform.tfvars.example | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
+cat terraform.tfvars.example | sed -e "s:your-unique-project-id:${PROJECT_ID}:g" > terraform.tfvars
 
 # Optional: If we're using local state, we will remove the GCS backend setting from terraform
 if [[ "$LOCAL_STATE" != "false" ]]; then
-    sed -i -e 's:backend:#backend:g' provider.tf
+    sed -i -e "s:backend:#backend:g" provider.tf
 
 # Run Terraform (auto approve if the flag is set)
 terraform init -backend-config="bucket=bkt-tfstate-${PROJECT_ID}"
