@@ -18,11 +18,7 @@ For Kueue, we'll be doing two things:
 
 ## Setup script
 
-Run this one script to setup both the common components and Kueue as per the above:
-
-```bash
-sh ./scripts/setup-gke.sh
-```
+We will run one script to setup both the common components and Kueue as per the above.
 
 This script will:
 
@@ -32,3 +28,11 @@ This script will:
 - Run Skaffold to install Kueue
 - Run Skaffold for basic configuration
 - Run Skaffold to configure Kueue
+
+> **NOTE:** This installation script can take 5-10 minutes, please be patient.
+
+Run this command: 
+
+```bash
+sh ./scripts/setup-gke.sh
+```
