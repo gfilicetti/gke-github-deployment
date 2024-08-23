@@ -2,46 +2,54 @@
 # setup-gke.sh LOCAL_STATE AUTO_APPROVE
 
 # Command line params
-LOCAL_STATE=${1:-"false"}
-AUTO_APPROVE=${2:-"false"}
+DEV_MODE=${1:-"false"}
+LOCAL_STATE=${2:-"false"}
+AUTO_APPROVE=${3:-"false"}
 
 # Local vars
 PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
 
-# get into the terraform folder
-cd ../terraform
+# if we're in dev mode, then actually run terraform
+if [[ "$DEV_MODE" != "false" ]]; then
+  # get into the terraform folder
+  cd ../terraform
 
-# first check that we already have the TF state bucket created
-if gcloud -q storage buckets describe gs://bkt-tfstate-${PROJECT_ID} >/dev/null 2>&1; then
-  printf "Terraform remote state bucket is found, continuing..\n"
-else 
-  printf "ERROR: Terraform remote state bucket is NOT found. Make sure to run ./scripts/setup-tfstate.sh first.\n"
-  exit 1
+  # first check that we already have the TF state bucket created
+  if gcloud -q storage buckets describe gs://bkt-tfstate-${PROJECT_ID} >/dev/null 2>&1; then
+    printf "Terraform remote state bucket is found, continuing..\n"
+  else 
+    printf "ERROR: Terraform remote state bucket is NOT found. Make sure to run ./scripts/setup-tfstate.sh first.\n"
+    exit 1
+  fi
+
+  # add the project ID to tfvars
+  cat terraform.tfvars.example | sed -e "s:your-unique-project-id:${PROJECT_ID}:g" > terraform.tfvars
+
+  # Optional: If we're using local state, we will remove the GCS backend setting from terraform
+  if [[ "$LOCAL_STATE" != "false" ]]; then
+    sed -i -e "s:backend:#backend:g" provider.tf
+  fi
+
+  # Run Terraform (auto approve if the flag is set)
+  terraform init -backend-config="bucket=bkt-tfstate-${PROJECT_ID}"
+  terraform plan -out=out.tfplan
+  if [[ "$AUTO_APPROVE" != "false" ]]; then
+    terraform apply "out.tfplan" -auto-approve
+  else
+    terraform apply "out.tfplan"
+  fi
+
+  # Get back into the GKE folder
+  cd ../gke
 fi
-
-# add the project ID to tfvars
-cat terraform.tfvars.example | sed -e "s:your-unique-project-id:${PROJECT_ID}:g" > terraform.tfvars
-
-# Optional: If we're using local state, we will remove the GCS backend setting from terraform
-if [[ "$LOCAL_STATE" != "false" ]]; then
-  sed -i -e "s:backend:#backend:g" provider.tf
-fi
-
-# Run Terraform (auto approve if the flag is set)
-terraform init -backend-config="bucket=bkt-tfstate-${PROJECT_ID}"
-terraform plan -out=out.tfplan
-if [[ "$AUTO_APPROVE" != "false" ]]; then
-  terraform apply "out.tfplan" -auto-approve
-else
-  terraform apply "out.tfplan"
-fi
-
-# Get back into the GKE folder
-cd ../gke
 
 # Replace variables in GKE configuration files
-# Get Terraform output in json format
-TF_OUTPUT_JSON=`terraform output -json`
+# Make sure we can get tf output and save it in json format
+if TF_OUTPUT_JSON=`terraform output -json`; then
+  printf "Terraform output values are found, continuing..\n"
+else 
+  printf "ERROR: Terraform output values are NOT found. Make sure you have run Terraform successfully.\n"
+  exit 1
 
 TF_CLUSTER=`jq -r '.gke_name.value' <<< $TF_OUTPUT_JSON`
 TF_REGION=`jq -r '.region.value' <<< $TF_OUTPUT_JSON`
