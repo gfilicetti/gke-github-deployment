@@ -6,7 +6,7 @@ We will be using [Skaffold](https://skaffold.dev/docs/) to stand up the Kubernet
 
 ## Configuring Common Components
 
-If you haven't already, we will call out to Terraform to provision this project's resources. For more information on what is provisioned see the [Terraform instructions here](../terraform/README.md).
+Even though Terraform has already been run and our resources provisioned, we will call out to it to get its output values. For more information on what is provisioned see the [Terraform instructions here](../terraform/README.md).
 
 The Skaffold file for common components can be [found here](./common/skaffold.yaml).
 
@@ -23,7 +23,7 @@ We will run one script to setup both the common components and Kueue as per the 
 This script will:
 
 - Run Terraform
-    - This will be a no-op if you've already run it, but we need to get the output variables.
+    - This will be a no-op because you've already run it, but we need to get the output variables.
 - Replace tokens in all config files in the `gke` folder with the real values that Terraform outputs.
 - Run Skaffold to install Kueue
 - Run Skaffold for basic configuration
