@@ -36,6 +36,6 @@ spec:
         csi:
           driver: gcsfuse.csi.storage.gke.io
           volumeAttributes:
-            bucketName: gcs-testtest-431919-gcp-test-input
+            bucketName: <BUCKET NAME>
       restartPolicy: Never
   backoffLimit: 1

@@ -25,18 +25,17 @@ steps:
   dir: /workspace
   args: [ 'build',
     '-t',
-    '${_LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}',
-    '.' ]
+    '${LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}',
+    './containers/ffmpeg' ]
 
 images:
-- '${_LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}'
+- '${LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}'
 
 # options:
 #   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _PROJECT_ID: 'testtest-431919'
+  _PROJECT_ID: ''
   _ARTIFACT_REPO_NAME: 'repo-batch-jobs'
   _IMAGE_NAME: 'ffmpeg'
-  _IMAGE_VERSION: 'v0.0.1'
-  _LOCATION: 'us-central1'
+  _IMAGE_VERSION: 'latest'
