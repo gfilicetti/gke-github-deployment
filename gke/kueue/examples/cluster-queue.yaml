@@ -4,7 +4,7 @@ metadata:
   name: cluster-queue-a
 spec:
   namespaceSelector: {} # Available to all namespaces
-  # cohort: "team-ab"
+  cohort: "team-ab"
   queueingStrategy: BestEffortFIFO # Default queueing strategy
   resourceGroups:
   - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage"]
@@ -27,7 +27,7 @@ metadata:
   name: cluster-queue-b
 spec:
   namespaceSelector: {} # Available to all namespaces
-  # cohort: "team-ab"
+  cohort: "team-ab"
   queueingStrategy: BestEffortFIFO # Default queueing strategy
   resourceGroups:
   - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage"]

@@ -35,8 +35,8 @@ images:
 #   logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _PROJECT_ID: 'testtest-431919'
+  _PROJECT_ID: ''
   _ARTIFACT_REPO_NAME: 'repo-batch-jobs'
-  _IMAGE_NAME: 'ffmpeg'
+  _IMAGE_NAME: 'ffmpeg-api'
   _IMAGE_VERSION: 'v0.0.1'
   _LOCATION: 'us-central1'
