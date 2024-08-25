@@ -150,7 +150,7 @@ resource "google_bigquery_table" "job-stats-summary" {
           output.content_type,
           output.size
       )) AS output_files,
-      ARRAY_CONCAT(gke_events.Events, batch_events.Events) AS Events
+      ARRAY_CONCAT(IFNULL(gke_events.Events, []), IFNULL(batch_events.Events, [])) AS Events
     FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS j
     LEFT JOIN `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gcs_objects_input.table_id}` AS input 
       ON j.FileURI = input.URI
@@ -243,6 +243,56 @@ module "scheduled_queries" {
               (JobId)
             LEFT JOIN
               `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}` AS existing_e
+            USING
+              (JobId,
+                LogName,
+                Status,
+                TimeStamp)
+            WHERE
+              existing_e.TimeStamp IS NULL)
+          EOF
+      }
+    },
+    {
+      name                 = "update-batch-log-events"
+      location             = var.region
+      service_account_name = google_service_account.sa_bq_scheduled.email
+      data_source_id       = "scheduled_query"
+      schedule             = "every 60 minutes"
+      scheduleOptions = {
+        "disableAutoScheduling" = false
+      }
+      destination_dataset_id = module.bigquery.bigquery_dataset.dataset_id
+
+      params = {
+        # write_disposition = "WRITE_APPEND"
+        query = <<EOF
+          INSERT INTO
+            `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}` (
+            SELECT
+              jobs.JobId,
+              e.LogName,
+              e.Status,
+              e.Timestamp
+            FROM
+              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS jobs
+            INNER JOIN (
+              SELECT
+                labels.workflows_googleapis_com_execution_id AS JobId,
+                logName AS LogName,
+                jsonpayload_type_executionssystemlog.state AS Status,
+                timestamp AS TimeStamp
+              FROM
+                `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.workflows_googleapis_com_executions_system`
+              WHERE
+                TIMESTAMP_TRUNC(timestamp, DAY) = TIMESTAMP(CURRENT_DATE())
+                AND resource.type = 'workflows.googleapis.com/Workflow'
+              GROUP BY
+                ALL ) AS e
+            USING
+              (JobId)
+            LEFT JOIN
+              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}` AS existing_e
             USING
               (JobId,
                 LogName,
