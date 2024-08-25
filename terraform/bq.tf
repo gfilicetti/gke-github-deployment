@@ -39,6 +39,34 @@ resource "google_bigquery_table" "jobs" {
   ]
 }
 
+# Log Events: GKE
+resource "google_bigquery_table" "gke-log-events" {
+  dataset_id = module.bigquery.bigquery_dataset.dataset_id
+  table_id   = "log-events-gke"
+  schema     = file("../analytics/bq-log-events-gke-schema.json")
+  labels = {
+    env = "logs"
+  }
+
+  depends_on = [
+    module.bigquery
+  ]
+}
+
+# Log Events: Batch API
+resource "google_bigquery_table" "batch-log-events" {
+  dataset_id = module.bigquery.bigquery_dataset.dataset_id
+  table_id   = "log-events-batch"
+  schema     = file("../analytics/bq-log-events-gke-schema.json")
+  labels = {
+    env = "logs"
+  }
+
+  depends_on = [
+    module.bigquery
+  ]
+}
+
 # A BigQuery connection to the rest of the GCP Resources
 resource "google_bigquery_connection" "cloud_resource_connection" {
   connection_id = "bq-biglake-gcp-resources"
@@ -106,7 +134,7 @@ resource "google_bigquery_table" "job-stats-summary" {
 
   view {
     use_legacy_sql = false
-    query = <<EOF
+    query          = <<EOF
     # Query that combines Job stats information with GCS object metadata and transcoding backend logs.
     SELECT 
       j.JobId,
@@ -121,7 +149,8 @@ resource "google_bigquery_table" "job-stats-summary" {
           output.generation,
           output.content_type,
           output.size
-      )) AS output_files
+      )) AS output_files,
+      ARRAY_CONCAT(gke_events.Events, batch_events.Events) AS Events
     FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS j
     LEFT JOIN `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gcs_objects_input.table_id}` AS input 
       ON j.FileURI = input.URI
@@ -139,6 +168,20 @@ resource "google_bigquery_table" "job-stats-summary" {
       output.URI_PARTS[SAFE_OFFSET(2)] = "${resource.google_storage_bucket.gcs-output.name}"
       AND output.URI_PARTS[SAFE_OFFSET(3)] = j.BackendSrv
       AND output.URI_PARTS[SAFE_OFFSET(4)] = j.JobId
+    LEFT JOIN (
+      SELECT 
+        JobId,
+        ARRAY_AGG(STRUCT(LogName, Status, TimeStamp) IGNORE NULLS) AS Events
+      FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}`
+      GROUP BY JobId
+    ) AS gke_events USING(JobId)
+    LEFT JOIN (
+      SELECT 
+        JobId,
+        ARRAY_AGG(STRUCT(LogName, Status, TimeStamp) IGNORE NULLS) AS Events
+      FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}`
+      GROUP BY JobId
+    ) AS batch_events USING(JobId)
     GROUP BY
       ALL
     EOF
@@ -148,4 +191,72 @@ resource "google_bigquery_table" "job-stats-summary" {
     google_bigquery_table.jobs,
     google_bigquery_table.gcs_objects_input
   ]
+}
+
+# Create a set of scheduled BigQuery jobs to load data from logs
+# Log Sink -> {various BigQuery table exports} -> Jobs-specific Events
+module "scheduled_queries" {
+  source  = "terraform-google-modules/bigquery/google//modules/scheduled_queries"
+  version = "~> 8.1.0"
+
+  project_id = var.project_id
+
+  queries = [
+    {
+      name                 = "update-gke-log-events"
+      location             = var.region
+      service_account_name = google_service_account.sa_bq_scheduled.email
+      data_source_id       = "scheduled_query"
+      schedule             = "every 60 minutes"
+      scheduleOptions = {
+        "disableAutoScheduling" = false
+      }
+      destination_dataset_id = module.bigquery.bigquery_dataset.dataset_id
+
+      params = {
+        # write_disposition = "WRITE_APPEND"
+        query = <<EOF
+          INSERT INTO
+            `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}` (
+            SELECT
+              jobs.JobId,
+              e.LogName,
+              e.Status,
+              e.Timestamp
+            FROM
+              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS jobs
+            INNER JOIN (
+              SELECT
+                SPLIT(REPLACE(jsonPayload.metadata.name, "transcoding-", ""), '.')[SAFE_OFFSET(0)] AS JobId,
+                logName AS LogName,
+                jsonPayload.reason AS Status,
+                PARSE_TIMESTAMP("%Y-%m-%dT%H:%M:%SZ", jsonPayload.lasttimestamp) AS Timestamp
+              FROM
+                # Log Sink export: events
+                `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.events`
+              WHERE
+                TIMESTAMP_TRUNC(timestamp, DAY) = TIMESTAMP(CURRENT_DATE())
+                AND jsonPayload.source.component = 'job-controller'
+              GROUP BY
+                ALL) AS e
+            USING
+              (JobId)
+            LEFT JOIN
+              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}` AS existing_e
+            USING
+              (JobId,
+                LogName,
+                Status,
+                TimeStamp)
+            WHERE
+              existing_e.TimeStamp IS NULL)
+          EOF
+      }
+    }
+  ]
+
+  depends_on = [
+    google_service_account.sa_bq_scheduled,
+    google_project_iam_member.bq-scheduled-query-sa-iam,
+  google_project_iam_member.bq-scheduled-query-sa-permission]
 }

@@ -16,7 +16,7 @@
 resource "google_service_account" "eventarc" {
   account_id   = "eventarc-trigger-sa"
   display_name = "TF - Eventarc Trigger SA"
-  project      =  local.project.id
+  project      = local.project.id
 }
 
 
@@ -59,7 +59,7 @@ module "member_roles_gke_cluster" {
     "roles/storage.objectUser",
   ]
 
-  depends_on = [google_project_service_identity.service_identity ]
+  depends_on = [google_project_service_identity.service_identity]
 }
 
 # Add roles to the created EventArc service account
@@ -73,7 +73,7 @@ module "member_roles_eventarc_trigger" {
     "roles/workflows.invoker"
   ]
 
-  depends_on = [google_project_service_identity.service_identity ]
+  depends_on = [google_project_service_identity.service_identity]
 }
 
 # Add roles to the default Cloud Build service account
@@ -104,7 +104,7 @@ module "member_roles_cloudbuild" {
     "roles/workflows.serviceAgent",
   ]
 
-  depends_on = [google_project_service_identity.service_identity ]
+  depends_on = [google_project_service_identity.service_identity]
 }
 
 # Add roles to the default Compute service account
@@ -144,7 +144,7 @@ module "member_roles_default_compute" {
     "roles/bigquery.user",
   ]
 
-  depends_on = [google_project_service_identity.service_identity ]
+  depends_on = [google_project_service_identity.service_identity]
 }
 
 # Add roles to the default Google Cloud Storage (GCS) service account
@@ -158,7 +158,7 @@ module "member_roles_gcs_service_account" {
     "roles/pubsub.publisher"
   ]
 
-  depends_on = [ google_project_service_identity.service_identity ]
+  depends_on = [google_project_service_identity.service_identity]
 }
 
 # PubSub needs these minimum permissions (GCS > EventArc > Workflow)
@@ -172,7 +172,7 @@ module "member_roles_pubsub_service_account" {
     "roles/iam.serviceAccountTokenCreator"
   ]
 
-  depends_on = [ google_project_service_identity.service_identity ]
+  depends_on = [google_project_service_identity.service_identity]
 }
 
 # Transcoder API service accounts needs to be able to read from GCS -input bucket and write to -output
@@ -187,7 +187,7 @@ module "member_roles_transcoder_service_account" {
     "roles/storage.objectViewer"
   ]
 
-  depends_on = [ google_project_service_identity.service_identity ]
+  depends_on = [google_project_service_identity.service_identity]
 }
 
 # BigQuery Connection to Google Cloud Storage (GCS) using SA
@@ -200,11 +200,34 @@ resource "google_project_iam_member" "bigquery_sa_objects" {
 # Logs Sink SA needs to be able to write to BigQuery
 resource "google_project_iam_binding" "bq-log-sink-writer" {
   project = var.project_id
-  role = "roles/bigquery.dataEditor"
+  role    = "roles/bigquery.dataEditor"
 
   members = [
     google_logging_project_sink.bq-log-sink-gke-events.writer_identity,
     google_logging_project_sink.bq-log-sink-workflow-events.writer_identity,
     google_logging_project_sink.bq-log-sink-batch-events.writer_identity
   ]
+}
+
+# Create a service account for BigQuery Scheduled
+resource "google_service_account" "sa_bq_scheduled" {
+  account_id   = "sa-${var.customer_id}-bq-scheduled"
+  display_name = "TF - BigQuery Scheduled SA"
+  project      = local.project.id
+}
+
+# grant bigquery admin role to the service account so that scheduled query can run
+resource "google_project_iam_member" "bq-scheduled-query-sa-iam" {
+  project = var.project_id
+  role    = "roles/bigquery.admin"
+  member  = "serviceAccount:${google_service_account.sa_bq_scheduled.email}"
+  depends_on = [
+    google_service_account.sa_bq_scheduled
+  ]
+}
+
+resource "google_project_iam_member" "bq-scheduled-query-sa-permission" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountShortTermTokenMinter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }

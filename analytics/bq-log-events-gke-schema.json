@@ -1,0 +1,26 @@
+[
+    {
+        "description": "Unique Job identifier",
+        "mode": "REQUIRED",
+        "name": "JobId",
+        "type": "STRING"
+    },
+    {
+        "description": "The source of the log event.",
+        "mode": "NULLABLE",
+        "name": "LogName",
+        "type": "STRING"
+    },
+    {
+        "description": "The event status at that particular log event time.",
+        "mode": "NULLABLE",
+        "name": "Status",
+        "type": "STRING"
+    },
+    {
+        "description": "The timestamp of the log event.",
+        "mode": "NULLABLE",
+        "name": "TimeStamp",
+        "type": "TIMESTAMP"
+    }    
+]
