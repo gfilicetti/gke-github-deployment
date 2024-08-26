@@ -13,7 +13,7 @@ The Skaffold file for common components can be [found here](./common/skaffold.ya
 ## Configuring Kueue
 
 For Kueue, we'll be doing two things: 
-- Using Skaffold to [install the framework itself](./skaffold.yaml) 
+- Using Skaffold to [install the Kueue framework itself](./skaffold.yaml) 
 - Using Skaffold to [set up Kueue](./kueue/skaffold.yaml) to our specs. 
 
 ## Setup script

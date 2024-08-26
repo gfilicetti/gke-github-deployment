@@ -2,6 +2,7 @@
 
 This folder holds source code and Docker configurations for the container images we'll be building and using:
 - [ffmpeg](./ffmpeg/README.md)
+- [ffmpeg-api](./ffmpeg-api/README.md)
 
 ## Building Container Images
 
