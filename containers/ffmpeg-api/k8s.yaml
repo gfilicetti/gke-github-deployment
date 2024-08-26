@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ffmpeg-api
+  labels:
+    name: ffmpeg-api
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 40%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      name: ffmpeg-api
+  template:
+    metadata:
+      labels:
+        name: ffmpeg-api
+        version: stable
+      annotations:
+        gke-gcsfuse/volumes: "true"
+    spec:
+      restartPolicy: Always
+      serviceAccountName: k8s-sa-cluster
+      containers:
+      - image: ffmpeg-api
+        name: ffmpeg-api
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: http-front
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5
+        # livenessProbe:
+        #   tcpSocket:
+        #     port: http-front
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5
+        env:
+        - name: ENV
+          value: dev
+        # TODO: Update prior to deployment
+        - name: INPUT_BUCKET
+          value: <INPUT_BUCKET>
+        resources:
+          requests:
+            cpu: 4 #16
+            memory: 16Gi #64Gi
+          limits:
+            memory: 16Gi #64Gi
+        volumeMounts:
+        - name: gcs-fuse-csi-input
+          mountPath: /input
+        - name: gcs-fuse-csi-output
+          mountPath: /output
+      volumes:
+      - name: gcs-fuse-csi-input
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: <INPUT_BUCKET>
+      - name: gcs-fuse-csi-output
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: <OUTPUT_BUCKET>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: ffmpeg-api
+  name: ffmpeg-api
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    name: ffmpeg-api
+  sessionAffinity: None
+  type: LoadBalancer
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ffmpeg-api
+  namespace: jobs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ffmpeg-api
+  minReplicas: 2
+  maxReplicas: 30
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - periodSeconds: 15
+          type: Percent
+          value: 50
