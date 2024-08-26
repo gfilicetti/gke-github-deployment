@@ -25,3 +25,8 @@ gcloud services enable --project $PROJECT_ID \
   transcoder.googleapis.com \
   workflows.googleapis.com \
   workflowexecutions.googleapis.com
+
+# Cont'd, enable APIs for BigQuery services
+gcloud services enable --project $PROJECT_ID \
+  bigquery.googleapis.com \
+  bigquerydatatransfer.googleapis.com
