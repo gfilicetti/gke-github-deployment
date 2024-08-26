@@ -42,7 +42,7 @@ resource "google_logging_project_sink" "bq-log-sink-workflow-events" {
   }
 
   # Send all Workflow Event logs to BigQuery
-  filter = "resource.labels.service=(\"workflowexecutions.googleapis.com\" OR \"workflows.googleapis.com\")"
+  filter = "logName=\"projects/${var.project_id}/logs/workflows.googleapis.com%2Fexecutions_system\""
 
   # Use a unique writer (creates a unique service account used for writing)
   unique_writer_identity = true

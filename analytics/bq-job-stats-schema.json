@@ -28,5 +28,17 @@
         "mode": "NULLABLE",
         "name": "contentType",
         "type": "STRING"
-    }
+    },
+    {
+        "description": "Request message to the backend service.",
+        "mode": "NULLABLE",
+        "name": "requestJson",
+        "type": "JSON"
+    },
+    {
+        "description": "Response json message from the backend service.",
+        "mode": "NULLABLE",
+        "name": "responseJson",
+        "type": "JSON"
+    }    
 ]
