@@ -26,7 +26,7 @@ steps:
   args: [ 'build',
     '-t',
     '${LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}',
-    './containers/ffmpeg' ]
+    '.' ]
 
 images:
 - '${LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}'
