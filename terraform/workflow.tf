@@ -58,6 +58,10 @@ resource "google_workflows_workflow" "bulk_transcoding_workflow" {
   source_contents = data.local_file.bulk_input_template.content
 }
 
+################################
+## EVENTARC PROVISIONING HACK ##
+################################
+
 resource "google_eventarc_trigger" "primary" {
   name            = "trigger-${var.customer_id}-gcs-transcoding"
   location        = var.region
@@ -75,7 +79,7 @@ resource "google_eventarc_trigger" "primary" {
   }
 
   depends_on = [
-    google_project_service_identity.service_identity,
+    time_sleep.wait_for_service_agent_readiness,
     module.member_roles_default_compute,
     module.member_roles_gcs_service_account
   ]

@@ -3,18 +3,18 @@ This repository is a full example of a CI/CD pipeline using GitHub actions,
 terraform and other tech to create and deploy workloads to a GKE Autopilot
 installation.
 
-It includes working examples of: 
+It includes working examples of:
   - Terraform scripts for Google Cloud provisioning
   - GitHub actions for Google Cloud CI/CD pipelines
   - Building an ffmpeg container using Cloud Build
-  - Using Kueue for Kubernetes Job management 
+  - Using Kueue for Kubernetes Job management
   - Google Cloud Workflows
   - GCSFuse for storage
 
 ## Architecture
 ![High level architecture](docs/img/architecture-diagram.png "High level architecture")
 
-## Technology Used 
+## Technology Used
 - [Terraform](https://www.terraform.io/downloads.html)
 - [Artifact Registry](https://cloud.google.com/artifact-registry/docs)
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -68,6 +68,10 @@ Instructions for building container images can be [found here](./containers/READ
   sh ./scripts/enable-api.sh
   ```
 
+## (Optional) Setting up GitHub Actions
+
+Instructions for setting up and using GitHub Actions can be [found here](./github-actions/README.md).
+
 ## Provisioning Infrastructure
 
 There are 2 options for deployment:
@@ -79,10 +83,6 @@ There are 2 options for deployment:
 ## Setting up GKE
 
 Instructions for setting up GKE can be [found here](./gke/README.md)
-
-## Setting up GitHub Actions
-
-Instructions for setting up and using GitHub Actions can be [found here](./github-actions/README.md)
 
 ## Building Container Images
 
