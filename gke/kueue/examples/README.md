@@ -19,22 +19,29 @@ Kueue has built-in support for popular jobs:
 ## Prerequisites
 
 1. Create a your GKE cluster
-1. Get the credentials
-1. Install Kueue using [these instructions](../../README.md).
+  - This was done when you ran Terraform to provision your infrastructure.
+2. Get the `kubectl` credentials
+  - Run this `gcloud` command to setup your credentials:
+  
+    ```bash
+    gcloud containers clusters get-credentials gke-gcp-test 
+    ```
+
+3. Install Kueue using [these instructions](../../README.md).
 
 ## Demo
 
 ### Configuration
 
-Kubernetes manifests to apply:
+Please apply all of these Kubernetes manifests using the command line given
 
-| File Name | Description | Changes required | Command Line |
+| File Name | Description | Command Line |
 |---|---|---|---|
-| [jobs-namespace-sa.yaml](./jobs-namespace-sa.yaml) | Create NS and SA. | SA and PROJECT_ID | `kubectl apply -f jobs-namespace-sa.yaml` |
-| [cluster-queue.yaml](./cluster-queue.yaml) | Cluster queue and resource quota. |  | `kubectl apply -f cluster-queue.yaml` |
-| [local-queue.yaml](./local-queue.yaml) | Local queue for different teams. |  | `kubectl apply -f local-queue.yaml` |
-| [resource-flavor.yaml](./resource-flavor.yaml) | Configure resource flavor. |  | `kubectl apply -f resource-flavor.yaml` |
-| [job-priority.yaml](./job-priority.yaml) | Configure workload priority. |  | `kubectl apply -f job-priority.yaml` |
+| [jobs-namespace-sa.yaml](./jobs-namespace-sa.yaml) | Create NS and SA. | `kubectl apply -f jobs-namespace-sa.yaml` |
+| [cluster-queue.yaml](./cluster-queue.yaml) | Cluster queue and resource quota. | `kubectl apply -f cluster-queue.yaml` |
+| [local-queue.yaml](./local-queue.yaml) | Local queue for different teams. | `kubectl apply -f local-queue.yaml` |
+| [resource-flavor.yaml](./resource-flavor.yaml) | Configure resource flavor. | `kubectl apply -f resource-flavor.yaml` |
+| [job-priority.yaml](./job-priority.yaml) | Configure workload priority. | `kubectl apply -f job-priority.yaml` |
 
 ### Submitting a Simple Job
 
@@ -83,10 +90,11 @@ kubectl -n jobs get localqueues,clusterqueue,jobs,workloads,pods
 
 1. Go to the [cluster-queue.yaml](./cluster-queue.yaml) file and enable the cohort "team-ab"
    1. Remove the `#` from this line `# cohort: "team-ab"`
-   2. Repeat that for the cluster-queue-a and cluster-queue-b
+   2. Repeat that for the `cluster-queue-a` and `cluster-queue-b`
    3. Apply the cluster-queue.yaml
    4. `kubectl get clusterqueue` to see the cohort creation
-2. Run again 10 replicas of the last job, you can see that we borrowed resources from cluster-queue-b
+2. Once again, run 10 replicas of the last job. You can see that we borrowed resources from `cluster-queue-b`
+
   ```bash
   for i in {1..10}; do kubectl create -f job-kueue-example-2.yaml; done
   ```
