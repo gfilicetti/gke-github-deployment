@@ -25,6 +25,7 @@ This script will:
 - Run Terraform
     - This will be a no-op because you've already run it, but we need to get the output variables.
 - Replace tokens in all config files in the `gke` folder with the real values that Terraform outputs.
+    - [See below](#token-replacement-details) for details on how token replacement is done.
 - Run Skaffold to install Kueue
 - Run Skaffold for basic configuration
 - Run Skaffold to configure Kueue
@@ -36,3 +37,20 @@ Run this command:
 ```bash
 sh ./scripts/setup-gke.sh
 ```
+
+### Token Replacement Details
+In various .yaml files we need to use values that are output from Terraform.
+
+This is done by token substitution. We search for the **names** of Terraform outputs and replace them with the **returned values**.
+
+We search all `*.yaml` files in this `gke` folder recursively for any of the output names below and replace them with the value of the output from the Terraform run.
+
+|TF Output Name|Example Value|
+|---|---|
+|`customer_id`|`gcp`|
+|`project_id`|`transcoding-on-gke-pilot-11`|
+|`region`|`us-central1`|
+|`gke_name`|`gke-gcp-test`|
+|`job_namespace`|`jobs`|
+|`input_bucket`|`gcs-transcoding-on-gke-pilot-11-gcp-test-input`|
+|`output_bucket`|`gcs-transcoding-on-gke-pilot-11-gcp-test-output`|

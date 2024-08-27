@@ -22,3 +22,13 @@ output "gke_name" {
   description = "name of the cluster"
   value       = module.gke.name
 }
+
+output "input_bucket" {
+  description = "The name of the GCS bucket used for input"
+  value       = google_storage_bucket.gcs-input.name
+}
+
+output "output_bucket" {
+  description = "The name of the GCS bucket used for output"
+  value       = google_storage_bucket.gcs-output.name
+}
