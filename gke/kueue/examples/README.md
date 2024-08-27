@@ -24,7 +24,7 @@ Kueue has built-in support for popular jobs:
   - Run this `gcloud` command to setup your credentials:
   
     ```bash
-    gcloud containers clusters get-credentials gke-gcp-test 
+    gcloud container clusters get-credentials gke-gcp-test --region us-central1
     ```
 
 3. Install Kueue using [these instructions](../../README.md).
@@ -36,7 +36,7 @@ Kueue has built-in support for popular jobs:
 Please apply all of these Kubernetes manifests using the command line given
 
 | File Name | Description | Command Line |
-|---|---|---|---|
+|---|---|---|
 | [jobs-namespace-sa.yaml](./jobs-namespace-sa.yaml) | Create NS and SA. | `kubectl apply -f jobs-namespace-sa.yaml` |
 | [cluster-queue.yaml](./cluster-queue.yaml) | Cluster queue and resource quota. | `kubectl apply -f cluster-queue.yaml` |
 | [local-queue.yaml](./local-queue.yaml) | Local queue for different teams. | `kubectl apply -f local-queue.yaml` |
@@ -52,7 +52,7 @@ kubectl create -f job-kueue-example-1.yaml
 
 For status output, use:
 ```bash
-kubectl -n jobs get localqueues,clusterqueue,jobs,workloads
+kubectl -n jobs get localqueues,clusterqueue,jobs,workloads,pods
 ```
 
 Use this command to get resource allocation status:
