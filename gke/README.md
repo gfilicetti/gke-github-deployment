@@ -13,7 +13,7 @@ The Skaffold file for common components can be [found here](./common/skaffold.ya
 ## Configuring Kueue
 
 For Kueue, we'll be doing two things: 
-- Using Skaffold to [install the Kueue framework itself](./skaffold.yaml) 
+- Using Skaffold to [install the Kueue framework](./skaffold.yaml) 
 - Using Skaffold to [set up Kueue](./kueue/skaffold.yaml) to our specs. 
 
 ## Setup script
@@ -54,3 +54,16 @@ We search all `*.yaml` files in this `gke` folder recursively for any of the out
 |`job_namespace`|`jobs`|
 |`input_bucket`|`gcs-transcoding-on-gke-pilot-11-gcp-test-input`|
 |`output_bucket`|`gcs-transcoding-on-gke-pilot-11-gcp-test-output`|
+
+## Uninstalling Kueue
+
+To uninstall queue, run this command:
+
+> **NOTE:** Make sure you use the same version as the one you installed.
+
+```bash
+VERSION=v0.8.0
+kubectl delete -f \
+  https://github.com/kubernetes-sigs/kueue/releases/download/$VERSION/manifests.yaml
+```
+
