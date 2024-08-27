@@ -89,21 +89,27 @@ kubectl -n jobs get localqueues,clusterqueue,jobs,workloads,pods
 ### Sharing Resources With [Cohorts](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/#cohort)
 
 1. Go to the [cluster-queue.yaml](./cluster-queue.yaml) file and enable the cohort "team-ab"
-   1. Remove the `#` from this line `# cohort: "team-ab"`
-   2. Repeat that for the `cluster-queue-a` and `cluster-queue-b`
-   3. Apply the cluster-queue.yaml
-   4. `kubectl get clusterqueue` to see the cohort creation
+    1. Remove the `#` from this line `# cohort: "team-ab"`
+    2. Repeat that for the `cluster-queue-a` and `cluster-queue-b`
+    3. Apply the cluster-queue.yaml:
+      ```bash
+      kubectl apply -f cluster-queue.yaml
+      ```
+    4. Now check the Cluster Queues to see the cohort creation:
+      ```bash
+      kubectl get clusterqueue
+      ```
 2. Once again, run 10 replicas of the last job. You can see that we borrowed resources from `cluster-queue-b`
 
   ```bash
   for i in {1..10}; do kubectl create -f job-kueue-example-2.yaml; done
   ```
 
-Take another look at the [cluster-queue.yaml](./cluster-queue.yaml), we can also use extra parameters like `borrowingLimit` and `lendingLimit` to have more control over our resource allocation.
+Take another look at [cluster-queue.yaml](./cluster-queue.yaml). We can also use extra parameters like `borrowingLimit` and `lendingLimit` to have more control over our resource allocation.
 
 ## Cleanup
 
-Delete k8s resources:
+Delete Kubernetes resources:
 ```bash
 kubectl delete -f local-queue.yaml
 kubectl delete -f cluster-queue.yaml
