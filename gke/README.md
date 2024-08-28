@@ -57,13 +57,9 @@ We search all `*.yaml` files in this `gke` folder recursively for any of the out
 
 ## Uninstalling Kueue
 
-To uninstall queue, run this command:
-
-> **NOTE:** Make sure you use the same version as the one you installed.
+To uninstall queue, run this Skaffold command:
 
 ```bash
-VERSION=v0.8.0
-kubectl delete -f \
-  https://github.com/kubernetes-sigs/kueue/releases/download/$VERSION/manifests.yaml
+skaffold delete -m kueue-install
 ```
 
