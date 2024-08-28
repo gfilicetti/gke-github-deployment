@@ -2,7 +2,7 @@
 
 ## Why [Kueue](https://kueue.sigs.k8s.io/docs/overview/)?
 
-You can install Kueue on top of a vanilla Kubernetes cluster. Kueue does not replace any existing Kubernetes components. Kueue is compatible with cloud environments where:
+You can install Kueue on top of a vanilla Kubernetes cluster. Kueue does not replace any existing Kubernetes components. Kueue is compatible with cloud environments.
 
 Kueue APIs allow you to express:
 - Quotas and policies for fair sharing among tenants.
@@ -24,7 +24,7 @@ Kueue has built-in support for popular jobs:
   - Run this `gcloud` command to setup your credentials:
   
     ```bash
-    gcloud containers clusters get-credentials gke-gcp-test 
+    gcloud container clusters get-credentials gke-gcp-test --region us-central1
     ```
 
 3. Install Kueue using [these instructions](../../README.md).
@@ -36,7 +36,7 @@ Kueue has built-in support for popular jobs:
 Please apply all of these Kubernetes manifests using the command line given
 
 | File Name | Description | Command Line |
-|---|---|---|---|
+|---|---|---|
 | [jobs-namespace-sa.yaml](./jobs-namespace-sa.yaml) | Create NS and SA. | `kubectl apply -f jobs-namespace-sa.yaml` |
 | [cluster-queue.yaml](./cluster-queue.yaml) | Cluster queue and resource quota. | `kubectl apply -f cluster-queue.yaml` |
 | [local-queue.yaml](./local-queue.yaml) | Local queue for different teams. | `kubectl apply -f local-queue.yaml` |
@@ -52,7 +52,7 @@ kubectl create -f job-kueue-example-1.yaml
 
 For status output, use:
 ```bash
-kubectl -n jobs get localqueues,clusterqueue,jobs,workloads
+kubectl -n jobs get localqueues,clusterqueue,jobs,workloads,pods
 ```
 
 Use this command to get resource allocation status:
@@ -86,33 +86,33 @@ For status output, use:
 kubectl -n jobs get localqueues,clusterqueue,jobs,workloads,pods
 ```
 
-### Sharing Resources [Cohort](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/#cohort)
+### Sharing Resources With [Cohorts](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/#cohort)
 
 1. Go to the [cluster-queue.yaml](./cluster-queue.yaml) file and enable the cohort "team-ab"
-   1. Remove the `#` from this line `# cohort: "team-ab"`
-   2. Repeat that for the `cluster-queue-a` and `cluster-queue-b`
-   3. Apply the cluster-queue.yaml
-   4. `kubectl get clusterqueue` to see the cohort creation
+    1. Remove the `#` from this line `# cohort: "team-ab"`
+    2. Repeat that for the `cluster-queue-a` and `cluster-queue-b`
+    3. Apply the cluster-queue.yaml:
+      ```bash
+      kubectl apply -f cluster-queue.yaml
+      ```
+    4. Now check the Cluster Queues to see the cohort creation:
+      ```bash
+      kubectl get clusterqueue
+      ```
 2. Once again, run 10 replicas of the last job. You can see that we borrowed resources from `cluster-queue-b`
+
   ```bash
   for i in {1..10}; do kubectl create -f job-kueue-example-2.yaml; done
   ```
 
-Take another look at the [cluster-queue.yaml](./cluster-queue.yaml), we can also use extra parameters like `borrowingLimit` and `lendingLimit` to have more control over our resource allocation.
+Take another look at [cluster-queue.yaml](./cluster-queue.yaml). We can also use extra parameters like `borrowingLimit` and `lendingLimit` to have more control over our resource allocation.
 
 ## Cleanup
 
-Delete k8s resources:
+Delete Kubernetes resources:
 ```bash
 kubectl delete -f local-queue.yaml
 kubectl delete -f cluster-queue.yaml
 kubectl delete -f resource-flavor.yaml
 ```
 
-Uninstall Kueue
-
-```
-VERSION=v0.8.0
-kubectl delete -f \
-  https://github.com/kubernetes-sigs/kueue/releases/download/$VERSION/manifests.yaml
-```
