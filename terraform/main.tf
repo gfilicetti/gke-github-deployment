@@ -11,6 +11,8 @@ locals {
     "pubsub",
     "storage",
     "transcoder",
+    "bigquerydatatransfer",
+    "bigquery"
   ]
   service_accounts_default = {
     cloudbuild   = "${local.project.number}@cloudbuild.gserviceaccount.com"
@@ -18,6 +20,7 @@ locals {
     pubsub       = "service-${local.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
     compute      = data.google_compute_default_service_account.default.email
     storage      = data.google_storage_project_service_account.default.email_address
+    bigquerydatatransfer       = "service-${local.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
   }
   service_account_cloud_services = (
     "${local.project.number}@cloudservices.gserviceaccount.com"
