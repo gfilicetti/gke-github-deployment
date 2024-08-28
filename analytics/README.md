@@ -2,6 +2,36 @@
 
 > TODO(alanpoole): diagram
 
+# Configuring BQ resources
+The folklowing steps will walk you through the process of setting up Big Query data set, tables, connection, view, and scheduled queries.
+
+1. Navigate to the scripts directory
+
+    ```bash
+    cd ./scripts
+    ```
+    
+2. Copy the .env.example file to create a .env file.
+
+    ```
+    # Copy the .env.example file to create a .env file.
+    cp .env.example .env
+    ```
+
+3. Edit the variables within the .env file based on your GCP project values and naming conventions.
+
+4. Set the env variables
+
+    ```
+    . .env
+    ```
+
+5. Run the (setup-bq.sh)[./setup-bq.sh] script.
+
+    ```
+    ./setup.sh
+    ```
+
 # Dataset Overview
 ![overview of bq assets](../docs/img/bq-dataset-assets.png)
 

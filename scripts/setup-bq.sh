@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# SET ENV Variables
-PROJECT_ID=$(gcloud config get-value project)
-CUSTOMER_ID="gcp"
-GCP_REGION="us-central1"
-SOURCE_GCS="gcs-gke-github-gcp-test-input"
-OUTPUT_GCS="gcs-gke-github-gcp-test-output"
-
-
 #Create BQ Dataset
 bq --location=$GCP_REGION mk \
     --dataset \
@@ -40,7 +32,7 @@ bq mk \
 bq mk \
 --connection \
 --location=$GCP_REGION \
-    --connection_type=CLOUD_RESOURCE "bq-biglake-gcp-resources-script"
+    --connection_type=CLOUD_RESOURCE "bq-biglake-gcp-resources"
 
 # Create a BigQuery object table with manual metadata caching.
 bq mkdef --connection_id=$PROJECT_ID.$GCP_REGION.bq-biglake-gcp-resources-script \

@@ -98,3 +98,6 @@ Instructions for setting up Kueue in your environment can be [found here](./exam
 For one-time or routine batch processing, the [Compute Engine Batch](https://cloud.google.com/batch/docs/create-run-job) service can be used to define a job template, setup quota, schedule 1-N jobs, clean up, and monitor/troubleshoot jobs as they run.
 
 Instructions for setting up Batch Compute Jobs in your environment can be [found here](./examples/batch-compute-jobs/README.md).
+
+## Big Query
+Instructions for setting up BQ resources can be [found here](./analytics/README.md)
