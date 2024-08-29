@@ -28,7 +28,12 @@ The following steps will walk you through setting up **Terraform** to provision 
 
 > __Note:__ The deployment of cloud resources can take between 5 - 10 minutes.
 
-> __Note:__ If you get the error: `Permission denied while using the Eventarc Service` you will need to run the 3 Terraform commands above (`init`, `plan`, `apply`) again and it will fix the EventArc error.
+> __Note:__ If you get the error: `Permission denied while using the Eventarc Service` you will need to run this Terraform command to fix the error:
+
+```bash
+terraform plan -out=out.tfplan
+terraform apply "out.tfplan"
+```
 
 ## Tearing Down Infrastructure
 

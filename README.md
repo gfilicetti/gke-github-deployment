@@ -32,8 +32,6 @@ We will be deploying a container image of a customized 'ffmpeg' build to a GKE A
 
 > __Note:__ Due to the need for potentially 15k+ nodes, configuration and deployment of multiple Autopilot clusters must be supported.
 
-Instructions for building container images can be [found here](./containers/README.md).
-
 ## Initializing up your Project
 
 1. First authenticate to Google Cloud:
@@ -92,7 +90,7 @@ Instructions for building container images can be [found here](./containers/READ
 
 Kueue is a Kubernetes-native system that manages job quotas by determining when jobs should wait, start, or be preempted.
 
-Instructions for setting up Kueue in your environment can be [found here](./examples/kueue/README.md).
+Instructions for running some Kueue examples can be [found here](./gke/kueue/examples/README.md).
 
 ## Batch Compute Jobs
 For one-time or routine batch processing, the [Compute Engine Batch](https://cloud.google.com/batch/docs/create-run-job) service can be used to define a job template, setup quota, schedule 1-N jobs, clean up, and monitor/troubleshoot jobs as they run.
