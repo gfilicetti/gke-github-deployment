@@ -34,8 +34,16 @@ bq mk \
 --location=$GCP_REGION \
     --connection_type=CLOUD_RESOURCE "bq-biglake-gcp-resources"
 
+# Get Connection service account ID
+SERVICE_ACCOUNT_ID=$(bq show --format prettyjson --connection $PROJECT_ID.$GCP_REGION.bq-biglake-gcp-resources | jq --raw-output .cloudResource.serviceAccountId)
+
+# Grant Storage bucket access to connection Service Account
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+--member=serviceAccount:$SERVICE_ACCOUNT_ID \
+--role=roles/storage.objectViewer
+
 # Create a BigQuery object table with manual metadata caching.
-bq mkdef --connection_id=$PROJECT_ID.$GCP_REGION.bq-biglake-gcp-resources-script \
+bq mkdef --connection_id=$PROJECT_ID.$GCP_REGION.bq-biglake-gcp-resources \
 --noautodetect \
 --object_metadata="SIMPLE" \
 --metadata_cache_mode="MANUAL" \
@@ -46,7 +54,7 @@ bq mk --table \
   "transcoder_jobs_$CUSTOMER_ID.gcs-objects-input"
 
 # Create a BigQuery object table with manual metadata caching.
-bq mkdef --connection_id=$PROJECT_ID.$GCP_REGION.bq-biglake-gcp-resources-script \
+bq mkdef --connection_id=$PROJECT_ID.$GCP_REGION.bq-biglake-gcp-resources \
 --noautodetect \
 --object_metadata="SIMPLE" \
 --metadata_cache_mode="MANUAL" \

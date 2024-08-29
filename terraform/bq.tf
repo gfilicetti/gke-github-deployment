@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "bigquery" {
+/*
+module "bigquery"{
   source       = "terraform-google-modules/bigquery/google"
   version      = "~> 8.1.0"
   dataset_id   = "transcoder_jobs_${var.customer_id}"
@@ -310,3 +311,4 @@ module "scheduled_queries" {
     google_project_iam_member.bq-scheduled-query-sa-iam,
   google_project_iam_member.bq-scheduled-query-sa-permission]
 }
+*/
