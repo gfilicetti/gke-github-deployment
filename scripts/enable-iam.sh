@@ -17,6 +17,7 @@ gcloud iam service-accounts create "${GH_ACTIONS_SA}" \
 for SUCCINCT_ROLE in \
     viewer \
     artifactregistry.admin \
+    bigquery.admin \
     cloudbuild.connectionAdmin \
     cloudbuild.builds.builder \
     clouddeploy.jobRunner \
@@ -27,6 +28,7 @@ for SUCCINCT_ROLE in \
     eventarc.developer \
     iam.serviceAccountAdmin \
     iam.serviceAccountUser \
+    logging.configWriter \
     pubsub.subscriber \
     resourcemanager.projectIamAdmin \
     run.developer \

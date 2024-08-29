@@ -18,7 +18,7 @@ module "bigquery" {
   dataset_id   = "transcoder_jobs_${var.customer_id}"
   dataset_name = "Transcoder Jobs Stats (${var.customer_id})"
   description  = "Each row of this table represents a Transcoder Job initiated by an upload to the Google Cloud Storage (GCS) bucket or by bulk upload in the Workflow UI."
-  project_id   = var.project_id
+  project_id   = local.project.id
   location     = var.region
   dataset_labels = {
     env = "transcoding"
@@ -34,6 +34,8 @@ resource "google_bigquery_table" "jobs" {
     env = "transcoding"
   }
 
+  deletion_protection=false
+
   depends_on = [
     module.bigquery
   ]
@@ -48,6 +50,8 @@ resource "google_bigquery_table" "gke-log-events" {
     env = "logs"
   }
 
+  deletion_protection=false
+
   depends_on = [
     module.bigquery
   ]
@@ -61,6 +65,8 @@ resource "google_bigquery_table" "batch-log-events" {
   labels = {
     env = "logs"
   }
+
+  deletion_protection=false
 
   depends_on = [
     module.bigquery
@@ -78,7 +84,6 @@ resource "google_bigquery_connection" "cloud_resource_connection" {
 
 # This defines a BigQuery object table with manual metadata caching.
 resource "google_bigquery_table" "gcs_objects_input" {
-  deletion_protection = false
   table_id            = "gcs-objects-input"
   dataset_id          = module.bigquery.bigquery_dataset.dataset_id
   external_data_configuration {
@@ -95,6 +100,8 @@ resource "google_bigquery_table" "gcs_objects_input" {
     metadata_cache_mode = "MANUAL"
   }
 
+  deletion_protection = false
+
   # This ensures that the connection can access the bucket
   # before Terraform creates a table.
   depends_on = [
@@ -103,7 +110,6 @@ resource "google_bigquery_table" "gcs_objects_input" {
 }
 
 resource "google_bigquery_table" "gcs_objects_output" {
-  deletion_protection = false
   table_id            = "gcs-objects-output"
   dataset_id          = module.bigquery.bigquery_dataset.dataset_id
   external_data_configuration {
@@ -119,6 +125,8 @@ resource "google_bigquery_table" "gcs_objects_output" {
 
     metadata_cache_mode = "MANUAL"
   }
+
+  deletion_protection = false
 
   # This ensures that the connection can access the bucket
   # before Terraform creates a table.
@@ -136,7 +144,7 @@ resource "google_bigquery_table" "job-stats-summary" {
     use_legacy_sql = false
     query          = <<EOF
     # Query that combines Job stats information with GCS object metadata and transcoding backend logs.
-    SELECT 
+    SELECT
       j.JobId,
       j.createdDateTime,
       j.BackendSrv,
@@ -152,7 +160,7 @@ resource "google_bigquery_table" "job-stats-summary" {
       )) AS output_files,
       ARRAY_CONCAT(IFNULL(gke_events.Events, []), IFNULL(batch_events.Events, [])) AS Events
     FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS j
-    LEFT JOIN `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gcs_objects_input.table_id}` AS input 
+    LEFT JOIN `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gcs_objects_input.table_id}` AS input
       ON j.FileURI = input.URI
     LEFT JOIN (
       SELECT
@@ -169,14 +177,14 @@ resource "google_bigquery_table" "job-stats-summary" {
       AND output.URI_PARTS[SAFE_OFFSET(3)] = j.BackendSrv
       AND output.URI_PARTS[SAFE_OFFSET(4)] = j.JobId
     LEFT JOIN (
-      SELECT 
+      SELECT
         JobId,
         ARRAY_AGG(STRUCT(LogName, Status, TimeStamp) IGNORE NULLS) AS Events
       FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}`
       GROUP BY JobId
     ) AS gke_events USING(JobId)
     LEFT JOIN (
-      SELECT 
+      SELECT
         JobId,
         ARRAY_AGG(STRUCT(LogName, Status, TimeStamp) IGNORE NULLS) AS Events
       FROM `${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}`
@@ -186,6 +194,8 @@ resource "google_bigquery_table" "job-stats-summary" {
       ALL
     EOF
   }
+
+  deletion_protection = false
 
   depends_on = [
     google_bigquery_table.jobs,
@@ -199,7 +209,7 @@ module "scheduled_queries" {
   source  = "terraform-google-modules/bigquery/google//modules/scheduled_queries"
   version = "~> 8.1.0"
 
-  project_id = var.project_id
+  project_id = local.project.id
 
   queries = [
     {
@@ -217,14 +227,14 @@ module "scheduled_queries" {
         # write_disposition = "WRITE_APPEND"
         query = <<EOF
           INSERT INTO
-            `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}` (
+            `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}` (
             SELECT
               jobs.JobId,
               e.LogName,
               e.Status,
               e.Timestamp
             FROM
-              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS jobs
+              `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS jobs
             INNER JOIN (
               SELECT
                 SPLIT(REPLACE(jsonPayload.metadata.name, "transcoding-", ""), '.')[SAFE_OFFSET(0)] AS JobId,
@@ -233,7 +243,7 @@ module "scheduled_queries" {
                 PARSE_TIMESTAMP("%Y-%m-%dT%H:%M:%SZ", jsonPayload.lasttimestamp) AS Timestamp
               FROM
                 # Log Sink export: events
-                `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.events`
+                `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.events`
               WHERE
                 TIMESTAMP_TRUNC(timestamp, DAY) = TIMESTAMP(CURRENT_DATE())
                 AND jsonPayload.source.component = 'job-controller'
@@ -242,7 +252,7 @@ module "scheduled_queries" {
             USING
               (JobId)
             LEFT JOIN
-              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}` AS existing_e
+              `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.gke-log-events.table_id}` AS existing_e
             USING
               (JobId,
                 LogName,
@@ -268,14 +278,14 @@ module "scheduled_queries" {
         # write_disposition = "WRITE_APPEND"
         query = <<EOF
           INSERT INTO
-            `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}` (
+            `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}` (
             SELECT
               jobs.JobId,
               e.LogName,
               e.Status,
               e.Timestamp
             FROM
-              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS jobs
+              `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.jobs.table_id}` AS jobs
             INNER JOIN (
               SELECT
                 labels.workflows_googleapis_com_execution_id AS JobId,
@@ -283,7 +293,7 @@ module "scheduled_queries" {
                 jsonpayload_type_executionssystemlog.state AS Status,
                 timestamp AS TimeStamp
               FROM
-                `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.workflows_googleapis_com_executions_system`
+                `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.workflows_googleapis_com_executions_system`
               WHERE
                 TIMESTAMP_TRUNC(timestamp, DAY) = TIMESTAMP(CURRENT_DATE())
                 AND resource.type = 'workflows.googleapis.com/Workflow'
@@ -292,7 +302,7 @@ module "scheduled_queries" {
             USING
               (JobId)
             LEFT JOIN
-              `${var.project_id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}` AS existing_e
+              `${local.project.id}.${module.bigquery.bigquery_dataset.dataset_id}.${google_bigquery_table.batch-log-events.table_id}` AS existing_e
             USING
               (JobId,
                 LogName,
@@ -306,7 +316,7 @@ module "scheduled_queries" {
   ]
 
   depends_on = [
-    google_service_account.sa_bq_scheduled,
-    google_project_iam_member.bq-scheduled-query-sa-iam,
-  google_project_iam_member.bq-scheduled-query-sa-permission]
+    module.member_roles_bq_scheduled,
+    module.member_roles_bigquerydatatransfer_service_account
+  ]
 }
