@@ -343,7 +343,7 @@
                 namespace: ${GKE_NAMESPACE}
                 project: ${PROJECT}
                 location: ${LOCATION}
-                job: ${request.args.job}
+                job: ${request.job}
             result: gkejob
         - result:
             return: 
