@@ -198,3 +198,45 @@ bq query \
             TimeStamp)
         WHERE
             existing_e.TimeStamp IS NULL)'
+
+#Create logging sink for Logs from Google Kubernetes Engine (GKE)
+gcloud logging sinks create bq-log-sink-gke-events\
+ bigquery.googleapis.com/projects/${PROJECT_ID}/datasets/transcoder_jobs_${CUSTOMER_ID} \
+  --log-filter='resource.type="k8s_cluster" AND resource.labels.cluster_name="'${GKE_CLUSTER_NAME}'" AND logName="projects/'${PROJECT_ID}'/logs/events"' \
+  --use-partitioned-tables
+
+# Get service account ID
+GKE_SINK_MEMBER=$(gcloud logging sinks describe bq-log-sink-gke-events --format json | jq .writerIdentity --raw-output)
+
+# Grant BQ access to the sink
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+--member=$GKE_SINK_MEMBER \
+--role=roles/bigquery.dataEditor
+
+#Create logging sink for Logs from Managed Workflows
+gcloud logging sinks create bq-log-sink-workflow-events\
+ bigquery.googleapis.com/projects/${PROJECT_ID}/datasets/transcoder_jobs_${CUSTOMER_ID} \
+  --log-filter='logName="projects/'${PROJECT_ID}'/logs/workflows.googleapis.com%2Fexecutions_system"' \
+  --use-partitioned-tables
+
+# Get service account ID
+WORKFLOW_SINK_MEMBER=$(gcloud logging sinks describe bq-log-sink-workflow-events --format json | jq .writerIdentity --raw-output)
+
+# Grant Storage bucket access to connection Service Account
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+--member=$WORKFLOW_SINK_MEMBER \
+--role=roles/bigquery.dataEditor
+
+#Create logging sink for Logs from Batch Jobs Event Logs
+gcloud logging sinks create bq-log-sink-batch-events\
+ bigquery.googleapis.com/projects/${PROJECT_ID}/datasets/transcoder_jobs_${CUSTOMER_ID} \
+  --log-filter='logName="projects/'${PROJECT_ID}'/logs/batch_task_logs" OR "projects/'${PROJECT_ID}'/logs/batch_agent_logs"' \
+  --use-partitioned-tables
+
+# Get service account ID
+BATCH_SINK_MEMBER=$(gcloud logging sinks describe bq-log-sink-batch-events --format json | jq .writerIdentity --raw-output)
+
+# Grant BQ access to sink
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+--member=$BATCH_SINK_MEMBER \
+--role=roles/bigquery.dataEditor

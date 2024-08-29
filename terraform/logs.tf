@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # Logs from Google Kubernetes Engine (GKE)
+/*
 resource "google_logging_project_sink" "bq-log-sink-gke-events" {
   name = "bq-log-sink-gke-events"
 
@@ -65,3 +66,4 @@ resource "google_logging_project_sink" "bq-log-sink-batch-events" {
   # Use a unique writer (creates a unique service account used for writing)
   unique_writer_identity = true
 }
+*/
