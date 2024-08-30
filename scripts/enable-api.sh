@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Enable IAM permissions for default service accounts for GKE and Cloud Build
-PROJECT_ID=$(gcloud config get-value project)
+# Source environment variables from .env file (see scripts/setup-env.sh)
+source .env
 
 # Enable all the APIs needed in our demos
 for GOOGLE_CLOUD_API in \
@@ -28,6 +28,6 @@ for GOOGLE_CLOUD_API in \
   workflows.googleapis.com \
   workflowexecutions.googleapis.com \
     ; do
-  gcloud services enable --project ${PROJECT_ID} \
+  gcloud services enable --project ${GCP_PROJECT_ID} \
     ${GOOGLE_CLOUD_API}
 done

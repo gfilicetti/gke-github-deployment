@@ -12,6 +12,8 @@ jobs:
       id-token: 'write'
     env:
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_CUSTOMER_ID: ${{ vars.GCP_CUSTOMER_ID }}
+      GCP_LOCATION: ${{ vars.GCP_LOCATION }}
       GCP_WI_PROVIDER_ID: ${{ vars.GCP_WI_PROVIDER_ID }}
     defaults:
       run:
@@ -53,8 +55,8 @@ jobs:
           terraform plan \
             -out=out.tfplan \
             -var "project_id=${{ env.GCP_PROJECT_ID }}" \
-            -var "customer_id=gcp" \
-            -var "region=us-central1" \
+            -var "customer_id=${{ env.GCP_CUSTOMER_ID }}" \
+            -var "region=${{ env.GCP_LOCATION }}" \
             -var "job_namespace=jobs"
         continue-on-error: true
 

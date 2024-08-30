@@ -22,6 +22,8 @@ provider "kubernetes" {
 }
 
 module "gke" {
+  count = var.transcoding_method.enable_gke_jobs == true ? 1 : 0
+
   deletion_protection        = false
   source                     = "terraform-google-modules/kubernetes-engine/google//modules/beta-autopilot-private-cluster"
   version                    = "32.0.0"

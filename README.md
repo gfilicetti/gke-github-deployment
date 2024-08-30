@@ -15,6 +15,7 @@ It includes working examples of:
 ![High level architecture](docs/img/architecture-diagram.png "High level architecture")
 
 ## Technology Used
+- [GitHub CLI](https://github.com/cli/cli#installation)
 - [Terraform](https://www.terraform.io/downloads.html)
 - [Artifact Registry](https://cloud.google.com/artifact-registry/docs)
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -65,6 +66,23 @@ We will be deploying a container image of a customized 'ffmpeg' build to a GKE A
   ```bash
   sh ./scripts/enable-api.sh
   ```
+
+6. Finally, setup your unique `.env` variables to be used throughout the setup
+process
+
+  ```bash
+  sh ./scripts/setup-env.sh
+  ```
+
+During this step you will be prompted for a couple inputs relative to your unique project. Most
+inputs will contain defaults that might already be set, in which case go ahead and press [ENTER]
+to accept and continue.
+
+1. The GitHub username/organization. This is the value used above when you cloned your fork.
+2. The name of the GitHub repository, by default this is set to `gke-github-deployment`.
+3. Your unique Google Cloud project ID.
+4. Defaut region location for Google Cloud setup.
+5. A short (3-5 char) identifier for your cloud resources (e.g. gcp).
 
 ## (Optional) Setting up GitHub Actions
 

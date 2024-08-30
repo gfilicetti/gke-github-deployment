@@ -1,19 +1,9 @@
 #!/bin/bash
 
-# Enable IAM permissions for default service accounts for GKE and Cloud Build
-PROJECT_ID=$(gcloud config get-value project)
+# Source environment variables from .env file (see scripts/setup-env.sh)
+source .env
 
-# Fetch Project Number from Project ID:
-PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
-
-# GitHub Actions SA:
-GH_ACTIONS_SA="sa-tf-gh-actions"
-
-# 1. Create a Google Cloud Service Account.
-gcloud iam service-accounts create "${GH_ACTIONS_SA}" \
-  --project "${PROJECT_ID}"
-
-# 2. Add roles to Google Cloud Service Account.
+# Add roles to Google Cloud Service Account.
 for SUCCINCT_ROLE in \
     viewer \
     artifactregistry.admin \
@@ -37,8 +27,10 @@ for SUCCINCT_ROLE in \
     storage.objectAdmin \
     workflows.editor \
     ; do
-  gcloud projects add-iam-policy-binding \
-    --member="serviceAccount:${GH_ACTIONS_SA}@${PROJECT_ID}.iam.gserviceaccount.com" \
-    --role "roles/$SUCCINCT_ROLE" "$PROJECT_ID" \
+
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT_ID" \
+    --member="serviceAccount:${GCP_SA_GITHUB_ACTIONS}@${GCP_PROJECT_ID}.iam.gserviceaccount.com" \
+    --role "roles/$SUCCINCT_ROLE" \
     --condition=None
+
 done
