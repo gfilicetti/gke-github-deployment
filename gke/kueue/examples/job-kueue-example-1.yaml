@@ -36,6 +36,6 @@ spec:
         csi:
           driver: gcsfuse.csi.storage.gke.io
           volumeAttributes:
-            bucketName: <BUCKET NAME>
+            bucketName: output_bucket
       restartPolicy: Never
   backoffLimit: 1

@@ -3,18 +3,18 @@ This repository is a full example of a CI/CD pipeline using GitHub actions,
 terraform and other tech to create and deploy workloads to a GKE Autopilot
 installation.
 
-It includes working examples of: 
+It includes working examples of:
   - Terraform scripts for Google Cloud provisioning
   - GitHub actions for Google Cloud CI/CD pipelines
   - Building an ffmpeg container using Cloud Build
-  - Using Kueue for Kubernetes Job management 
+  - Using Kueue for Kubernetes Job management
   - Google Cloud Workflows
   - GCSFuse for storage
 
 ## Architecture
 ![High level architecture](docs/img/architecture-diagram.png "High level architecture")
 
-## Technology Used 
+## Technology Used
 - [Terraform](https://www.terraform.io/downloads.html)
 - [Artifact Registry](https://cloud.google.com/artifact-registry/docs)
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -31,8 +31,6 @@ It includes working examples of:
 We will be deploying a container image of a customized 'ffmpeg' build to a GKE Autopilot Kubernetes cluster.
 
 > __Note:__ Due to the need for potentially 15k+ nodes, configuration and deployment of multiple Autopilot clusters must be supported.
-
-Instructions for building container images can be [found here](./containers/README.md).
 
 ## Initializing up your Project
 
@@ -68,6 +66,10 @@ Instructions for building container images can be [found here](./containers/READ
   sh ./scripts/enable-api.sh
   ```
 
+## (Optional) Setting up GitHub Actions
+
+Instructions for setting up and using GitHub Actions can be [found here](./github-actions/README.md).
+
 ## Provisioning Infrastructure
 
 There are 2 options for deployment:
@@ -80,10 +82,6 @@ There are 2 options for deployment:
 
 Instructions for setting up GKE can be [found here](./gke/README.md)
 
-## Setting up GitHub Actions
-
-Instructions for setting up and using GitHub Actions can be [found here](./github-actions/README.md)
-
 ## Building Container Images
 
 Instructions for building container images can be [found here](./containers/README.md).
@@ -92,7 +90,7 @@ Instructions for building container images can be [found here](./containers/READ
 
 Kueue is a Kubernetes-native system that manages job quotas by determining when jobs should wait, start, or be preempted.
 
-Instructions for setting up Kueue in your environment can be [found here](./examples/kueue/README.md).
+Instructions for running some Kueue examples can be [found here](./gke/kueue/examples/README.md).
 
 ## Batch Compute Jobs
 For one-time or routine batch processing, the [Compute Engine Batch](https://cloud.google.com/batch/docs/create-run-job) service can be used to define a job template, setup quota, schedule 1-N jobs, clean up, and monitor/troubleshoot jobs as they run.

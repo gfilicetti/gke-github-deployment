@@ -5,14 +5,14 @@ locals {
     number  = data.google_project.project.number
   }
   _services = [
+    "bigquery",
+    "bigquerydatatransfer",
     "cloudbuild",
     "compute",
     "eventarc",
     "pubsub",
     "storage",
-    "transcoder",
-    "bigquerydatatransfer",
-    "bigquery"
+    "transcoder"
   ]
   service_accounts_default = {
     cloudbuild   = "${local.project.number}@cloudbuild.gserviceaccount.com"
@@ -43,4 +43,12 @@ resource "google_project_service_identity" "service_identity" {
   provider   = google-beta
   project    = local.project.id
   service    = each.value
+}
+
+resource "time_sleep" "wait_for_service_agent_readiness" {
+  depends_on = [
+    google_project_service_identity.service_identity,
+  ]
+  # SLO for IAM provisioning of Service Agents is 7min.
+  create_duration = "420s"
 }

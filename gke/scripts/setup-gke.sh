@@ -43,6 +43,8 @@ TF_OUTPUT_JSON=`terraform output -json`
 TF_CLUSTER=`jq -r '.gke_name.value' <<< $TF_OUTPUT_JSON`
 TF_REGION=`jq -r '.region.value' <<< $TF_OUTPUT_JSON`
 TF_PROJECT=`jq -r '.project_id.value' <<< $TF_OUTPUT_JSON`
+TF_BUCKET_INPUT=`jq -r '.input_bucket.value' <<< $TF_OUTPUT_JSON`
+TF_BUCKET_OUTPUT=`jq -r '.output_bucket.value' <<< $TF_OUTPUT_JSON`
 
 # Get back into the GKE folder
 cd ../gke
