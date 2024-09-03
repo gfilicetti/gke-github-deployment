@@ -78,7 +78,7 @@ There are 2 options for deployment:
 
 2. Use a GitHub Action to run all the Terraform configuration files. [See instructions here.](./github-actions/README.md)
 
-## Setting up GKE
+## Setting up GKE and Kueue
 
 Instructions for setting up GKE can be [found here](./gke/README.md)
 
@@ -86,11 +86,17 @@ Instructions for setting up GKE can be [found here](./gke/README.md)
 
 Instructions for building container images can be [found here](./containers/README.md).
 
-## Kueue
+## Kueue Examples
 
 Kueue is a Kubernetes-native system that manages job quotas by determining when jobs should wait, start, or be preempted.
 
 Instructions for running some Kueue examples can be [found here](./gke/kueue/examples/README.md).
+
+## Google Cloud Workflows
+
+Workflows is a fully managed orchestration platform that executes services in an order that you define.
+
+Instructions for setting up Workflows and running transcoding jobs through it can be [found here](./workflows/README.md).
 
 ## Batch Compute Jobs
 For one-time or routine batch processing, the [Compute Engine Batch](https://cloud.google.com/batch/docs/create-run-job) service can be used to define a job template, setup quota, schedule 1-N jobs, clean up, and monitor/troubleshoot jobs as they run.
