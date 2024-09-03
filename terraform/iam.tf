@@ -53,19 +53,6 @@ resource "google_service_account_iam_binding" "sa_gke_cluster_wi_binding" {
   ]
 }
 
-/*
-# Logs Sink SA needs to be able to write to BigQuery
-resource "google_project_iam_binding" "bq-log-sink-writer" {
-  project = local.project.id
-  role    = "roles/bigquery.dataEditor"
-  members = [
-    google_logging_project_sink.bq-log-sink-gke-events.writer_identity,
-    google_logging_project_sink.bq-log-sink-workflow-events.writer_identity,
-    google_logging_project_sink.bq-log-sink-batch-events.writer_identity
-  ]
-}
-*/
-
 ##########################################################
 ###### 3.a) MEMBER ROLES - Created Service Accounts ######
 ##########################################################
@@ -243,30 +230,4 @@ module "member_roles_bigquerydatatransfer_service_account" {
   ]
 
   depends_on = [google_project_service_identity.service_identity]
-}
-
-/*
-# BigQuery Connection to Google Cloud Storage (GCS) using SA
-# TODO: What Service Account is this?
-resource "google_project_iam_member" "bigquery_sa_objects" {
-  role    = "roles/storage.objectViewer"
-  project = local.project.id
-  member  = "serviceAccount:${resource.google_bigquery_connection.cloud_resource_connection.cloud_resource[0].service_account_id}"
-}
-*/
-
-# grant bigquery admin role to the service account so that scheduled query can run
-resource "google_project_iam_member" "bq-scheduled-query-sa-iam" {
-  project = var.project_id
-  role    = "roles/bigquery.admin"
-  member  = "serviceAccount:${google_service_account.sa_bq_scheduled.email}"
-  depends_on = [
-    google_service_account.sa_bq_scheduled
-  ]
-}
-
-resource "google_project_iam_member" "bq-scheduled-query-sa-permission" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountShortTermTokenMinter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }

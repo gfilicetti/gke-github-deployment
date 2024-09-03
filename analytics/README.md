@@ -3,7 +3,7 @@
 > TODO(alanpoole): diagram
 
 # Configuring BQ resources
-The folklowing steps will walk you through the process of setting up Big Query data set, tables, connection, view, and scheduled queries.
+The following steps will walk you through the process of setting up Big Query data set, tables, connection, view, and scheduled queries.
 
 1. Navigate to the scripts directory
 
