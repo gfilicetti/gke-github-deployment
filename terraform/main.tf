@@ -5,21 +5,22 @@ locals {
     number  = data.google_project.project.number
   }
   _services = [
+    "bigquery",
     "bigquerydatatransfer",
     "cloudbuild",
     "compute",
     "eventarc",
     "pubsub",
     "storage",
-    "transcoder",
+    "transcoder"
   ]
   service_accounts_default = {
-    cloudbuild           = "${local.project.number}@cloudbuild.gserviceaccount.com"
-    bigquerydatatransfer = "service-${local.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-    transcoder           = "service-${local.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
-    pubsub               = "service-${local.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-    compute              = data.google_compute_default_service_account.default.email
-    storage              = data.google_storage_project_service_account.default.email_address
+    cloudbuild   = "${local.project.number}@cloudbuild.gserviceaccount.com"
+    transcoder   = "service-${local.project.number}@gcp-sa-transcoder.iam.gserviceaccount.com"
+    pubsub       = "service-${local.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+    compute      = data.google_compute_default_service_account.default.email
+    storage      = data.google_storage_project_service_account.default.email_address
+    bigquerydatatransfer       = "service-${local.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
   }
   service_account_cloud_services = (
     "${local.project.number}@cloudservices.gserviceaccount.com"

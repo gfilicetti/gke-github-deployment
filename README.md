@@ -98,6 +98,9 @@ Workflows is a fully managed orchestration platform that executes services in an
 
 Instructions for setting up Workflows and running transcoding jobs through it can be [found here](./workflows/README.md).
 
+## Big Query
+Instructions for setting up BQ resources can be [found here](./analytics/README.md)
+
 ## Batch Compute Jobs
 For one-time or routine batch processing, the [Compute Engine Batch](https://cloud.google.com/batch/docs/create-run-job) service can be used to define a job template, setup quota, schedule 1-N jobs, clean up, and monitor/troubleshoot jobs as they run.
 
