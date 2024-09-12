@@ -7,7 +7,7 @@ spec:
   # cohort: "team-ab"
   queueingStrategy: BestEffortFIFO # Default queueing strategy
   resourceGroups:
-  - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage"]
+  - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage", "cloud.google.com/pod-slots"]
     flavors:
     - name: "default-flavor"
       resources:
@@ -20,6 +20,8 @@ spec:
         nominalQuota: 10
       - name: "ephemeral-storage"
         nominalQuota: 10Gi
+      - name: "cloud.google.com/pod-slots"
+        nominalQuota: 100
 ---
 apiVersion: kueue.x-k8s.io/v1beta1
 kind: ClusterQueue
@@ -30,7 +32,7 @@ spec:
   # cohort: "team-ab"
   queueingStrategy: BestEffortFIFO # Default queueing strategy
   resourceGroups:
-  - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage"]
+  - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage", "cloud.google.com/pod-slots"]
     flavors:
     - name: "default-flavor"
       resources:
@@ -43,3 +45,5 @@ spec:
         nominalQuota: 10
       - name: "ephemeral-storage"
         nominalQuota: 500Gi
+      - name: "cloud.google.com/pod-slots"
+        nominalQuota: 1000

@@ -293,12 +293,23 @@
                         kueue.x-k8s.io/queue-name: lq-team-b
                         # kueue.x-k8s.io/priority-class: high-priority
                     spec:
+                      ttlSecondsAfterFinished: 60
                       template:
                         metadata:
                           annotations:
                             gke-gcsfuse/volumes: "true"
+                            gke-gcsfuse/cpu-limit: "2"
+                            gke-gcsfuse/memory-limit: 16Gi
+                            gke-gcsfuse/ephemeral-storage-limit: 100Gi
+                            gke-gcsfuse/cpu-request: 500m
+                            gke-gcsfuse/memory-request: 1Gi
+                            gke-gcsfuse/ephemeral-storage-request: 100Gi
                         spec:
                           serviceAccountName: k8s-sa-cluster
+                          nodeSelector:
+                            cloud.google.com/machine-family: n2
+                            cloud.google.com/compute-class: Performance
+                            # cloud.google.com/gke-ephemeral-storage-local-ssd: "true"
                           containers:
                           - name: transcoding
                             image: ${CONTAINER_IMAGE_URL}
@@ -322,18 +333,26 @@
                                 requests:
                                     cpu: 16
                                     memory: 64Gi
+                                    ephemeral-storage: 100Gi
+                                limits:
+                                    memory: 64Gi
+                                    ephemeral-storage: 100Gi  
                           volumes:
                           - name: gcs-fuse-input
                             csi:
                               driver: gcsfuse.csi.storage.gke.io
                               volumeAttributes:
                                 bucketName: "${BUCKET_NAME}"
+                                fileCacheCapacity: "-1"
+                                enable-parallel-downloads: "true"
                           - name: gcs-fuse-output
                             csi:
                               driver: gcsfuse.csi.storage.gke.io
                               volumeAttributes:
                                 bucketName: "${OUTPUT_BUCKET_NAME}"
                                 mountOptions: ${"only-dir=" + OUTPUT_PATH}
+                                fileCacheCapacity: "-1"
+                                enable-parallel-downloads: "true"
                           restartPolicy: Never
                       backoffLimit: 1
         - create_k8s_job:

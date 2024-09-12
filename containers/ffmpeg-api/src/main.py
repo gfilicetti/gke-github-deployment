@@ -22,6 +22,7 @@ import json
 import requests
 from typing import List
 
+
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -33,11 +34,11 @@ logging.basicConfig(
 tags_metadata = [
     {
         "name": "ffmpeg-api",
-        "description": "ffmeg-api",
+        "description": "ffmpeg-api rest requests",
     },
     {
-        "name": "mock",
-        "description": "fake ffmeg-api",
+        "name": "ffmpeg-event",
+        "description": "ffmpeg-event to receive events from eventarc + pub/sub",
     },
 ]
 
@@ -62,20 +63,14 @@ headers = {"Content-Type": "application/json"}
 
 class Payload_FileTranscode(BaseModel):
     file: str
-    # max_output_tokens: int | None = 1024
-    # temperature: float | None = 0.2
-    # top_p: float | None = 0.8
-    # top_k: int | None = 40
+    transcode_mode: str | None = "cpu"
 
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
-                    "file": "already inside the Bucket",
-                    # "max_output_tokens": 1024,
-                    # "temperature": 0.2,
-                    # "top_p": 0.8,
-                    # "top_k": 40,
+                    "file": "sample-file.mp4",
+                    "transcode_mode": "cpu",
                 }
             ]
         }
@@ -86,52 +81,22 @@ class Payload_FileTranscode(BaseModel):
 async def health_check():
     return {'status': 'ok'}
 
-
-# @app.post("/ffmpeg-api", tags=["ffmpeg-rest"])
-# def genai_text(payload: Payload_Text):
-#     try:
-#         request_payload = {
-#             'prompt': payload.prompt,
-#             'max_output_tokens': payload.max_output_tokens,
-#             'temperature': payload.temperature,
-#             'top_p': payload.top_p,
-#             'top_k': payload.top_k,
-#         }
-#         response = requests.post(f'{GENAI_TEXT_ENDPOINT}', headers=headers, json=request_payload)
-#         logging.debug(f'request_payload: {request_payload}')
-#         return json.loads(response.content)
-#     except Exception as e:
-#         logging.exception(f'At /genai/text. {e}')
-#         return JSONResponse(
-#             status_code=400,
-#             content={'status': 'exception calling endpoint'},
-#         )
-
 @app.post("/ffmpeg-api", tags=["ffmpeg-api"])
 def ffmpeg_api(payload: Payload_FileTranscode):
-    request_payload = {
-        'file': payload.file,
-        # 'from_id': payload.from_id,
-        # 'to_id': payload.to_id,
-        # 'debug': payload.debug
-    }
-    logging.debug(f'request_payload: {request_payload}')
-    os.system(f'export MEDIA={payload.file} && if ls -l /input/$MEDIA; then ./entrypoint-api.sh; else echo "$MEDIA not found"; fi')
-    return (f'File {request_payload} - OK')
-
-@app.post("/ffmpeg-api-mock", tags=["mock"])
-def ffmpeg_api_mock(payload: Payload_FileTranscode):
-    request_payload = {
-        'file': payload.file,
-        # 'from_id': payload.from_id,
-        # 'to_id': payload.to_id,
-        # 'debug': payload.debug
-    }
-    logging.debug(f'request_payload: {request_payload}')
-    print(request_payload)
-    return (request_payload)
-
-
+    try:
+        request_payload = {
+            'file': payload.file,
+            'transcode_mode': payload.transcode_mode,
+        }
+        logging.debug(f'request_payload: {request_payload}')
+        return os.popen(f'export MEDIA={payload.file} && export TRANSCODE_MODE={payload.transcode_mode} && if ls -l /input/$MEDIA; then ./entrypoint-api.sh; else echo "$MEDIA not found"; fi').read() 
+    
+    except Exception as e:
+        logging.debug(f'At /ffmpeg-api. {e}')
+        return JSONResponse(
+            status_code=400,
+            content={ 'status': 'excepction calling endpoint'}
+        )
 
 if __name__ == "__main__":
     import uvicorn

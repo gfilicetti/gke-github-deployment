@@ -10,7 +10,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 40%
-      maxUnavailable: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       name: ffmpeg-api
@@ -24,6 +24,10 @@ spec:
     spec:
       restartPolicy: Always
       serviceAccountName: k8s-sa-cluster
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        cloud.google.com/machine-family: n2
+        cloud.google.com/compute-class: Performance
       containers:
       - image: ffmpeg-api
         name: ffmpeg-api
@@ -32,45 +36,65 @@ spec:
         - name: http
           containerPort: 8080
           protocol: TCP
-        # readinessProbe:
-        #   httpGet:
-        #     path: /health
-        #     port: http-front
-        #   initialDelaySeconds: 5
-        #   periodSeconds: 5
-        # livenessProbe:
-        #   tcpSocket:
-        #     port: http-front
-        #   initialDelaySeconds: 5
-        #   periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /_healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
         env:
         - name: ENV
           value: dev
         # TODO: Update prior to deployment
         - name: INPUT_BUCKET
-          value: <INPUT_BUCKET>
+          value: not-in-use
         resources:
-          requests:
+          requests: ### CPU based transcoding: N2 custom shape: 36 vCPU, 72GB RAM, 100GB SSD
             cpu: 4 #16
             memory: 16Gi #64Gi
+            ephemeral-storage: 200Gi
           limits:
+            cpu: 4 #16
             memory: 16Gi #64Gi
+            ephemeral-storage: 200Gi
         volumeMounts:
-        - name: gcs-fuse-csi-input
+        - name: gcs-fuse-csi-gke-input
           mountPath: /input
+        - name: gcs-fuse-csi-gke-event-input
+          mountPath: /input-event
         - name: gcs-fuse-csi-output
           mountPath: /output
       volumes:
-      - name: gcs-fuse-csi-input
+      - name: gcs-fuse-csi-gke-input
         csi:
           driver: gcsfuse.csi.storage.gke.io
           volumeAttributes:
-            bucketName: <INPUT_BUCKET>
+            bucketName: gcs-testtest-431919-gcp-gke-input
+            fileCacheCapacity: "100Gi"
+            cache-dir: "/var/cache"
+            enable-parallel-downloads: "true"
+      - name: gcs-fuse-csi-gke-event-input
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: gcs-testtest-431919-gcp-gke-input
+            fileCacheCapacity: "100Gi"
+            cache-dir: "/var/cache"
+            enable-parallel-downloads: "true"
       - name: gcs-fuse-csi-output
         csi:
           driver: gcsfuse.csi.storage.gke.io
           volumeAttributes:
-            bucketName: <OUTPUT_BUCKET>
+            bucketName: gcs-testtest-431919-gcp-test-output
+            fileCacheCapacity: "100Gi"
+            cache-dir: "/var/cache"
+            enable-parallel-downloads: "true"
+
 ---
 apiVersion: v1
 kind: Service
@@ -78,6 +102,8 @@ metadata:
   labels:
     name: ffmpeg-api
   name: ffmpeg-api
+  # annotations:
+  #   networking.gke.io/load-balancer-type: "Internal"
 spec:
   ports:
   - name: http
