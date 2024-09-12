@@ -6,7 +6,7 @@ There are a number of ways to determine the efficiency of GPU-accelerated tasks 
 
 `nvidia-smi` is a built-in command that's installed when NVIDIA drivers are installed. Use the following flags to monitor encoder/decoder usage:
 
-```console
+```bash
 nvidia-smi dmon -s pucvmet
 ```
 The output looks like:
@@ -29,7 +29,7 @@ Note the `enc` and `dec` columns show NVENC and NVDEC usage, respectively.
 
 To watch encoder and decoder usage, use the following command:
 
-```console
+```bash
 gpustat -e -i
 ```
 
@@ -43,7 +43,7 @@ Note the `E` and `D` fields show NVENC and NVDEC usage, respectively.
 
 [NVIDIA Data Center GPU Manager](https://docs.nvidia.com/nsight-systems/InstallationGuide/index.html) (DCGM) is a suite of tools for managing and monitoring NVIDIA datacenter GPUs in cluster environments. You can install DCGM tools on a worker node for deeper insight into GPU utilization.
 
-```console
+```bash
 # Get a list of DCGM metrics
 dcgmi dmon -l | grep enc_stats
 
@@ -62,7 +62,7 @@ The output looks like:
 
 Once installed, you can capture profiling data by wrapping your ffmpeg script with the following command:
 
-```console
+```bash
 nsys profile --trace nvvideo [SCRIPT]
 ```
 

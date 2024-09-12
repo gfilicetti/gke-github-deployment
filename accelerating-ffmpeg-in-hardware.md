@@ -37,7 +37,7 @@ There are some other very specific settings at play, but to keep things simple, 
 
 This set of parameters was deemed "good enough" by WBD; they are reluctant to share their exact `ffmpeg` parameters as they consider it proprietary information. The command we used looks like this:
 
-```console
+```bash
 ffmpeg \
   -i $SOURCE \
   -c:v libx264 \
@@ -80,7 +80,7 @@ These parameters are unique to the CPU-only use case:
 ## Scenario 2: GPU
 Here we shift to hardware-accelerated transcoding, using a single NVIDIA L4 GPU. Because we have to use a different codec, some of the parameters have to change:
 
-```console
+```bash
 ffmpeg \
   -hwaccel cuda \
   -hwaccel_output_format cuda \
@@ -112,7 +112,7 @@ This senario is designed to test generating multiple transcodes from the same so
 
 In this example, we encode three different resolutions, their widths being 720, 1280, and 1920. The video height is determined using a calculation that maintains the original video's aspect ratio.
 
-```console
+```bash
 ffmpeg \
   -hwaccel cuda \
   -hwaccel_output_format cuda \

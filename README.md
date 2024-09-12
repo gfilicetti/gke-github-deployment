@@ -41,25 +41,25 @@ With respect to using ffmpeg for transcoding, we have done some research and doc
 
 1. First authenticate to Google Cloud:
 
-  ```console
+  ```bash
   gcloud auth application-default login
   ```
 
 2. Create a new project (skip this if you already have a project created):
 
-  ```console
+  ```bash
   gcloud projects create <your-project-id>
   ```
 
 3. Set the new project as your context for the `gcloud` CLI:
 
-  ```console
+  ```bash
   gcloud config set project <your-project-id>
   ```
 
 4. Check if your authentication is ok and your project id is set:
 
-  ```console
+  ```bash
   gcloud projects describe <your-project-id>
   ```
 
@@ -67,7 +67,7 @@ With respect to using ffmpeg for transcoding, we have done some research and doc
 
 5. Enable all the needed Google Cloud APIs by running this script:
 
-  ```console
+  ```bash
   sh ./scripts/enable-api.sh
   ```
 
