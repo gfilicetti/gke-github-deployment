@@ -26,13 +26,3 @@ variable "job_namespace" {
   type        = string
   default     = "jobs"
 }
-
-variable "transcoding_method" {
-  description = "Flags to enable specific installation methods"
-  type = map(bool)
-  default = {
-    "enable_gke_jobs"         = true
-    "enable_transcoding_api" = true
-    "enable_gce_batch"       = true
-  }
-}
