@@ -32,6 +32,11 @@ We will be deploying a container image of a customized 'ffmpeg' build to a GKE A
 
 > __Note:__ Due to the need for potentially 15k+ nodes, configuration and deployment of multiple Autopilot clusters must be supported.
 
+### Research and Documentation
+With respect to using ffmpeg for transcoding, we have done some research and documented the following areas of concern:
+- [ffmpeg + Hardware Acceleration](./accelerating-ffmpeg-in-hardware.md)
+- [Monitoring Transcoding Resource Usage](./monitoring-encoder-usage.md)
+
 ## Initializing up your Project
 
 1. First authenticate to Google Cloud:
