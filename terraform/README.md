@@ -4,21 +4,14 @@ This folder contains Terraform configuration files to provision the infrastructu
 ## Provisioning Infrastructure
 The following steps will walk you through setting up **Terraform** to provision infrastruction in Google Cloud.
 
-1. Create remote state for Terraform in Google Cloud Storage:
+1. Create remote state for Terraform in Google Cloud Storage and a Terraform tfvars file using
+your project id to create unique variable names:
 
     ```bash
-    sh ./scripts/setup-tfstate.sh
+    sh ./scripts/setup-tf.sh
     ```
 
-2. Create a Terraform tfvars file using your project id to create unique variable names:
-
-    ```bash
-    cd ./terraform
-    export PROJECT_ID=$(gcloud config get-value core/project)
-    cat terraform.tfvars.example | sed -e "s:your-unique-project-id:$PROJECT_ID:g" > terraform.tfvars
-    ```
-
-3. Deploy infrastructure with Terraform:
+2. Deploy infrastructure with Terraform:
 
     ```bash
     terraform init -backend-config="bucket=bkt-tfstate-${PROJECT_ID}"
