@@ -12,16 +12,16 @@ spec:
     - name: "default-flavor"
       resources:
       - name: "cpu"
-        nominalQuota: 10
+        nominalQuota: 32
         # borrowingLimit: 20
       - name: "memory"
-        nominalQuota: 10Gi
+        nominalQuota: 128Gi
       - name: "nvidia.com/gpu"
-        nominalQuota: 10
+        nominalQuota: 2
       - name: "ephemeral-storage"
-        nominalQuota: 10Gi
+        nominalQuota: 200Gi
       - name: "cloud.google.com/pod-slots"
-        nominalQuota: 100
+        nominalQuota: 10
 ---
 apiVersion: kueue.x-k8s.io/v1beta1
 kind: ClusterQueue
@@ -34,6 +34,19 @@ spec:
   resourceGroups:
   - coveredResources: ["cpu", "memory", "nvidia.com/gpu", "ephemeral-storage", "cloud.google.com/pod-slots"]
     flavors:
+    - name: "spot"
+      resources:
+      - name: "cpu"
+        nominalQuota: 160
+        # lendingLimit: 10
+      - name: "memory"
+        nominalQuota: 640Gi
+      - name: "nvidia.com/gpu"
+        nominalQuota: 10
+      - name: "ephemeral-storage"
+        nominalQuota: 1000Gi
+      - name: "cloud.google.com/pod-slots"
+        nominalQuota: 100
     - name: "default-flavor"
       resources:
       - name: "cpu"
@@ -46,4 +59,4 @@ spec:
       - name: "ephemeral-storage"
         nominalQuota: 500Gi
       - name: "cloud.google.com/pod-slots"
-        nominalQuota: 1000
+        nominalQuota: 100

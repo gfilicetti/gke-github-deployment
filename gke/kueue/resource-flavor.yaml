@@ -2,3 +2,19 @@ apiVersion: kueue.x-k8s.io/v1beta1
 kind: ResourceFlavor
 metadata:
   name: default-flavor # This ResourceFlavor will be used for all the resources
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: "spot"
+spec:
+  nodeLabels:
+    cloud.google.com/gke-spot: "true"
+  # nodeTaints:
+  # - effect: NoSchedule
+  #   key: spot
+  #   value: "true"
+  # tolerations:
+  # - key: "spot-taint"
+  #   operator: "Exists"
+  #   effect: "NoSchedule"
