@@ -47,3 +47,11 @@ requires:
   path: ./common/skaffold.yaml
 - configs: ["kueue-cfg"]
   path: ./kueue/skaffold.yaml
+---
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: ffmpeg-build
+requires:
+- configs: ["ffmpeg-build"]
+  path: ../containers/ffmpeg/skaffold.yaml

@@ -291,7 +291,7 @@
                       namespace: ${GKE_NAMESPACE}
                       annotations:
                         kueue.x-k8s.io/queue-name: lq-team-b
-                        # kueue.x-k8s.io/priority-class: high-priority
+                        kueue.x-k8s.io/priority-class: high-priority
                     spec:
                       ttlSecondsAfterFinished: 60
                       template:
@@ -304,11 +304,16 @@
                             gke-gcsfuse/cpu-request: 500m
                             gke-gcsfuse/memory-request: 1Gi
                             gke-gcsfuse/ephemeral-storage-request: 100Gi
+                            # cluster-autoscaler.kubernetes.io/safe-to-evict: "false"  #Not available for spot pods
                         spec:
                           serviceAccountName: k8s-sa-cluster
                           nodeSelector:
+                            ###N2 instances
                             cloud.google.com/machine-family: n2
                             cloud.google.com/compute-class: Performance
+                            ###L4 GPU nodes
+                            # cloud.google.com/compute-class: Accelerator
+                            # cloud.google.com/gke-accelerator: nvidia-l4
                             # cloud.google.com/gke-ephemeral-storage-local-ssd: "true"
                           containers:
                           - name: transcoding
@@ -334,9 +339,12 @@
                                     cpu: 16
                                     memory: 64Gi
                                     ephemeral-storage: 100Gi
+                                    # nvidia.com/gpu: "1"
                                 limits:
+                                    cpu: 16
                                     memory: 64Gi
-                                    ephemeral-storage: 100Gi  
+                                    ephemeral-storage: 100Gi
+                                    # nvidia.com/gpu: "1"
                           volumes:
                           - name: gcs-fuse-input
                             csi:
@@ -352,7 +360,6 @@
                                 bucketName: "${OUTPUT_BUCKET_NAME}"
                                 mountOptions: ${"only-dir=" + OUTPUT_PATH}
                                 fileCacheCapacity: "-1"
-                                enable-parallel-downloads: "true"
                           restartPolicy: Never
                       backoffLimit: 1
         - create_k8s_job:

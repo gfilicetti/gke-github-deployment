@@ -1,0 +1,331 @@
+{
+  "displayName": "Kueue overview",
+  "mosaicLayout": {
+    "columns": 48,
+    "tiles": [
+      {
+        "width": 9,
+        "height": 8,
+        "widget": {
+          "scorecard": {
+            "timeSeriesQuery": {
+              "prometheusQuery": "sum(rate(kueue_admission_attempts_total[60s]))",
+              "unitOverride": "",
+              "outputFullDuration": false
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [],
+            "dimensions": [],
+            "measures": []
+          },
+          "title": "Admissions /s",
+          "id": ""
+        }
+      },
+      {
+        "xPos": 9,
+        "width": 9,
+        "height": 8,
+        "widget": {
+          "scorecard": {
+            "timeSeriesQuery": {
+              "prometheusQuery": "sum(histogram_quantile(0.99, rate(kueue_admission_attempt_duration_seconds_bucket[60s]))>0)",
+              "unitOverride": "",
+              "outputFullDuration": false
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [],
+            "dimensions": [],
+            "measures": []
+          },
+          "title": "Admission latency [99th perc]",
+          "id": ""
+        }
+      },
+      {
+        "xPos": 18,
+        "width": 9,
+        "height": 8,
+        "widget": {
+          "scorecard": {
+            "timeSeriesQuery": {
+              "prometheusQuery": "sum(kueue_admitted_active_workloads)",
+              "unitOverride": "",
+              "outputFullDuration": false
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [],
+            "dimensions": [],
+            "measures": []
+          },
+          "title": "Active workloads",
+          "id": ""
+        }
+      },
+      {
+        "xPos": 27,
+        "width": 9,
+        "height": 8,
+        "widget": {
+          "scorecard": {
+            "timeSeriesQuery": {
+              "prometheusQuery": "sum(kueue_pending_workloads)",
+              "unitOverride": "",
+              "outputFullDuration": false
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [],
+            "dimensions": [],
+            "measures": []
+          },
+          "title": "Pending workloads",
+          "id": ""
+        }
+      },
+      {
+        "xPos": 18,
+        "yPos": 16,
+        "width": 18,
+        "height": 24,
+        "widget": {
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "prometheusQuery": "sum by(cluster_queue)(rate(kueue_admitted_workloads_total[${__interval}]))",
+                  "unitOverride": "",
+                  "outputFullDuration": false
+                },
+                "plotType": "LINE",
+                "legendTemplate": "",
+                "targetAxis": "Y1",
+                "dimensions": [],
+                "measures": [],
+                "breakdowns": []
+              }
+            ],
+            "thresholds": [],
+            "yAxis": {
+              "label": "",
+              "scale": "LINEAR"
+            },
+            "chartOptions": {
+              "mode": "COLOR",
+              "showLegend": false,
+              "displayHorizontal": false
+            }
+          },
+          "title": "Kueue Admitted Workloads Total",
+          "id": ""
+        }
+      },
+      {
+        "yPos": 8,
+        "width": 18,
+        "height": 16,
+        "widget": {
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "prometheusQuery": "sum by(cluster_queue)(kueue_admitted_active_workloads)",
+                  "unitOverride": "",
+                  "outputFullDuration": false
+                },
+                "plotType": "LINE",
+                "legendTemplate": "",
+                "targetAxis": "Y1",
+                "dimensions": [],
+                "measures": [],
+                "breakdowns": []
+              }
+            ],
+            "thresholds": [],
+            "yAxis": {
+              "label": "",
+              "scale": "LINEAR"
+            },
+            "chartOptions": {
+              "mode": "COLOR",
+              "showLegend": false,
+              "displayHorizontal": false
+            }
+          },
+          "title": "Active workloads per cluster queue",
+          "id": ""
+        }
+      },
+      {
+        "yPos": 24,
+        "width": 18,
+        "height": 16,
+        "widget": {
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "prometheusQuery": "sum by(cluster_queue)(kueue_pending_workloads)",
+                  "unitOverride": "",
+                  "outputFullDuration": false
+                },
+                "plotType": "LINE",
+                "legendTemplate": "",
+                "targetAxis": "Y1",
+                "dimensions": [],
+                "measures": [],
+                "breakdowns": []
+              }
+            ],
+            "thresholds": [],
+            "yAxis": {
+              "label": "",
+              "scale": "LINEAR"
+            },
+            "chartOptions": {
+              "mode": "COLOR",
+              "showLegend": false,
+              "displayHorizontal": false
+            }
+          },
+          "title": "Pending workloads per cluster queue",
+          "id": ""
+        }
+      },
+      {
+        "xPos": 27,
+        "yPos": 8,
+        "width": 9,
+        "height": 8,
+        "widget": {
+          "scorecard": {
+            "timeSeriesQuery": {
+              "timeSeriesQueryLanguage": "{ t_0:\nfetch k8s_container\n| metric 'kubernetes.io/container/memory/used_bytes'\n|  filter true() \n|  filter true() \n|  filter resource.namespace_name == 'jobs'\n| group_by 5m, [value_used_bytes_mean: mean(value.used_bytes)]\n| every 5m\n| group_by [],\n    [value_used_bytes_mean_aggregate: aggregate(value_used_bytes_mean)]\n\n   ; \n   t_1:\nfetch k8s_container\n| metric 'kubernetes.io/container/memory/request_bytes'\n|  filter true() \n|  filter true() \n|  filter resource.namespace_name == 'jobs' \n| group_by 5m, [value_request_bytes_mean: mean(value.request_bytes)]\n| every 5m\n| group_by [], [value_request_bytes_mean_aggregate: aggregate(value_request_bytes_mean)]}\n| join\n| window 5m\n| value\n   [v_0:\n      cast_units(\n        div(t_0.value_used_bytes_mean_aggregate,\n          t_1.value_request_bytes_mean_aggregate) * 100,\n        \"%\")]",
+              "unitOverride": "",
+              "outputFullDuration": false
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [],
+            "dimensions": [],
+            "measures": []
+          },
+          "title": "Memory Request utilization",
+          "id": ""
+        }
+      },
+      {
+        "yPos": 40,
+        "width": 36,
+        "height": 12,
+        "widget": {
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "prometheusQuery": "count(rate(kubernetes_io:pod_network_received_bytes_count{monitored_resource=\"k8s_pod\",namespace_name=\"jobs\"}[${__interval}]))",
+                  "unitOverride": "",
+                  "outputFullDuration": false
+                },
+                "plotType": "LINE",
+                "legendTemplate": "",
+                "targetAxis": "Y1",
+                "dimensions": [],
+                "measures": [],
+                "breakdowns": []
+              }
+            ],
+            "thresholds": [],
+            "yAxis": {
+              "label": "",
+              "scale": "LINEAR"
+            },
+            "chartOptions": {
+              "mode": "COLOR",
+              "showLegend": false,
+              "displayHorizontal": false
+            }
+          },
+          "title": "Total Pods at \"jobs\" namespace",
+          "id": ""
+        }
+      },
+      {
+        "yPos": 52,
+        "width": 48,
+        "height": 10,
+        "widget": {
+          "title": "Conversion info",
+          "text": {
+            "content": "Converted from kueue-dashboard.json on 2024-9-16 at 10:45:08\n\nFor conversion issues such as no data in charts or missing tiles, please see our [troubleshooting docs](https://github.com/GoogleCloudPlatform/monitoring-dashboard-samples/blob/master/scripts/dashboard-importer/README.md#conversion-issues)\n\n##### Generated Warnings\n\n- This dashboard contains collapsible groups that were not imported because the importer doesn't support their conversion. Tiles in collapsible groups will be unnested.",
+            "format": "MARKDOWN",
+            "style": {
+              "backgroundColor": "",
+              "textColor": "",
+              "horizontalAlignment": "H_LEFT",
+              "verticalAlignment": "V_TOP",
+              "padding": "PADDING_SIZE_UNSPECIFIED",
+              "fontSize": "FONT_SIZE_UNSPECIFIED",
+              "pointerLocation": "POINTER_LOCATION_UNSPECIFIED"
+            }
+          },
+          "id": ""
+        }
+      },
+      {
+        "xPos": 18,
+        "yPos": 8,
+        "width": 9,
+        "height": 8,
+        "widget": {
+          "scorecard": {
+            "timeSeriesQuery": {
+              "timeSeriesQueryLanguage": "{ t_0:\n   fetch k8s_container\n   | metric 'kubernetes.io/container/cpu/core_usage_time'\n|  filter true() \n|  filter true() \n|  filter resource.namespace_name == 'jobs'\n   | align rate(5m)\n   | every 5m\n   | group_by [], [value_core_usage_time_aggregate: aggregate(value.core_usage_time)]; \n   t_1:\nfetch k8s_container\n| metric 'kubernetes.io/container/cpu/request_cores'\n|  filter true() \n|  filter true() \n|  filter resource.namespace_name == 'jobs'\n| group_by 5m, [value_request_cores_mean: mean(value.request_cores)]\n| every 5m\n| group_by [],\n    [value_request_cores_mean_aggregate: aggregate(value_request_cores_mean)]}\n| join\n| window 5m\n| value\n   [v_0:\n      cast_units(\n        div(t_0.value_core_usage_time_aggregate,\n          t_1.value_request_cores_mean_aggregate) * 100,\n        \"%\")]",
+              "unitOverride": "",
+              "outputFullDuration": false
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [
+              {
+                "label": "",
+                "value": 90,
+                "color": "YELLOW",
+                "direction": "ABOVE",
+                "targetAxis": "TARGET_AXIS_UNSPECIFIED"
+              },
+              {
+                "label": "",
+                "value": 95,
+                "color": "RED",
+                "direction": "ABOVE",
+                "targetAxis": "TARGET_AXIS_UNSPECIFIED"
+              }
+            ],
+            "dimensions": [],
+            "measures": []
+          },
+          "title": "CPU Request utilization",
+          "id": ""
+        }
+      }
+    ]
+  },
+  "dashboardFilters": [],
+  "labels": {
+    "goog-imported-via-script": "",
+    "goog-imported-grafana-revision": "12",
+    "cloud-monitoring-dashboard-importer": "",
+    "goog-imported-grafana-dashboard-from-ui": "",
+    "goog-imported-grafana-dashboard": ""
+  }
+}

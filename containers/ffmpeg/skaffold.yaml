@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC All Rights Reserved.
+# Copyright 2024 Google LLC All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v4beta7
+apiVersion: skaffold/v3
 kind: Config
 metadata:
-  name: kueue-cfg
-manifests:
-  rawYaml:
-  - ./cluster-queue.yaml
-  - ./local-queue.yaml
-  - ./resource-flavor.yaml
-  - ./job-priority.yaml
-  - ./kueue-monitoring.yaml
-deploy:
-  # statusCheckDeadlineSeconds: 300
-  # tolerateFailuresUntilDeadline: true
-  kubectl: {}
+  name: ffmpeg-build
+build:
+  googleCloudBuild: {}
+  tagPolicy:
+    dateTime:
+      format: "2006-01-02_15-04-05.999_MST"
+      timezone: "Local"
+    # sha256: {}
+  artifacts:
+  - image: ffmpeg
+    context: .
