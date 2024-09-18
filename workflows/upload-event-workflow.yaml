@@ -291,7 +291,7 @@
                       namespace: ${GKE_NAMESPACE}
                       annotations:
                         kueue.x-k8s.io/queue-name: lq-team-b
-                        # kueue.x-k8s.io/priority-class: high-priority
+                        kueue.x-k8s.io/priority-class: high-priority
                     spec:
                       ttlSecondsAfterFinished: 60
                       template:

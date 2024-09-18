@@ -22,6 +22,7 @@ manifests:
   - ./local-queue.yaml
   - ./resource-flavor.yaml
   - ./job-priority.yaml
+  - ./kueue-monitoring.yaml
 deploy:
   # statusCheckDeadlineSeconds: 300
   # tolerateFailuresUntilDeadline: true
