@@ -27,7 +27,7 @@ This will create a new Service Account and give it all necessary roles.
 Run this script:
 
 ```bash
-sh ./scripts/enable-gh-actions.sh
+bash ./scripts/enable-gh-actions.sh
 ```
 
 Make note of the returned output from running this script. It will look like this:
@@ -53,7 +53,7 @@ You will need these values to finish setting up GitHub Actions.
 Run this script:
 
 ```bash
-sh ./scripts/enable-iam.sh
+bash ./scripts/enable-iam.sh
 ```
 
 ### Setup GitHub Actions In Your Fork
@@ -74,7 +74,7 @@ You should see two entries that look like this:
 0. (One time only) Create remote state for Terraform in Google Cloud Storage:
 
   ```bash
-  sh ./scripts/setup-tfstate.sh
+  bash ./scripts/setup-tfstate.sh
   ```
 
 1. Follow these steps to invoke the GitHub Action that will run terraform to provision our infrastructure.

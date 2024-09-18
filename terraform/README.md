@@ -8,7 +8,7 @@ The following steps will walk you through setting up **Terraform** to provision 
 your project id to create unique variable names:
 
     ```bash
-    sh ./scripts/setup-tf.sh
+    bash ./scripts/setup-tf.sh
     ```
 
 2. Deploy infrastructure with Terraform:

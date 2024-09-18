@@ -41,7 +41,7 @@ With respect to using ffmpeg for transcoding, we have done some research and doc
 - [ffmpeg + Hardware Acceleration](./accelerating-ffmpeg-in-hardware.md)
 - [Monitoring Transcoding Resource Usage](./monitoring-encoder-usage.md)
 
-## Initializing up your Project
+## Initializing Your Project
 
 1. First authenticate to Google Cloud:
 
@@ -72,14 +72,14 @@ With respect to using ffmpeg for transcoding, we have done some research and doc
 5. Enable all the needed Google Cloud APIs by running this script:
 
   ```bash
-  sh ./scripts/enable-api.sh
+  bash ./scripts/enable-api.sh
   ```
 
 6. Finally, setup your unique `.env` variables to be used throughout the setup
 process
 
   ```bash
-  sh ./scripts/setup-env.sh
+  bash ./scripts/setup-env.sh
   ```
 
 During this step you will be prompted for a couple inputs relative to your unique project. Most
