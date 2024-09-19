@@ -24,13 +24,12 @@ fi
 gh auth status > /dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo "gh: command found and logged into GitHub"
-  GH_AVAILABLE=1
+  GH_AVAILABLE=true
 fi
-
 
 # Obtain possible defaults of key environment variables:
 _GITHUB_REPO="gke-github-deployment"
-if [ $GH_AVAILABLE -eq 1 ]; then
+if [ $GH_AVAILABLE ]; then
   _GITHUB_ORG=$(gh repo view --json owner -q ".owner.login")
   _GITHUB_REPO=$(gh repo view --json name -q ".name")
 fi
@@ -56,7 +55,7 @@ GCP_CUSTOMER_ID="${GCP_CUSTOMER_ID:-`echo $_GCP_CUSTOMER_ID`}"
 gcloud config set project ${GCP_PROJECT_ID} 2> /dev/null
 gcloud config set compute/region ${GCP_LOCATION} 2> /dev/null
 
-if [ $GH_AVAILABLE -eq 1 ]; then
+if [ $GH_AVAILABLE ]; then
   gh repo set-default ${GITHUB_ORG}/${GITHUB_REPO}
 fi
 
