@@ -14,15 +14,17 @@ your project id to create unique variable names:
 2. Deploy infrastructure with Terraform:
 
     ```bash
-    cd terraform
-    terraform init -backend-config="bucket=bkt-tfstate-${PROJECT_ID}"
+    cd ./terraform
+    ```
+    ```bash
+    terraform init -backend-config="bucket=bkt-tfstate-$(gcloud config get project)"
     terraform plan -out=out.tfplan
     terraform apply "out.tfplan"
     ```
 
 > __Note:__ The deployment of cloud resources can take between 5 - 10 minutes.
 
-> __Note:__ If you get the error: `Permission denied while using the Eventarc Service` you will need to run this Terraform command to fix the error:
+> __Note:__ If you get the error: `Permission denied while using the Eventarc Service` you will need to run these Terraform commands to fix the error:
 
 ```bash
 terraform plan -out=out.tfplan

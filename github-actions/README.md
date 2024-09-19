@@ -6,7 +6,8 @@ This project has a number of examples of using Github Actions with Google Cloud,
 - Invoking Cloud Build to build our container for ffmpeg
 
 ## Setting up GitHub Actions for Google Cloud
-To setup GitHub Actions securely with our Google Cloud environment we will need to do a one time setup for Workload Identity federation through a Google Cloud service account. [More info here.](https://github.com/google-github-actions/auth?tab=readme-ov-file#workload-identity-federation-through-a-service-account)
+
+First we need to set up our GitHub environment to work with Google Cloud.
 
 ### Create a Fork
 
@@ -23,6 +24,7 @@ Setting up GitHub Actions for automated deployments with Terraform requires the 
 This will create a new Service Account and give it all necessary roles.
 
 ### Enable Workload Identity Federation
+To setup GitHub Actions securely with our Google Cloud environment we will need to do a one time setup for Workload Identity federation through a Google Cloud service account. [More info here](https://github.com/google-github-actions/auth?tab=readme-ov-file#workload-identity-federation-through-a-service-account).
 
 Run this script:
 
