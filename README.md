@@ -43,6 +43,12 @@ With respect to using ffmpeg for transcoding, we have done some research and doc
 
 ## Initializing Your Project
 
+These instructions walk you through setting up your environment for this project.
+
+You will need to clone this repository to the machine you want to use to set up your Google Cloud environment.
+
+> **Note:** We recommended using Google Cloud Shell instead of your local laptop. Cloud Shell has all the tooling you need already pre-installed.
+
 1. First authenticate to Google Cloud:
 
   ```bash

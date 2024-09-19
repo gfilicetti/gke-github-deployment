@@ -17,12 +17,23 @@
 if ! [ $(command -v gh) ]
 then
   echo "bash: gh: command not found"
-  echo "condsider installing gh cli at: https://github.com/cli/cli#installation"
+  echo "Consider installing gh cli at: https://github.com/cli/cli#installation"
 fi
 
+# figure out if we're logged into the gh CLI
+gh auth status > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo "gh: command found and logged into GitHub"
+  GH_AVAILABLE="true"
+fi
+
+
 # Obtain possible defaults of key environment variables:
-_GITHUB_ORG=$(gh repo view --json owner -q ".owner.login")
-_GITHUB_REPO=$(gh repo view --json name -q ".name")
+_GITHUB_REPO="gke-github-deployment"
+if [ $GH_AVAILABLE -eq "true" ]; then
+  _GITHUB_ORG=$(gh repo view --json owner -q ".owner.login")
+  _GITHUB_REPO=$(gh repo view --json name -q ".name")
+fi
 _GCP_SA_GITHUB_ACTIONS="sa-tf-gh-actions"
 _GCP_PROJECT_ID=$(gcloud config get-value project)
 _GCP_LOCATION=$(gcloud config get-value compute/region)
@@ -45,7 +56,9 @@ GCP_CUSTOMER_ID="${GCP_CUSTOMER_ID:-`echo $_GCP_CUSTOMER_ID`}"
 gcloud config set project ${GCP_PROJECT_ID} 2> /dev/null
 gcloud config set compute/region ${GCP_LOCATION} 2> /dev/null
 
-gh repo set-default ${GITHUB_ORG}/${GITHUB_REPO}
+if [ $GH_AVAILABLE -eq "true" ]; then
+  gh repo set-default ${GITHUB_ORG}/${GITHUB_REPO}
+fi
 
 GCLOUD_CONFIG=$(gcloud config list 2> /dev/null)
 
