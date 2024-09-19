@@ -96,4 +96,4 @@ Using the method above, run the: **Terraform DESTROY** GitHub action.
 
 You can use the **CloudBuild CI** GitHub action to build and push containers to Artifact Registry, where they will later be used to deploy to a container runtime environment like GKE.
 
-For more information on containers in this project, see their [README file](../containers/ffmpeg/README.md).
+For more information on containers in this project, see the containers [README file](../containers/README.md).
