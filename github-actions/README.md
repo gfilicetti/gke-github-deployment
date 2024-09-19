@@ -76,7 +76,7 @@ You should see two entries that look like this:
 0. (One time only) Create remote state for Terraform in Google Cloud Storage:
 
   ```bash
-  bash ./scripts/setup-tfstate.sh
+  bash ./scripts/setup-tf.sh
   ```
 
 1. Follow these steps to invoke the GitHub Action that will run terraform to provision our infrastructure.
