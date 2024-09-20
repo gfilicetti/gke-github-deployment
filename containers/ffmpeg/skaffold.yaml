@@ -15,7 +15,7 @@
 apiVersion: skaffold/v3
 kind: Config
 metadata:
-  name: ffmpeg-cfg
+  name: ffmpeg-build
 build:
   googleCloudBuild: {}
   tagPolicy:
