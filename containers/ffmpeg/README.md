@@ -8,6 +8,27 @@ Additionally, the [Intel Optimized FFmpeg](https://hub.docker.com/r/intel/intel-
 
 As an example, [entrypoint.sh](entrypoint.sh) is used to reference the command-line variable `MEDIA`, mount the `/input` and `/output` drives, and kick off the `ffmpeg` command.
 
+## Build, Test and Deploy with Cloud Build
+
+We have provided `cloudbuild.yaml` configuration file that will allow you to do the docker build on Google Cloud and have it automatically push to Artifact Registry.
+
+Run this `gcloud` command:
+
+```bash
+export PROJECT_ID=$(gcloud config get-value core/project)
+gcloud builds submit --config ./cloudbuild.yaml \
+  --region us-central1 \
+  --substitutions _PROJECT_ID=$PROJECT_ID
+```
+
+## Use It in a Job
+
+```bash
+ffmpeg-container-name --MEDIA="filename.mp4"
+```
+
+Reads from `/input` (a local disk, a Google Cloud Storage Bucket, etc) and outputs the results to `/output`.
+
 ## Build, Test and Deploy Locally
 
 ### Build the container
@@ -37,25 +58,5 @@ docker run ffmpeg-container-name:v1 ffmpeg -v
     ```bash
     docker push us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:v1
     ```
-
-## Build, Test and Deploy with Cloud Build
-
-We have provided `cloudbuild.yaml` configuration file that will allow you to do the docker build on Google Cloud and have it automatically push to Artifact Registry.
-
-Run this `gcloud` command:
-
-```bash
-gcloud builds submit --config ./cloudbuild.yaml \
---region us-central1 \
---substitutions _PROJECT_ID=$PROJECT_ID
-```
-
-## Use It in a Job
-
-```
-ffmpeg-container-name --MEDIA="filename.mp4"
-```
-
-Reads from `/input` (a local disk, a Google Cloud Storage Bucket, etc) and outputs the results to `/output`.
 
 
