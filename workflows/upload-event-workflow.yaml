@@ -386,7 +386,17 @@
                 location: ${LOCATION}
                 job: ${request.job}
             result: gkejob
+        - await_k8s_job:
+            call: gke.await_job
+            args: 
+                cluster_id: ${GKE_CLUSTER_NAME}
+                job_name: ${gkejob.metadata.name}
+                namespace: ${GKE_NAMESPACE}
+                project: ${PROJECT}
+                location: ${LOCATION}
+                timeout: 1000
+            result: gkefinishedjob
         - result:
             return: 
               request: ${request}
-              response: ${gkejob}
+              response: ${gkefinishedjob}
