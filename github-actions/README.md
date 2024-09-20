@@ -39,9 +39,9 @@ Make note of the returned output from running this script. It will look like thi
 
 GCP_SA_GITHUB_ACTIONS: sa-tf-gh-actions
 GCP_PROJECT_ID: <your-project-id>
-GCP_WI_PROVIDER_ID: <workload-id-provider-id>
 GCP_CUSTOMER_ID: <your-customer-id>
 GCP_LOCATION: <gcp-region>
+GCP_WI_PROVIDER_ID: <workload-id-provider-id>
 
 ----------------------------------------
 ```
@@ -87,6 +87,10 @@ You should see two entries that look like this:
     1. Click on the **Run workflow** green button
 
 ![Run Terraform deployment workflow](../docs/img/gh-actions-workflow-run.png)
+
+> __Note:__ The deployment of cloud resources can take between 5 - 10 minutes.
+
+> __Note:__ If you get the error: `Permission denied while using the Eventarc Service` you will need to run the **Terraform Deployment** GitHub Action again.
 
 ## Tearing Down Infrastructure with Terraform
 
