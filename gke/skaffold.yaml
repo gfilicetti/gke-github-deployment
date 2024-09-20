@@ -52,7 +52,7 @@ requires:
 apiVersion: skaffold/v4beta1
 kind: Config
 metadata:
-  name: ffmpeg-build
+  name: wf-ffmpeg-build
 requires:
 - configs: ["ffmpeg-build"]
   path: ../containers/ffmpeg/skaffold.yaml
