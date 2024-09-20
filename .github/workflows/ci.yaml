@@ -27,6 +27,7 @@ jobs:
     env:
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       GCP_WI_PROVIDER_ID: ${{ vars.GCP_WI_PROVIDER_ID }}
+      GCP_LOCATION: ${{ vars.GCP_LOCATION }} \
 
     steps:
       - name: Checkout Code
