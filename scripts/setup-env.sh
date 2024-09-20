@@ -35,7 +35,7 @@ if [ $GH_AVAILABLE ]; then
 fi
 _GCP_SA_GITHUB_ACTIONS="sa-tf-gh-actions"
 _GCP_PROJECT_ID=$(gcloud config get-value project)
-_GCP_LOCATION=$(gcloud config get-value compute/region && echo "us-central1")
+_GCP_LOCATION=$(gcloud config get-value compute/region || echo "us-central1")
 _GCP_CUSTOMER_ID="gcp"
 
 # Request acceptance of defaults or alternatives
