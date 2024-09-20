@@ -16,6 +16,7 @@ steps:
 - id: 'repoBuildConfirmation'
   name: 'alpine'
   entrypoint: 'sh'
+  dir: /workspace
   args:
   - '-c'
   - |
@@ -35,6 +36,7 @@ steps:
 
 - id: 'dockerBuild'
   name: 'gcr.io/cloud-builders/docker'
+  dir: /workspace
   args: [ 'build',
     '-t',
     '${LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}',
