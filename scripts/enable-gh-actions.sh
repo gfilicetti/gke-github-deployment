@@ -76,8 +76,23 @@ EOF
 
 echo "GCP_WI_PROVIDER_ID=\"${GCP_WI_PROVIDER_ID}\"" >> .env
 
-gh variable set GCP_SA_GITHUB_ACTIONS --body "$GCP_SA_GITHUB_ACTIONS" --repo ${GITHUB_ORG}/${GITHUB_REPO}
-gh variable set GCP_PROJECT_ID --body "$GCP_PROJECT_ID" --repo ${GITHUB_ORG}/${GITHUB_REPO}
-gh variable set GCP_CUSTOMER_ID --body "$GCP_CUSTOMER_ID" --repo ${GITHUB_ORG}/${GITHUB_REPO}
-gh variable set GCP_LOCATION --body "$GCP_LOCATION" --repo ${GITHUB_ORG}/${GITHUB_REPO}
-gh variable set GCP_WI_PROVIDER_ID --body "$GCP_WI_PROVIDER_ID" --repo ${GITHUB_ORG}/${GITHUB_REPO}
+if ! [ $(command -v gh) ]
+then
+  echo "bash: gh: command not found"
+  echo "Consider installing gh cli at: https://github.com/cli/cli#installation"
+fi
+
+# figure out if we're logged into the gh CLI and that the gh command exists
+if [ $(command -v gh) ]; then
+  gh auth status > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo "gh: command found and logged into GitHub"
+    echo "gh: setting variables"
+
+    gh variable set GCP_SA_GITHUB_ACTIONS --body "$GCP_SA_GITHUB_ACTIONS" --repo ${GITHUB_ORG}/${GITHUB_REPO}
+    gh variable set GCP_PROJECT_ID --body "$GCP_PROJECT_ID" --repo ${GITHUB_ORG}/${GITHUB_REPO}
+    gh variable set GCP_CUSTOMER_ID --body "$GCP_CUSTOMER_ID" --repo ${GITHUB_ORG}/${GITHUB_REPO}
+    gh variable set GCP_LOCATION --body "$GCP_LOCATION" --repo ${GITHUB_ORG}/${GITHUB_REPO}
+    gh variable set GCP_WI_PROVIDER_ID --body "$GCP_WI_PROVIDER_ID" --repo ${GITHUB_ORG}/${GITHUB_REPO}
+  fi
+fi

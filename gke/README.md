@@ -35,7 +35,7 @@ This script will:
 Run this command: 
 
 ```bash
-sh ./scripts/setup-gke.sh
+bash ./scripts/setup-gke.sh
 ```
 
 ### Token Replacement Details

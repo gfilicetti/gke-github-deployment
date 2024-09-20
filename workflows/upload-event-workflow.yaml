@@ -132,24 +132,25 @@
                 assign:
                   - requestJson: ${gkejobsubprocess.request}
                   - resultJson: ${gkejobsubprocess.response}
-            next: bq_job_insert
-        - bq_job_insert:
-            call: googleapis.bigquery.v2.tabledata.insertAll
-            args:
-              projectId: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
-              datasetId: ${sys.get_env("BQ_JOBS_STATS_DATASET")}
-              tableId: ${sys.get_env("BQ_JOBS_STATS_TABLE")}
-              body: # TableDataInsertAllRequest
-                rows:
-                  - json:
-                        JobId: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
-                        createdDateTime: ${createdDateTime}
-                        BackendSrv: ${BACKEND_SRV}
-                        fileURI: ${"gs://" + event.bucket + "/" + event.data.name}
-                        contentType: ${event.data.contentType}
-                        requestJson: ${json.encode_to_string(requestJson)}
-                        responseJson: ${json.encode_to_string(resultJson)}
-            next: finish_workflow
+            next: finish_workflow     
+        #     next: bq_job_insert
+        # - bq_job_insert:
+        #     call: googleapis.bigquery.v2.tabledata.insertAll
+        #     args:
+        #       projectId: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+        #       datasetId: ${sys.get_env("BQ_JOBS_STATS_DATASET")}
+        #       tableId: ${sys.get_env("BQ_JOBS_STATS_TABLE")}
+        #       body: # TableDataInsertAllRequest
+        #         rows:
+        #           - json:
+        #                 JobId: ${sys.get_env("GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID")}
+        #                 createdDateTime: ${createdDateTime}
+        #                 BackendSrv: ${BACKEND_SRV}
+        #                 fileURI: ${"gs://" + event.bucket + "/" + event.data.name}
+        #                 contentType: ${event.data.contentType}
+        #                 requestJson: ${json.encode_to_string(requestJson)}
+        #                 responseJson: ${json.encode_to_string(resultJson)}
+        #     next: finish_workflow
         - finish_workflow:
             return: ${resultJson}
 

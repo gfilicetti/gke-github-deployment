@@ -22,6 +22,9 @@ It includes working examples of:
 - [GKE Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
 - [Kueue](https://kueue.sigs.k8s.io/docs/overview/)
 - [Skaffold](https://skaffold.dev/docs/)
+- [Google Workflows](https://cloud.google.com/workflows/docs/overview)
+- [Eventarc](https://cloud.google.com/eventarc/docs/overview)
+- [BigQuery ](https://cloud.google.com/bigquery/docs/introduction)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [gcloud](https://cloud.google.com/sdk/docs/install)
 - Future TBD:
@@ -38,7 +41,13 @@ With respect to using ffmpeg for transcoding, we have done some research and doc
 - [ffmpeg + Hardware Acceleration](./accelerating-ffmpeg-in-hardware.md)
 - [Monitoring Transcoding Resource Usage](./monitoring-encoder-usage.md)
 
-## Initializing up your Project
+## Initializing Your Project
+
+These instructions walk you through setting up your environment for this project.
+
+You will need to clone this repository to the machine you want to use to set up your Google Cloud environment.
+
+> **Note:** We recommended using Google Cloud Shell instead of your local laptop. Cloud Shell has all the tooling you need already pre-installed.
 
 1. First authenticate to Google Cloud:
 
@@ -69,14 +78,14 @@ With respect to using ffmpeg for transcoding, we have done some research and doc
 5. Enable all the needed Google Cloud APIs by running this script:
 
   ```bash
-  sh ./scripts/enable-api.sh
+  bash ./scripts/enable-api.sh
   ```
 
 6. Finally, setup your unique `.env` variables to be used throughout the setup
 process
 
   ```bash
-  sh ./scripts/setup-env.sh
+  bash ./scripts/setup-env.sh
   ```
 
 During this step you will be prompted for a couple inputs relative to your unique project. Most

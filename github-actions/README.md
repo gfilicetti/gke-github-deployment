@@ -6,7 +6,8 @@ This project has a number of examples of using Github Actions with Google Cloud,
 - Invoking Cloud Build to build our container for ffmpeg
 
 ## Setting up GitHub Actions for Google Cloud
-To setup GitHub Actions securely with our Google Cloud environment we will need to do a one time setup for Workload Identity federation through a Google Cloud service account. [More info here.](https://github.com/google-github-actions/auth?tab=readme-ov-file#workload-identity-federation-through-a-service-account)
+
+First we need to set up our GitHub environment to work with Google Cloud.
 
 ### Create a Fork
 
@@ -23,11 +24,12 @@ Setting up GitHub Actions for automated deployments with Terraform requires the 
 This will create a new Service Account and give it all necessary roles.
 
 ### Enable Workload Identity Federation
+To setup GitHub Actions securely with our Google Cloud environment we will need to do a one time setup for Workload Identity federation through a Google Cloud service account. [More info here](https://github.com/google-github-actions/auth?tab=readme-ov-file#workload-identity-federation-through-a-service-account).
 
 Run this script:
 
 ```bash
-sh ./scripts/enable-gh-actions.sh
+bash ./scripts/enable-gh-actions.sh
 ```
 
 Make note of the returned output from running this script. It will look like this:
@@ -53,7 +55,7 @@ You will need these values to finish setting up GitHub Actions.
 Run this script:
 
 ```bash
-sh ./scripts/enable-iam.sh
+bash ./scripts/enable-iam.sh
 ```
 
 ### Setup GitHub Actions In Your Fork
@@ -74,7 +76,7 @@ You should see two entries that look like this:
 0. (One time only) Create remote state for Terraform in Google Cloud Storage:
 
   ```bash
-  sh ./scripts/setup-tfstate.sh
+  bash ./scripts/setup-tf.sh
   ```
 
 1. Follow these steps to invoke the GitHub Action that will run terraform to provision our infrastructure.
@@ -94,4 +96,4 @@ Using the method above, run the: **Terraform DESTROY** GitHub action.
 
 You can use the **CloudBuild CI** GitHub action to build and push containers to Artifact Registry, where they will later be used to deploy to a container runtime environment like GKE.
 
-For more information on containers in this project, see their [README file](../containers/ffmpeg/README.md).
+For more information on containers in this project, see the containers [README file](../containers/README.md).
