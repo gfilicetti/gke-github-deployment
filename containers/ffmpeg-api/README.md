@@ -1,6 +1,6 @@
 # FFmpeg API Container
 
-For more information about the ffmpeg container at ffmpeg-api is built on, look at its [README](../ffmpeg/README.md).
+For more information about the ffmpeg container that ffmpeg-api is built on, look at its [README](../ffmpeg/README.md).
 
 ## Variables for skaffold
 
