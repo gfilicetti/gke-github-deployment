@@ -39,9 +39,9 @@ Make note of the returned output from running this script. It will look like thi
 
 GCP_SA_GITHUB_ACTIONS: sa-tf-gh-actions
 GCP_PROJECT_ID: <your-project-id>
-GCP_WI_PROVIDER_ID: <workload-id-provider-id>
 GCP_CUSTOMER_ID: <your-customer-id>
 GCP_LOCATION: <gcp-region>
+GCP_WI_PROVIDER_ID: <workload-id-provider-id>
 
 ----------------------------------------
 ```
