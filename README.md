@@ -75,17 +75,17 @@ You will need to clone this repository to the machine you want to use to set up 
 
 > __Note:__ You should see your `projectId` listed with an `ACTIVE` state.
 
-5. Enable all the needed Google Cloud APIs by running this script:
-
-  ```bash
-  bash ./scripts/enable-api.sh
-  ```
-
-6. Finally, setup your unique `.env` variables to be used throughout the setup
+5. Setup your unique `.env` variables to be used throughout the setup
 process
 
   ```bash
   bash ./scripts/setup-env.sh
+  ```
+
+6. Finally, enable all the needed Google Cloud APIs by running this script:
+
+  ```bash
+  bash ./scripts/enable-api.sh
   ```
 
 During this step you will be prompted for a couple inputs relative to your unique project. Most
