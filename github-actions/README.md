@@ -88,6 +88,10 @@ You should see two entries that look like this:
 
 ![Run Terraform deployment workflow](../docs/img/gh-actions-workflow-run.png)
 
+> __Note:__ The deployment of cloud resources can take between 5 - 10 minutes.
+
+> __Note:__ If you get the error: `Permission denied while using the Eventarc Service` you will need to run the **Terraform Deployment** GitHub Action again.
+
 ## Tearing Down Infrastructure with Terraform
 
 Using the method above, run the: **Terraform DESTROY** GitHub action.
