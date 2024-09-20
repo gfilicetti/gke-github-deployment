@@ -46,6 +46,6 @@ jobs:
 
       - name: 'Submit CloudBuild with gcloud'
         run: |
-          gcloud builds submit --config ./containers/ffmpeg/cloudbuild.yaml \
+          gcloud builds submit --config ./containers/ffmpeg/cloudbuild.ghaction.yaml \
             --region ${{ env.GCP_LOCATION }} \
             --substitutions _PROJECT_ID=${{ env.GCP_PROJECT_ID }}
