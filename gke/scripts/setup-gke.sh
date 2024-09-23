@@ -22,8 +22,12 @@ AUTO_APPROVE=${2:-"false"}
 # Local vars
 PROJECT_ID=$(gcloud config list --format 'value(core.project)' 2>/dev/null)
 
+# Run the Setup Terraform script to ensure terraform.tfvars are set
+cd ../
+bash scripts/setup-tf.sh
+
 # get into the terraform folder
-cd ../terraform
+cd terraform
 
 # first check that we already have the TF state bucket created
 if gcloud -q storage buckets describe gs://bkt-tfstate-${PROJECT_ID} >/dev/null 2>&1; then
@@ -32,9 +36,6 @@ else
   printf "ERROR: Terraform remote state bucket is NOT found. Make sure to run ./scripts/setup-tfstate.sh first.\n"
   exit 1
 fi
-
-# add the project ID to tfvars
-cat terraform.tfvars.example | sed -e "s:your-unique-project-id:${PROJECT_ID}:g" > terraform.tfvars
 
 # Optional: If we're using local state, we will remove the GCS backend setting from terraform
 if [[ "$LOCAL_STATE" != "false" ]]; then

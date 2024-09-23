@@ -20,13 +20,19 @@ source .env
 # Terraform directory
 TF_DIR=$(pwd)/terraform
 
-gcloud storage buckets create "gs://bkt-tfstate-${GCP_PROJECT_ID}" \
-  --project="${GCP_PROJECT_ID}" \
-  --location=us-central1 \
-  --public-access-prevention \
-  --uniform-bucket-level-access
-
-gsutil versioning set on "gs://bkt-tfstate-${GCP_PROJECT_ID}"
+# first check that we already have the TF state bucket created
+if gcloud -q storage buckets describe gs://bkt-tfstate-${PROJECT_ID} >/dev/null 2>&1; then
+  printf "Terraform remote state bucket is found, continuing..\n"
+else 
+  # Create Google Cloud Storage bucket for TF
+  gcloud storage buckets create "gs://bkt-tfstate-${GCP_PROJECT_ID}" \
+    --project="${GCP_PROJECT_ID}" \
+    --location=us-central1 \
+    --public-access-prevention \
+    --uniform-bucket-level-access
+    
+  gsutil versioning set on "gs://bkt-tfstate-${GCP_PROJECT_ID}"
+fi
 
 cp $TF_DIR/terraform.tfvars.example $TF_DIR/terraform.tfvars
 
