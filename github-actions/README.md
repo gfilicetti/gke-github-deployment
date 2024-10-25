@@ -60,7 +60,7 @@ bash ./scripts/enable-iam.sh
 
 ### Setup GitHub Actions In Your Fork
 
-With the 2 key/value pairs outputted from the script in the previous step, follow these steps:
+With the key/value pairs outputted from the script in the previous step, follow these steps:
 
 1. In the Settings tab on the GitHub page for your fork, go to: **Secrets and Variables > Actions**
 1. Click on the **Variables** tab

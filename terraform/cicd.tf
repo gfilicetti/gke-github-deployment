@@ -18,3 +18,52 @@ resource "google_artifact_registry_repository" "repo" {
   description   = "Batch jobs Artifact Registry."
   format        = "DOCKER"
 }
+
+# Cloud Deploy | Pipeline
+resource "google_clouddeploy_delivery_pipeline" "primary" {
+  location    = var.region
+  name        = "ffmpeg-api-cd"
+  description = "Delivery pipeline for FFMPEG API (in Python)."
+  project     = local.project.id
+
+  serial_pipeline {
+    stages {
+      profiles  = ["profile-dev"]
+      target_id = "target-primary-gke"
+    }
+
+    stages {
+      profiles  = ["profile-staging"]
+      target_id = "target-primary-gke"
+    }
+
+    stages {
+      profiles  = ["profile-prod"]
+      target_id = "target-primary-gke"
+    }
+  }
+
+  annotations = {}
+
+  labels = {
+    lang = "python"
+  }
+}
+
+# Cloud Deploy | Targets
+resource "google_clouddeploy_target" "primary" {
+  project     = local.project.id
+  location    = var.region
+  name        = "target-primary-gke"
+  description = "Primary cluster (internal, autopush, integration tests, staging, production)"
+
+  gke {
+    cluster = module.gke.name
+  }
+
+  require_approval = true
+
+  labels = {
+    runtime = "gke"
+  }
+}
