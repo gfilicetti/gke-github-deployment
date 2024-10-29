@@ -33,11 +33,11 @@ spec:
       labels:
         name: ffmpeg-api
         version: stable
-      annotations:
-        gke-gcsfuse/volumes: "true"
+      # annotations:
+      #   gke-gcsfuse/volumes: "true"
     spec:
       restartPolicy: Always
-      serviceAccountName: k8s-sa-cluster
+      # serviceAccountName: k8s-sa-cluster
       terminationGracePeriodSeconds: 60
       nodeSelector:
         cloud.google.com/machine-family: n2
@@ -63,7 +63,7 @@ spec:
           periodSeconds: 5
         env:
         - name: ENV
-          value: dev
+          value: prod
         # TODO: Update prior to deployment
         - name: INPUT_BUCKET
           value: not-in-use
@@ -73,41 +73,41 @@ spec:
             memory: 16Gi #64Gi
             ephemeral-storage: 200Gi
           limits:
-            cpu: 4 #16
+            # cpu: 4 #16
             memory: 16Gi #64Gi
             ephemeral-storage: 200Gi
-        volumeMounts:
-        - name: gcs-fuse-csi-gke-input
-          mountPath: /input
-        - name: gcs-fuse-csi-gke-event-input
-          mountPath: /input-event
-        - name: gcs-fuse-csi-output
-          mountPath: /output
-      volumes:
-      - name: gcs-fuse-csi-gke-input
-        csi:
-          driver: gcsfuse.csi.storage.gke.io
-          volumeAttributes:
-            bucketName: gcs-testtest-431919-gcp-gke-input
-            fileCacheCapacity: "100Gi"
-            cache-dir: "/var/cache"
-            enable-parallel-downloads: "true"
-      - name: gcs-fuse-csi-gke-event-input
-        csi:
-          driver: gcsfuse.csi.storage.gke.io
-          volumeAttributes:
-            bucketName: gcs-testtest-431919-gcp-gke-input
-            fileCacheCapacity: "100Gi"
-            cache-dir: "/var/cache"
-            enable-parallel-downloads: "true"
-      - name: gcs-fuse-csi-output
-        csi:
-          driver: gcsfuse.csi.storage.gke.io
-          volumeAttributes:
-            bucketName: gcs-testtest-431919-gcp-test-output
-            fileCacheCapacity: "100Gi"
-            cache-dir: "/var/cache"
-            enable-parallel-downloads: "true"
+      #   volumeMounts:
+      #   - name: gcs-fuse-csi-gke-input
+      #     mountPath: /input
+      #   - name: gcs-fuse-csi-gke-event-input
+      #     mountPath: /input-event
+      #   - name: gcs-fuse-csi-output
+      #     mountPath: /output
+      # volumes:
+      # - name: gcs-fuse-csi-gke-input
+      #   csi:
+      #     driver: gcsfuse.csi.storage.gke.io
+      #     volumeAttributes:
+      #       bucketName: gcs-__PROJECT_ID__-__CUSTOMER_ID__-test-input
+      #       fileCacheCapacity: "100Gi"
+      #       cache-dir: "/var/cache"
+      #       enable-parallel-downloads: "true"
+      # - name: gcs-fuse-csi-gke-event-input
+      #   csi:
+      #     driver: gcsfuse.csi.storage.gke.io
+      #     volumeAttributes:
+      #       bucketName: gcs-__PROJECT_ID__-__CUSTOMER_ID__-test-input
+      #       fileCacheCapacity: "100Gi"
+      #       cache-dir: "/var/cache"
+      #       enable-parallel-downloads: "true"
+      # - name: gcs-fuse-csi-output
+        # csi:
+        #   driver: gcsfuse.csi.storage.gke.io
+        #   volumeAttributes:
+        #     bucketName: gcs-__PROJECT_ID__-__CUSTOMER_ID__-test-output
+        #     fileCacheCapacity: "100Gi"
+        #     cache-dir: "/var/cache"
+        #     enable-parallel-downloads: "true"
 
 ---
 apiVersion: v1
@@ -133,7 +133,6 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: ffmpeg-api
-  namespace: jobs
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

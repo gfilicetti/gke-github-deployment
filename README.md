@@ -7,6 +7,7 @@ It includes working examples of:
   - Terraform scripts for Google Cloud provisioning
   - GitHub actions for Google Cloud CI/CD pipelines
   - Building an ffmpeg container using Cloud Build
+  - Deploying a ffmpeg-api container using Cloud Deploy
   - Using Kueue for Kubernetes Job management
   - Google Cloud Workflows
   - GCSFuse for storage
@@ -15,18 +16,27 @@ It includes working examples of:
 ![High level architecture](docs/img/architecture-diagram.png "High level architecture")
 
 ## Technology Used
-- [GitHub CLI](https://github.com/cli/cli#installation)
-- [Terraform](https://www.terraform.io/downloads.html)
-- [Artifact Registry](https://cloud.google.com/artifact-registry/docs)
+**Code management (GitHub)**
 - [GitHub Actions](https://docs.github.com/en/actions)
+- [GitHub CLI](https://github.com/cli/cli#installation)
+
+**Google Cloud**
+- [Artifact Registry](https://cloud.google.com/artifact-registry/docs)
+- [BigQuery ](https://cloud.google.com/bigquery/docs/introduction)
+- [Cloud Build](https://cloud.google.com/build/docs/overview)
+- [Cloud Deploy](https://cloud.google.com/deploy/docs/overview)
+- [Eventarc](https://cloud.google.com/eventarc/docs/overview)
+- [gcloud CLI](https://cloud.google.com/sdk/docs/install)
 - [GKE Autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
+- [Google Workflows](https://cloud.google.com/workflows/docs/overview)
+
+**Infrastructure as Code**
+- [Terraform](https://www.terraform.io/downloads.html)
+
+**Platform Tooling**
 - [Kueue](https://kueue.sigs.k8s.io/docs/overview/)
 - [Skaffold](https://skaffold.dev/docs/)
-- [Google Workflows](https://cloud.google.com/workflows/docs/overview)
-- [Eventarc](https://cloud.google.com/eventarc/docs/overview)
-- [BigQuery ](https://cloud.google.com/bigquery/docs/introduction)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [gcloud](https://cloud.google.com/sdk/docs/install)
 - Future TBD:
   - Helm charts
   - ArgoCD
@@ -51,52 +61,52 @@ You will need to clone this repository to the machine you want to use to set up 
 
 1. First authenticate to Google Cloud:
 
-  ```bash
-  gcloud auth application-default login
-  ```
+    ```bash
+    gcloud auth application-default login
+    ```
 
 2. Create a new project (skip this if you already have a project created):
 
-  ```bash
-  gcloud projects create <your-project-id>
-  ```
+    ```bash
+    gcloud projects create <your-project-id>
+    ```
 
 3. Set the new project as your context for the `gcloud` CLI:
 
-  ```bash
-  gcloud config set project <your-project-id>
-  ```
+    ```bash
+    gcloud config set project <your-project-id>
+    ```
 
 4. Check if your authentication is ok and your project id is set:
 
-  ```bash
-  gcloud projects describe <your-project-id>
-  ```
+    ```bash
+    gcloud projects describe <your-project-id>
+    ```
 
-> __Note:__ You should see your `projectId` listed with an `ACTIVE` state.
+    > __Note:__ You should see your `projectId` listed with an `ACTIVE` state.
 
 5. Setup your unique `.env` variables to be used throughout the setup
 process
 
-  ```bash
-  bash ./scripts/setup-env.sh
-  ```
+    ```bash
+    bash ./scripts/setup-env.sh
+    ```
 
->__NOTE:__ During this step you will be prompted for a couple inputs relative to your unique
->project. Most inputs will contain defaults that might already be set, in which case go ahead and
->press [ENTER] to accept and continue.
->
->1. The GitHub username/o>rganization. This is the value used above when you cloned your fork.
->2. The name of the GitHu>b repository, by default this is set to `gke-github-deployment`.
->3. Your unique Google Cl>oud project ID.
->4. Defaut region location for Google Cloud setup.
->5. A short (3-5 char) identifier for your cloud resources (e.g. gcp).
+    >__NOTE:__ During this step you will be prompted for a couple inputs relative to your unique
+    >project. Most inputs will contain defaults that might already be set, in which case go ahead and
+    >press [ENTER] to accept and continue.
+    >
+    >1. The GitHub username/o>rganization. This is the value used above when you cloned your fork.
+    >2. The name of the GitHu>b repository, by default this is set to `gke-github-deployment`.
+    >3. Your unique Google Cl>oud project ID.
+    >4. Defaut region location for Google Cloud setup.
+    >5. A short (3-5 char) identifier for your cloud resources (e.g. gcp).
 
 6. Finally, enable all the needed Google Cloud APIs by running this script:
 
-  ```bash
-  bash ./scripts/enable-api.sh
-  ```
+    ```bash
+    bash ./scripts/enable-api.sh
+    ```
 
 ## (Optional) Setting up GitHub Actions
 
@@ -130,7 +140,7 @@ Workflows is a fully managed orchestration platform that executes services in an
 
 Instructions for setting up Workflows and running transcoding jobs through it can be [found here](./workflows/README.md).
 
-## Big Query
+## BigQuery
 Instructions for setting up BQ resources can be [found here](./analytics/README.md)
 
 ## Batch Compute Jobs

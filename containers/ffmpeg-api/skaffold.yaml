@@ -12,28 +12,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v3
+apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
-  name: ffmpeg-api-cfg
+  name: ffmpeg-api
 build:
   googleCloudBuild: {}
   tagPolicy:
-    dateTime:
-      format: "2006-01-02_15-04-05.999_MST"
-      timezone: "Local"
-    # sha256: {}
+    gitCommit: {}
   artifacts:
   - image: ffmpeg-api
     context: .
-manifests:
-  rawYaml:
-  - ./k8s.yaml
-deploy:
-  kubectl:
-    flags:
-      global:
-      - --namespace=jobs
-# requires:
-# - configs: ["common"]
-#   path: ../../common/skaffold.yaml
+    docker:
+      dockerfile: Dockerfile
+      noCache: false
+profiles:
+- name: profile-dev
+  manifests:
+    rawYaml:
+    - ./k8s.yaml
+  deploy:
+    kubectl:
+      flags:
+        global:
+        - --namespace=jobs
+- name: profile-staging
+  manifests:
+    rawYaml:
+    - ./k8s.yaml
+  deploy:
+    kubectl:
+      flags:
+        global:
+        - --namespace=jobs-staging
+- name: profile-prod
+  manifests:
+    rawYaml:
+    - ./k8s.yaml
+  deploy:
+    kubectl:
+      flags:
+        global:
+        - --namespace=jobs-prod

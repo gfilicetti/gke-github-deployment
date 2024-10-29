@@ -29,17 +29,17 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
   serial_pipeline {
     stages {
       profiles  = ["profile-dev"]
-      target_id = "target-primary-gke"
+      target_id = "target-primary-gke-dev"
     }
 
     stages {
       profiles  = ["profile-staging"]
-      target_id = "target-primary-gke"
+      target_id = "target-primary-gke-staging"
     }
 
     stages {
       profiles  = ["profile-prod"]
-      target_id = "target-primary-gke"
+      target_id = "target-primary-gke-prod"
     }
   }
 
@@ -51,19 +51,56 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
 }
 
 # Cloud Deploy | Targets
-resource "google_clouddeploy_target" "primary" {
+resource "google_clouddeploy_target" "primary-dev" {
   project     = local.project.id
   location    = var.region
-  name        = "target-primary-gke"
-  description = "Primary cluster (internal, autopush, integration tests, staging, production)"
+  name        = "target-primary-gke-dev"
+  description = "01 Primary cluster for dev (internal, autopush, integration tests)"
 
   gke {
-    cluster = module.gke.name
+    cluster = module.gke.cluster_id
+  }
+
+  require_approval = false
+
+  labels = {
+    runtime = "gke"
+    env = "dev"
+  }
+}
+
+resource "google_clouddeploy_target" "primary-staging" {
+  project     = local.project.id
+  location    = var.region
+  name        = "target-primary-gke-staging"
+  description = "02 Primary cluster for staging (staging)"
+
+  gke {
+    cluster = module.gke.cluster_id
+  }
+
+  require_approval = false
+
+  labels = {
+    runtime = "gke"
+    env = "staging"
+  }
+}
+
+resource "google_clouddeploy_target" "primary-prod" {
+  project     = local.project.id
+  location    = var.region
+  name        = "target-primary-gke-prod"
+  description = "03 Primary cluster for prod (prod)"
+
+  gke {
+    cluster = module.gke.cluster_id
   }
 
   require_approval = true
 
   labels = {
     runtime = "gke"
+    env = "prod"
   }
 }

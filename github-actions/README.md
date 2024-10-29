@@ -80,11 +80,11 @@ You should see two entries that look like this:
   ```
 
 1. Follow these steps to invoke the GitHub Action that will run terraform to provision our infrastructure.
-    1. Navigate to the **Actions** tab in GitHub
-    1. On the left side, click **Terraform Deployment**
-    1. On the right side, click the **Run workflow** button
-    1. In the drop down you get, select the **main** branch
-    1. Click on the **Run workflow** green button
+  1. Navigate to the **Actions** tab in GitHub
+  1. On the left side, click **Terraform Deployment**
+  1. On the right side, click the **Run workflow** button
+  1. In the drop down you get, select the **main** branch
+  1. Click on the **Run workflow** green button
 
 ![Run Terraform deployment workflow](../docs/img/gh-actions-workflow-run.png)
 
@@ -99,5 +99,7 @@ Using the method above, run the: **Terraform DESTROY** GitHub action.
 ## Invoking Cloud Build
 
 You can use the **CloudBuild CI** GitHub action to build and push containers to Artifact Registry, where they will later be used to deploy to a container runtime environment like GKE.
+
+The last step of Cloud Build will deploy latest image to Cloud Deploy, where a cloud adminstrator can manually promote to staging and production environments.
 
 For more information on containers in this project, see the containers [README file](../containers/README.md).

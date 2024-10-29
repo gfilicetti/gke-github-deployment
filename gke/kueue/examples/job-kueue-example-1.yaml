@@ -38,7 +38,7 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "250m"
-        command: 
+        command:
           - "/bin/sh"
           - "-c"
           - export HOST=$(hostname) && echo "scale=2000; 4*a(1)" | BC_LINE_LENGTH=0 bc -l >> /output/${HOST}pi.out && sleep 10
@@ -50,6 +50,6 @@ spec:
         csi:
           driver: gcsfuse.csi.storage.gke.io
           volumeAttributes:
-            bucketName: output_bucket
+            bucketName: gcs-__PROJECT_ID__-__CUSTOMER_ID__-test-output
       restartPolicy: Never
   backoffLimit: 1

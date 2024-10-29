@@ -26,30 +26,55 @@ steps:
       echo "***********************"
       echo "***********************"
       echo ""
-      echo "$_PROJECT_ID"
+      echo "$PROJECT_ID"
       echo "$LOCATION"
-      echo "$_ARTIFACT_REPO_NAME"
-      echo "$_IMAGE_NAME"
-      echo "$_IMAGE_VERSION"
+      echo "$_SKAFFOLD_MODULE"
+      echo "$_RELEASE_ID"
       echo ""
       echo "***********************"
 
-- id: 'dockerBuild'
-  name: 'gcr.io/cloud-builders/docker'
+- id: skaffoldBuild
+  name: gcr.io/k8s-skaffold/skaffold:v2.13.2
   dir: /workspace
-  args: [ 'build',
-    '-t',
-    '${LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}',
-    '.' ]
+  entrypoint: skaffold
+  args:
+    [
+      'build',
+      '--filename=./containers/skaffold.yaml',
+      '--module=$_SKAFFOLD_MODULE',
+      '--default-repo=$LOCATION-docker.pkg.dev/$PROJECT_ID/repo-batch-jobs',
+      '--tag=$_RELEASE_ID',
+      '--file-output=/workspace/artifacts.json',
+    ]
 
-images:
-- '${LOCATION}-docker.pkg.dev/${_PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_VERSION}'
+- id: buildArtifactsInfo
+  name: 'alpine'
+  entrypoint: 'sh'
+  dir: /workspace
+  args:
+  - '-c'
+  - |
+      echo $(cat /workspace/artifacts.json)
 
-# options:
-#   logging: CLOUD_LOGGING_ONLY
+- id: cloudDeploy
+  name: gcr.io/google.com/cloudsdktool/cloud-sdk
+  entrypoint: bash
+  dir: /workspace
+  args:
+  - '-c'
+  - |
+      gcloud deploy releases create rel-${_RELEASE_ID} \
+        --region=$LOCATION \
+        --delivery-pipeline=$_SKAFFOLD_MODULE-cd \
+        --skaffold-version="2.13" \
+        --skaffold-file=./containers/$_SKAFFOLD_MODULE/skaffold.yaml \
+        --build-artifacts=/workspace/artifacts.json
+
+serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/sa-tf-gh-actions@$PROJECT_ID.iam.gserviceaccount.com'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
 
 substitutions:
-  _PROJECT_ID: ''
-  _ARTIFACT_REPO_NAME: 'repo-batch-jobs'
-  _IMAGE_NAME: 'ffmpeg'
-  _IMAGE_VERSION: 'latest'
+  _SKAFFOLD_MODULE: __SKAFFOLD_MODULE__
+  _RELEASE_ID: __RELEASE_ID__

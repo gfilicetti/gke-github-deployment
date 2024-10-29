@@ -58,5 +58,3 @@ docker run ffmpeg-container-name:v1 ffmpeg -v
     ```bash
     docker push us-central1-docker.pkg.dev/alanpoole-transcoding-on-gke/intel-optimized-ffmpeg-avx2/ffmpeg-container-name:v1
     ```
-
-
