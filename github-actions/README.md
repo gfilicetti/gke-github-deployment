@@ -100,6 +100,6 @@ Using the method above, run the: **Terraform DESTROY** GitHub action.
 
 You can use the **CloudBuild CI** GitHub action to build and push containers to Artifact Registry, where they will later be used to deploy to a container runtime environment like GKE.
 
-The last step of Cloud Build will deploy latest image to Cloud Deploy, where a cloud adminstrator can manually promote to staging and production environments.
+The last step of Cloud Build will deploy latest image to Cloud Deploy, where a cloud administrator can manually promote to `staging` and `prod` environments.
 
 For more information on containers in this project, see the containers [README file](../containers/README.md).

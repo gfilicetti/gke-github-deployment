@@ -6,7 +6,7 @@ This folder holds source code and Docker configurations for the container images
 
 ## Building Container Images
 
-This section describes the process for building and pushing container images to Artifact Registry, where they will later be used to deploy to a container runtime environment like GKE.
+This section describes the process for building and pushing container images to Artifact Registry, where they will later be used to deploy to a container runtime environment like GKE via Cloud Deploy. Cloud Deploy will allow us to deploy to multiple environments and runtimes that best suit our needs, e.g. (dev, staging, prod).
 
 1. Run this command to invoke Cloud Build to build and push your container image to Artifact Registry
 
@@ -32,10 +32,10 @@ During the Cloud Build, the last step will deploy the latest container to Google
       --build-artifacts=/workspace/artifacts.json
     ```
 
-On successful completion of Cloud Build, the application will automatically be promoted to the `dev` Target. From there navigate to the Cloud Deploy UI, to manual promot and approve rollouts to `staging` and `prod` Targets.
+On successful completion of Cloud Build, the application will automatically be promoted to the `dev` target. From there navigate to the Cloud Deploy UI, to manual promot and approve rollouts to `staging` and `prod` targets.
 
 ![Cloud Deploy UI](../docs/img/clouddeploy-ui.png "Cloud Deploy UI")
 
 Cloud Deploy leverages Skaffold for defining how your application might be [rendered](https://skaffold.dev/docs/renderers/) and [deployed](https://skaffold.dev/docs/deployers/). Cloud Deploy pipeline and targets are defined in Terraform while how those applications' kubernetes manifests are rendered and deployed into their respective targets are defined with [Skaffold modules](https://skaffold.dev/docs/design/config/#multiple-configuration-support) and [profiles](https://skaffold.dev/docs/environment/profiles/) in each module.
 
-Not demonstrated in the repository, but Skaffold offers other benefits around the developer lifecycle (developmen and testing) prior to entering a CICD pipeline.
+>__NOTE:__ Not demonstrated in this repository, but Skaffold offers other benefits >around the developer lifecycle (continuous developmenr and testing) prior to >entering a CICD pipeline.

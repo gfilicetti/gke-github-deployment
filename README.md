@@ -95,10 +95,9 @@ process
     >__NOTE:__ During this step you will be prompted for a couple inputs relative to your unique
     >project. Most inputs will contain defaults that might already be set, in which case go ahead and
     >press [ENTER] to accept and continue.
-    >
-    >1. The GitHub username/o>rganization. This is the value used above when you cloned your fork.
-    >2. The name of the GitHu>b repository, by default this is set to `gke-github-deployment`.
-    >3. Your unique Google Cl>oud project ID.
+    >1. The GitHub username/organization. This is the value used above when you cloned your fork.
+    >2. The name of the GitHub repository, by default this is set to `gke-github-deployment`.
+    >3. Your unique Google Cloud project ID.
     >4. Defaut region location for Google Cloud setup.
     >5. A short (3-5 char) identifier for your cloud resources (e.g. gcp).
 

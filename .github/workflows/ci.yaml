@@ -44,7 +44,7 @@ jobs:
         with:
           version: '>= 363.0.0'
 
-      - name: Get short SHA
+      - name: 'Get short SHA'
         id: slug
         run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
 
