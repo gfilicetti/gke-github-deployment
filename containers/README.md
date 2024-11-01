@@ -38,4 +38,4 @@ On successful completion of Cloud Build, the application will automatically be p
 
 Cloud Deploy leverages Skaffold for defining how your application might be [rendered](https://skaffold.dev/docs/renderers/) and [deployed](https://skaffold.dev/docs/deployers/). Cloud Deploy Delivery Pipeline and Targets are defined in Terraform while how those applications' kubernetes manifests are rendered and deployed into their respective Targets are defined with [Skaffold modules](https://skaffold.dev/docs/design/config/#multiple-configuration-support) and [profiles](https://skaffold.dev/docs/environment/profiles/) in each module.
 
->__NOTE:__ Not demonstrated in this repository, but Skaffold offers other benefits around the developer lifecycle (continuous developmenr and testing) prior to entering a CICD pipeline.
+>__NOTE:__ Not demonstrated in this repository, but Skaffold offers other benefits around the developer lifecycle (continuous development and testing) prior to entering a CICD pipeline.
