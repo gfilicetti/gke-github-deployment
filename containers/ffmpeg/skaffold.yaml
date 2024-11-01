@@ -12,17 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v3
+apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
-  name: ffmpeg-build
+  name: ffmpeg
 build:
   googleCloudBuild: {}
   tagPolicy:
-    dateTime:
-      format: "2006-01-02_15-04-05.999_MST"
-      timezone: "Local"
-    # sha256: {}
+    gitCommit: {}
   artifacts:
   - image: ffmpeg
     context: .

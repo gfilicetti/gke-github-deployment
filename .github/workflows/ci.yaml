@@ -27,13 +27,13 @@ jobs:
     env:
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       GCP_WI_PROVIDER_ID: ${{ vars.GCP_WI_PROVIDER_ID }}
-      GCP_LOCATION: ${{ vars.GCP_LOCATION }} 
+      GCP_LOCATION: ${{ vars.GCP_LOCATION }}
 
     steps:
-      - name: Checkout Code
+      - name: 'Checkout Code'
         uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud Project
+      - name: 'Authenticate to Google Cloud Project'
         uses: 'google-github-actions/auth@v2'
         with:
           service_account: sa-tf-gh-actions@${{ env.GCP_PROJECT_ID }}.iam.gserviceaccount.com
@@ -44,8 +44,12 @@ jobs:
         with:
           version: '>= 363.0.0'
 
+      - name: 'Get short SHA'
+        id: slug
+        run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+
       - name: 'Submit CloudBuild with gcloud'
         run: |
-          gcloud builds submit --config ./containers/ffmpeg/cloudbuild.ghaction.yaml \
+          gcloud builds submit --config ./containers/ffmpeg-api/cloudbuild.yaml \
             --region ${{ env.GCP_LOCATION }} \
-            --substitutions _PROJECT_ID=${{ env.GCP_PROJECT_ID }}
+            --substitutions _SKAFFOLD_MODULE=ffmpeg-api,_RELEASE_ID=${{ steps.slug.outputs.sha7 }}

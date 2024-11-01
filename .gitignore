@@ -198,7 +198,6 @@ terraform.rc
 
 # Skaffold build logs
 **/build-*.json
-**/[Ss]kaffold.env
 
 # VSCode settings directory
 .vscode

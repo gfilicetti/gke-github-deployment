@@ -1,0 +1,7 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+requires:
+- configs: ["ffmpeg"]
+  path: ffmpeg/skaffold.yaml
+- configs: ["ffmpeg-api"]
+  path: ffmpeg-api/skaffold.yaml

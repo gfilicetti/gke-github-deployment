@@ -57,7 +57,7 @@ app = FastAPI(
 )
 
 
-INPUT_BUCKET    = os.environ['INPUT_BUCKET']
+INPUT_BUCKET = os.environ['INPUT_BUCKET']
 
 headers = {"Content-Type": "application/json"}
 
@@ -89,8 +89,8 @@ def ffmpeg_api(payload: Payload_FileTranscode):
             'transcode_mode': payload.transcode_mode,
         }
         logging.debug(f'request_payload: {request_payload}')
-        return os.popen(f'export MEDIA={payload.file} && export TRANSCODE_MODE={payload.transcode_mode} && if ls -l /input/$MEDIA; then ./entrypoint-api.sh; else echo "$MEDIA not found"; fi').read() 
-    
+        return os.popen(f'export MEDIA={payload.file} && export TRANSCODE_MODE={payload.transcode_mode} && if ls -l /input/$MEDIA; then ./entrypoint-api.sh; else echo "$MEDIA not found"; fi').read()
+
     except Exception as e:
         logging.debug(f'At /ffmpeg-api. {e}')
         return JSONResponse(

@@ -19,12 +19,13 @@ source .env
 
 # Add roles to Google Cloud Service Account.
 for SUCCINCT_ROLE in \
-    viewer \
     artifactregistry.admin \
     bigquery.admin \
     cloudbuild.connectionAdmin \
-    cloudbuild.builds.builder \
+    cloudbuild.builds.editor \
+    clouddeploy.developer \
     clouddeploy.jobRunner \
+    clouddeploy.operator \
     clouddeploy.releaser \
     compute.networkAdmin \
     compute.securityAdmin \

@@ -25,6 +25,7 @@ for GOOGLE_CLOUD_API in \
   bigquery.googleapis.com \
   bigquerydatatransfer.googleapis.com \
   cloudbuild.googleapis.com \
+  clouddeploy.googleapis.com \
   cloudresourcemanager.googleapis.com \
   compute.googleapis.com \
   container.googleapis.com \
