@@ -32,10 +32,10 @@ During the Cloud Build, the last step will deploy the latest container to Google
       --build-artifacts=/workspace/artifacts.json
     ```
 
-On successful completion of Cloud Build, the application will automatically be promoted to the `dev` target. From there navigate to the Cloud Deploy UI, to manual promot and approve rollouts to `staging` and `prod` targets.
+On successful completion of Cloud Build, the application will automatically be promoted to the `dev` Target. From there navigate to the Cloud Deploy UI, to manual promot and approve rollouts to `staging` and `prod` Targets.
 
 ![Cloud Deploy UI](../docs/img/clouddeploy-ui.png "Cloud Deploy UI")
 
-Cloud Deploy leverages Skaffold for defining how your application might be [rendered](https://skaffold.dev/docs/renderers/) and [deployed](https://skaffold.dev/docs/deployers/). Cloud Deploy pipeline and targets are defined in Terraform while how those applications' kubernetes manifests are rendered and deployed into their respective targets are defined with [Skaffold modules](https://skaffold.dev/docs/design/config/#multiple-configuration-support) and [profiles](https://skaffold.dev/docs/environment/profiles/) in each module.
+Cloud Deploy leverages Skaffold for defining how your application might be [rendered](https://skaffold.dev/docs/renderers/) and [deployed](https://skaffold.dev/docs/deployers/). Cloud Deploy Delivery Pipeline and Targets are defined in Terraform while how those applications' kubernetes manifests are rendered and deployed into their respective Targets are defined with [Skaffold modules](https://skaffold.dev/docs/design/config/#multiple-configuration-support) and [profiles](https://skaffold.dev/docs/environment/profiles/) in each module.
 
->__NOTE:__ Not demonstrated in this repository, but Skaffold offers other benefits >around the developer lifecycle (continuous developmenr and testing) prior to >entering a CICD pipeline.
+>__NOTE:__ Not demonstrated in this repository, but Skaffold offers other benefits around the developer lifecycle (continuous developmenr and testing) prior to entering a CICD pipeline.
