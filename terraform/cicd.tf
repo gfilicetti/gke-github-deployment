@@ -30,6 +30,11 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
     stages {
       profiles  = ["profile-dev"]
       target_id = "target-primary-gke-dev"
+      strategy {
+        standard {
+          verify = true
+        }
+      }
     }
 
     stages {

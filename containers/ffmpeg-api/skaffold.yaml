@@ -26,20 +26,53 @@ build:
     docker:
       dockerfile: Dockerfile
       noCache: false
+
 profiles:
 - name: profile-dev
-  manifests:
-    rawYaml:
-    - ./k8s.yaml
   deploy:
-    kubectl:
-      flags:
-        global:
-        - --namespace=jobs
+    helm:
+      releases:
+      - name: ffmpeg-api
+        chartPath: ./manifests/chart
+        namespace: jobs
+        createNamespace: true
+        setValueTemplates:
+          image.repository: "{{.IMAGE_REPO_ffmpeg_api}}"
+          image.tag: "{{.IMAGE_TAG_ffmpeg_api}}"
+        setValues:
+          replicaCount: 2
+          image.pullPolicy: "IfNotPresent"
+          service:
+            port: 8080
+          extraEnvs:
+          - name: ENV
+            value: dev
+          # TODO: Update prior to deployment
+          - name: INPUT_BUCKET
+            value: not-in-use
+          resources:
+            requests:
+              cpu: 4 #16
+              memory: 16Gi #64Gi
+              ephemeral-storage: 200Gi
+            limits:
+              memory: 16Gi #64Gi
+              ephemeral-storage: 200Gi
+
+  verify:
+  - name: wget
+    container:
+      name: wget
+      image: busybox
+      command: ['wget']
+      args: ['ffmpeg-api.jobs:8080/_healthz']
+    executionMode:
+      kubernetesCluster: {}
+
 - name: profile-staging
   manifests:
     rawYaml:
-    - ./k8s.yaml
+    - ./manifests/k8s.yaml
   deploy:
     kubectl:
       flags:
@@ -48,7 +81,7 @@ profiles:
 - name: profile-prod
   manifests:
     rawYaml:
-    - ./k8s.yaml
+    - ./manifests/k8s.yaml
   deploy:
     kubectl:
       flags:
