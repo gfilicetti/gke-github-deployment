@@ -30,6 +30,7 @@ steps:
       echo "Default region:          $LOCATION"
       echo "Skaffold module:         $_SKAFFOLD_MODULE"
       echo "Release version:         $_RELEASE_ID"
+      echo "Chart version:           $_CHART_VERSION"
       echo ""
       echo "**********************************************"
 
@@ -78,3 +79,4 @@ options:
 substitutions:
   _SKAFFOLD_MODULE: __SKAFFOLD_MODULE__
   _RELEASE_ID: __RELEASE_ID__
+  _CHART_VERSION: __CHART_VERSION__
