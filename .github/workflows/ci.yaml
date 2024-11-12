@@ -52,4 +52,4 @@ jobs:
         run: |
           gcloud builds submit --config ./containers/ffmpeg-api/cloudbuild.yaml \
             --region ${{ env.GCP_LOCATION }} \
-            --substitutions _SKAFFOLD_MODULE=ffmpeg-api,_RELEASE_ID=${{ steps.slug.outputs.sha7 }}
+            --substitutions _SKAFFOLD_MODULE=ffmpeg-api,_RELEASE_ID=${{ steps.slug.outputs.sha7 }},_CHART_VERSION=0.1.0

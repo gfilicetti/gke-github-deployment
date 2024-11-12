@@ -34,6 +34,11 @@ profiles:
       releases:
       - name: ffmpeg-api
         chartPath: ./manifests/chart
+        # If leveraging a remote chart uncomment the following blocks and update
+        # accordingly.
+
+        # remoteChart: oci://<gcp-location>-docker.pkg.dev/<project-id>/charts/ffmpeg-api
+        version: "{{._CHART_VERSION}}"
         namespace: jobs
         createNamespace: true
         setValueTemplates:
