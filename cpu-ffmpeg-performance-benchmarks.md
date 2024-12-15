@@ -76,17 +76,19 @@ We're using the same testing framework built for the blog post [Benchmarking Ren
 
 We transcoded the source video using the ffmpeg configuration:
 
-    ffmpeg \
-        -i [SOURCE_VIDEO] \
-        -report \
-        -c:v libx264 \
-        -filter:v scale="-2:[RESOLUTION]" \
-        -preset:v medium \
-        -x264-params "keyint=120:min-keyint=120:sliced-threads=0:scenecut=0:asm=${_ASM}" \
-        -tune psnr -profile:v high -b:v 6M -maxrate 12M -bufsize 24M \
-        -c:a copy \
-        -y \
-        [OUTPUT_FILE].mp4
+```
+ffmpeg \
+    -i [SOURCE_VIDEO] \
+    -report \
+    -c:v libx264 \
+    -filter:v scale="-2:[RESOLUTION]" \
+    -preset:v medium \
+    -x264-params "keyint=120:min-keyint=120:sliced-threads=0:scenecut=0:asm=${_ASM}" \
+    -tune psnr -profile:v high -b:v 6M -maxrate 12M -bufsize 24M \
+    -c:a copy \
+    -y \
+    [OUTPUT_FILE].mp4
+```
 
 Where:
 - `[SOURCE_VIDEO]` is the path to the source video.
