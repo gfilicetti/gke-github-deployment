@@ -50,6 +50,7 @@ We will be deploying a container image of a customized 'ffmpeg' build to a GKE A
 With respect to using ffmpeg for transcoding, we have done some research and documented the following areas of concern:
 - [ffmpeg + Hardware Acceleration](./accelerating-ffmpeg-in-hardware.md)
 - [Monitoring Transcoding Resource Usage](./monitoring-encoder-usage.md)
+- [ffmpeg CPU performance benchmarks](./cpu-ffmpeg-performance-benchmarks.md)
 
 ## Initializing Your Project
 
