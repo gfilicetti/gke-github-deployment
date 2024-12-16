@@ -1,4 +1,4 @@
-# CPU ffmpeg performance benchmarks
+# ffmpeg CPU performance benchmarks
 
 ## Objective
 Evaluate the transcoding performance between different Google Cloud [machine families](https://cloud.google.com/compute/docs/machine-resource) at both SD and HD resolutions. We measure both raw performance and price/performance metrics. For this set of benchmarks, we are only testing CPU encoding performance, not GPU.
