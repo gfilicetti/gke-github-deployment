@@ -17,7 +17,7 @@
 # Source environment variables from .env file (see scripts/setup-env.sh)
 source .env
 
-# Add roles to Google Cloud Service Account.
+# Add roles to Github Actions Google Cloud Service Account.
 for SUCCINCT_ROLE in \
     artifactregistry.admin \
     bigquery.admin \
